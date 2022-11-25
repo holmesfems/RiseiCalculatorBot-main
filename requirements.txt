@@ -1,0 +1,5 @@
+discord.py
+dislash.py
+pandas
+scipy
+requests
