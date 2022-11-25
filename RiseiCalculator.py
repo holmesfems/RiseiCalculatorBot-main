@@ -765,9 +765,9 @@ class RiseiCalculator(object):
                 return msg_list
             elif(to_print == "zone"):
                 #章別検索
-                if target_forPrint not in self.zoneIds:
-                    return "無効な章指定："+target_forPrint
                 stage_toPrint = [x for x in stageValues.items() if target_forPrint in self.stageId_to_name[x[0]]]
+                if len(stage_toPrint) == 0:
+                    return "無効な章指定："+target_forPrint
                 Header = "検索内容 = " + target_forPrint
                 msg_list = [Header]
                 for item in stage_toPrint:
