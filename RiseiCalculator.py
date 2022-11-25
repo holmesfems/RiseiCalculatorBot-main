@@ -826,23 +826,9 @@ rc = None
             OptionChoice("特別引換証効率表","specialList"),
             OptionChoice("契約賞金引換効率表(CC#9)","ccList"),
         ]),
-        Option("target_item","検索したい素材名",3,choices = [
-            OptionChoice("源岩","源岩"),
-            OptionChoice('装置',"装置"),
-            OptionChoice('エステル',"酯"),
-            OptionChoice('糖原',"糖"),
-            OptionChoice('異鉄',"异铁"),
-            OptionChoice('アケトン',"酮"),
-            OptionChoice('合成コール',"醇"),
-            OptionChoice('マンガン',"锰"),
-            OptionChoice('砥石',"研磨石"),
-            OptionChoice('RMA',"RMA"),
-            OptionChoice('ゲル',"凝胶"),
-            OptionChoice('熾合金',"炽合金"),
-            OptionChoice('素子結晶',"晶体"),
-            OptionChoice('溶剤',"溶剂"),
-            OptionChoice('切削液',"切削液")
-        ]),
+        Option("target_item","検索したい素材名",3,choices = \
+            [OptionChoice(stage_Category_zh_to_ja[x],x) for x in StageCategoryDict.keys()]
+        ),
         Option("event_code","マップ名の中に含まれる文字列",3),
         Option("mode","計算モード選択",3,choices = [OptionChoice("Sanity","Sanity"),OptionChoice("Time","Time")]),
         Option("min_times","計算に必要な最小サンプル数",4),
