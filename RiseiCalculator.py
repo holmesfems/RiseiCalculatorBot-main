@@ -691,7 +691,7 @@ class RiseiCalculator(object):
                             toPrint_item.append(["{0}: {1:.1f}%".format(left(15,stage_Category_zh_to_ja[dropItemCategory]+"効率"),\
                                 100*np.dot(targetItemValues,self.stage_dict[item[0]]["array"][targetItemIndex])/self.stage_dict[item[0]][selection])])
                     toPrint_item += [
-                        ["{0}消費       :".format(modeWord),str(self.stage_dict[item[0]][selection])],
+                        ["{0}消費       : ".format(modeWord),str(self.stage_dict[item[0]][selection])],
                         ["昇進効率       : {0:.1f}%".format(100*np.dot(exclude_Videos_Values,self.stage_dict[item[0]]["array"][4:])/self.stage_dict[item[0]][selection])],
                         ["試行数         : ",str(self.stage_dict[item[0]]["maxTimes"])],
                         ["最小試行数     : ",str(self.stage_dict[item[0]]["minTimes"]),"```"],
