@@ -775,6 +775,7 @@ class RiseiCalculator(object):
                     toPrint_item = [
                         ["```マップ名       : ",self.stageId_to_name[item[0]]],
                         ["総合{1}効率    : {0:.1f}%".format(100*item[1],modeWord)],
+                        ["95%信頼区間(2σ): {0:.1f}%".format(100*stageSD95[item[0]])],
                     ]
                     if len(dropItemCategoryList) == 0:
                         toPrint_item.append(["主ドロップ情報未登録"])
@@ -782,11 +783,10 @@ class RiseiCalculator(object):
                         for dropItemCategory in dropItemCategoryList:
                             targetItemIndex = [ValueTarget.index(x) for x in StageCategoryDict[dropItemCategory]["Items"]]
                             targetItemValues = seedValues[targetItemIndex]
-                            toPrint_item.append(["{0}: {1:.1f}".format(left(15,stage_Category_zh_to_ja[dropItemCategory]+"効率"),\
+                            toPrint_item.append(["{0}: {1:.1f}%".format(left(15,stage_Category_zh_to_ja[dropItemCategory]+"効率"),\
                                 100*np.dot(targetItemValues,self.stage_dict[item[0]]["array"][targetItemIndex])/self.stage_dict[item[0]][selection])])
                     toPrint_item += [
                         ["{0}消費       :".format(modeWord),str(self.stage_dict[item[0]][selection])],
-                        ["95%信頼区間(2σ): {0:.1f}%".format(100*stageSD95[item[0]])],
                         ["昇進効率       : {0:.1f}%".format(100*np.dot(exclude_Videos_Values,self.stage_dict[item[0]]["array"][4:])/self.stage_dict[item[0]][selection])],
                         ["試行数         : ",str(self.stage_dict[item[0]]["maxTimes"])],
                         ["最小試行数     : ",str(self.stage_dict[item[0]]["minTimes"]),"```"],
