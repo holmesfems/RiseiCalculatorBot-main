@@ -792,6 +792,9 @@ class RiseiCalculator(object):
                         ["最小試行数     : ",str(self.stage_dict[item[0]]["minTimes"]),"```"],
                     ]
                     msg_list.append("\n".join(["".join(x) for x in toPrint_item]))
+                    cnt = len(msg_list - 1)
+                    if(parameters["max_items"]>0 and cnt>=parameters["max_items"]):
+                        break
                 return msg_list
             #イベント検索
             elif(to_print == "events"):
@@ -826,6 +829,9 @@ class RiseiCalculator(object):
                         ["試行数         : ",str(self.event_dict[item[0]]["maxTimes"]),"```"],
                     ]
                     msg_list.append("\n".join(["".join(x) for x in toPrint_item]))
+                    cnt = len(msg_list)
+                    if(parameters["max_items"]>0 and cnt>=parameters["max_items"]):
+                        break
                 return msg_list
             elif(to_print == "te2List"):
             #資格証効率計算
@@ -952,7 +958,7 @@ rc = None
         Option("mode","計算モード選択",3,choices = [OptionChoice("Sanity","Sanity"),OptionChoice("Time","Time")]),
         Option("min_times","計算に必要な最小サンプル数",4),
         Option("min_basetimes","基準マップとして選ばれるために必要な最小サンプル数",4),
-        Option("max_items","表示するマップの数、素材計算の時のみ有効",4),
+        Option("max_items","表示するマップの数",4),
         Option("csv_file",'理性価値表CSVファイルを添付する',5),
         
         Option("ls_ce","LS,CEステージの番号",3,choices=[
