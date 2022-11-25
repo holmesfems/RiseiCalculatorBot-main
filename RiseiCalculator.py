@@ -884,7 +884,7 @@ async def riseicalculator(inter,target,target_item = None,event_code = "", mode=
                 msg = "アイテム名を指定してください"
                 return
         elif(target in ["zone","events"]):
-            if event_code is "":
+            if event_code == "":
                 msg = "ステージ名を指定してください"
                 return
         await inter.reply("target={0},mode={1},min_times={2},min_basetimes={3},max_items={4},csv_file={5},ls_ce={6}\n".format(\
