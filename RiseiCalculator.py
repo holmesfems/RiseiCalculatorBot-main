@@ -18,6 +18,7 @@ from io import StringIO
 from discord.ext import commands
 from dislash import slash_commands, Option, OptionType,OptionChoice
 import unicodedata
+
 def left(digit, msg):
     for c in msg:
         if unicodedata.east_asian_width(c) in ('F', 'W', 'A'):
@@ -26,7 +27,6 @@ def left(digit, msg):
             digit -= 1
     return msg + ' '*digit
 
-global penguin_url, headers, LanguageMap
 penguin_url = 'https://penguin-stats.io/PenguinStats/api/v2/'
 headers = {'User-Agent':'ArkPlanner'}
 LanguageMap = {'CN': 'zh', 'US': 'en', 'JP': 'ja', 'KR': 'ko'}
