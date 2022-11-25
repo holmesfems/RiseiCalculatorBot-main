@@ -845,12 +845,12 @@ rc = None
     guild_ids = test_guilds
 )
 
-async def riseicalculator(inter,target,target_item = None,event_code = "", mode="Sanity",min_times=1000,min_basetimes=3000,max_items=15,csv_file = False, ls_ce = '6',cache_time = 30):
+async def riseicalculator(inter,target,target_item = "",event_code = "", mode="Sanity",min_times=1000,min_basetimes=3000,max_items=15,csv_file = False, ls_ce = '6',cache_time = 30):
     msg = ""
     global rc
     try:
         if(target == "items"):
-            if target_item is None:
+            if target_item == "":
                 msg = "アイテム名を指定してください"
                 return
         elif(target in ["zone","events"]):
