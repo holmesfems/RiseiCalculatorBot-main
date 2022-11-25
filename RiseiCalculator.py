@@ -782,7 +782,7 @@ class RiseiCalculator(object):
                         for dropItemCategory in dropItemCategoryList:
                             targetItemIndex = [ValueTarget.index(x) for x in StageCategoryDict[dropItemCategory]["Items"]]
                             targetItemValues = seedValues[targetItemIndex]
-                            toPrint_item.append(["{0}: {1:.1f}".format(left(15,dropItemCategory+"効率"),\
+                            toPrint_item.append(["{0}: {1:.1f}".format(left(15,stage_Category_zh_to_ja[dropItemCategory]+"効率"),\
                                 100*np.dot(targetItemValues,self.stage_dict[item[0]]["array"][targetItemIndex])/self.stage_dict[item[0]][selection])])
                     toPrint_item += [
                         ["{0}消費       :".format(modeWord),str(self.stage_dict[item[0]][selection])],
