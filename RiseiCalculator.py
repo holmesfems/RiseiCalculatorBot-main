@@ -964,7 +964,7 @@ rc = None
     guild_ids = test_guilds
 )
 
-async def riseicalculator(inter,target,target_item = None,event_code = "", mode="Sanity",min_times=1000,min_basetimes=3000,max_items=-1,csv_file = False, ls_ce = '6',cache_time = 30):
+async def riseicalculator(inter,target,target_item = None,event_code = "", mode="Sanity",min_times=1000,min_basetimes=3000,max_items=15,csv_file = False, ls_ce = '6',cache_time = 30):
     msg = ""
     global rc
     try:
