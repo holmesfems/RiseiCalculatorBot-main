@@ -697,7 +697,7 @@ class RiseiCalculator(object):
                         ["最小試行数     : ",str(self.stage_dict[item[0]]["minTimes"]),"```"],
                     ]
                     msg_list.append("\n".join(["".join(x) for x in toPrint_item]))
-                    cnt = len(msg_list - 1)
+                    cnt = len(msg_list)-1
                     if(parameters["max_items"]>0 and cnt>=parameters["max_items"]):
                         break
                 return msg_list
