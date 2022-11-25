@@ -767,7 +767,7 @@ class RiseiCalculator(object):
                 #章別検索
                 stage_toPrint = [x for x in stageValues.items() if target_forPrint in self.stageId_to_name[x[0]]]
                 if len(stage_toPrint) == 0:
-                    return "無効な章指定："+target_forPrint
+                    return "無効なステージ指定："+target_forPrint
                 Header = "検索内容 = " + target_forPrint
                 msg_list = [Header]
                 for item in stage_toPrint:
@@ -782,7 +782,7 @@ class RiseiCalculator(object):
                         for dropItemCategory in dropItemCategoryList:
                             targetItemIndex = [ValueTarget.index(x) for x in StageCategoryDict[dropItemCategory]["Items"]]
                             targetItemValues = seedValues[targetItemIndex]
-                            toPrint_item.append(["{0}: {0:.1f}".format(left(15,dropItemCategory+"効率"),\
+                            toPrint_item.append(["{0}: {1:.1f}".format(left(15,dropItemCategory+"効率"),\
                                 100*np.dot(targetItemValues,self.stage_dict[item[0]]["array"][targetItemIndex])/self.stage_dict[item[0]][selection])])
                     toPrint_item += [
                         ["{0}消費       :".format(modeWord),str(self.stage_dict[item[0]][selection])],
