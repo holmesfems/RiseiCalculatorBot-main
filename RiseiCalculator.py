@@ -1,18 +1,12 @@
-from secrets import choice
 import numpy as np
 import numpy.linalg as LA
 import urllib.request, json, time, os, copy, sys
-from scipy.optimize import linprog
-from collections import defaultdict as ddict
 import random
 import pandas as pd
 import math
 import datetime
 import discord
-import requests
 from discord.ext import commands
-from pprint import pprint
-import aiohttp
 import traceback
 from io import StringIO
 from discord.ext import commands
@@ -102,16 +96,7 @@ def get_json(s,AdditionalReq=None):
 
 class RiseiCalculator(object):
     def __init__(self,
-                 filter_freq=200,
-                 filter_stages=[],
-                 url_stats='result/matrix?show_closed_zone=true',
-                 url_rules='formula',
-                 path_stats='data/matrix.json',
-                 path_rules='data/formula.json',
                  TargetServer = 'CN',
-                 update=False,
-                 banned_stages={},
-                 expValue=30,
                  ConvertionDR=0.18,
                  minTimes = 1000,
                  baseMinTimes = 3000,
@@ -130,7 +115,6 @@ class RiseiCalculator(object):
             path_rules: string. local path to the composing rules data.
         """
         self.get_item_id()
-        self.banned_stages = banned_stages # for debugging
         self.display_main_only = display_main_only
         self.ConvertionDR = ConvertionDR
         self.minTimes = minTimes
