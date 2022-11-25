@@ -84,7 +84,7 @@ StageCategoryDict = json.load(open("StageCategoryDict.json","r"))
 minClearTimeInjection = json.load(open("minClearTimeInjection.json","r"))
 
 #カテゴリを中国語から日本語へ変換
-stage_Category_zh_to_ja = json.load(open("stage_Category_zh_to_ja.json","r"))
+#stage_Category_zh_to_ja = json.load(open("stage_Category_zh_to_ja.json","r"))
         
 def get_json(s,AdditionalReq=None):
     if not AdditionalReq == None:
@@ -603,7 +603,7 @@ class RiseiCalculator(object):
             modeWord = {"Sanity":"理性","Time":"時間"}[self.Mode]
             selection = {"Sanity":"apCost","Time":"timeCost"}[self.Mode]
             if(to_print == "basemaps"):
-                basemaps = "基準マップ一覧:`{0}`".format({stage_Category_zh_to_ja[list(StageCategoryDict.keys())[x]]:self._seed2StageName(seeds)[x] for x in range(len(StageCategoryDict.keys()))})
+                basemaps = "基準マップ一覧:`{0}`".format({StageCategoryDict[x]["to_ja"]:self._seed2StageName(seeds)[list(StageCategoryDict.keys()).index(x)] for x in StageCategoryDict.keys()})
                 return basemaps
             #print("基準マップ分散:")
             #for i in range(len(StageCategoryDict.keys())):
@@ -627,7 +627,7 @@ class RiseiCalculator(object):
             #print(sorted_stageValues)
             #print("カテゴリ別効率順:")
                 category = target_forPrint
-                Header = stage_Category_zh_to_ja[category] + ": 理性価値(中級)={0:.3f}±{1:.3f}\n".format(name_to_Value[StageCategoryDict[category]['MainItem']][0],name_to_Value[StageCategoryDict[category]['MainItem']][1])
+                Header = StageCategoryDict[category]["to_ja"] + ": 理性価値(中級)={0:.3f}±{1:.3f}\n".format(name_to_Value[StageCategoryDict[category]['MainItem']][0],name_to_Value[StageCategoryDict[category]['MainItem']][1])
                 stage_toPrint = [x for x in sorted_stageValues if x[0] in self.category_ValidIds[category]]
                 targetItemIndex = [ValueTarget.index(x) for x in StageCategoryDict[category]["Items"]]
                 targetItemValues = seedValues[targetItemIndex]
@@ -672,7 +672,7 @@ class RiseiCalculator(object):
                         for dropItemCategory in dropItemCategoryList:
                             targetItemIndex = [ValueTarget.index(x) for x in StageCategoryDict[dropItemCategory]["Items"]]
                             targetItemValues = seedValues[targetItemIndex]
-                            toPrint_item.append(["{0}: {1:.1f}%".format(left(15,stage_Category_zh_to_ja[dropItemCategory]+"効率"),\
+                            toPrint_item.append(["{0}: {1:.1f}%".format(left(15,StageCategoryDict[dropItemCategory]["to_ja"]+"効率"),\
                                 100*np.dot(targetItemValues,self.stage_dict[item[0]]["array"][targetItemIndex])/self.stage_dict[item[0]][selection])])
                     toPrint_item += [
                         ["{0}消費       : ".format(modeWord),str(self.stage_dict[item[0]][selection])],
@@ -789,7 +789,7 @@ class RiseiCalculator(object):
                     ['合成-'+self.item_zh_to_ja[x['name']] for x in self.formula if x['name'] in ValueTarget] +\
                     ['スキル本換算1','スキル本換算2']
                 Rows_Name_ConstStage = {'5':['LS-5','CE-5','CA-5'],'6':['LS-6','CE-6','CA-5']}[self.LS_CE]
-                Rows_Name_Stages = [stage_Category_zh_to_ja[list(StageCategoryDict.keys())[x]] + self._seed2StageName(seeds)[x] for x in range(stages_need)]
+                Rows_Name_Stages = [StageCategoryDict[list(StageCategoryDict.keys())[x]]["to_ja"] + self._seed2StageName(seeds)[x] for x in range(stages_need)]
                 Rows_Name = Rows_Name_Convertion+Rows_Name_ConstStage+Rows_Name_Stages + ['理性価値']
                 #print(Columns_Name)
                 #print(Rows_Name)
@@ -827,7 +827,7 @@ rc = None
             OptionChoice("契約賞金引換効率表(CC#9)","ccList"),
         ]),
         Option("target_item","検索したい素材名",3,choices = \
-            [OptionChoice(stage_Category_zh_to_ja[x],x) for x in StageCategoryDict.keys()]
+            [OptionChoice(StageCategoryDict[x]["to_ja"],x) for x in StageCategoryDict.keys()]
         ),
         Option("event_code","マップ名の中に含まれる文字列",3),
         Option("mode","計算モード選択",3,choices = [OptionChoice("Sanity","Sanity"),OptionChoice("Time","Time")]),
