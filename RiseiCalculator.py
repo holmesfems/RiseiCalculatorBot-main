@@ -767,19 +767,24 @@ class RiseiCalculator(object):
                 #章別検索
                 if target_forPrint not in self.zoneIds:
                     return "無効な章指定："+target_forPrint
-                zone = target_forPrint
-                Header = "zone = " + self.zoneId_to_Name_ja[zone]
-                stage_toPrint = [x for x in stageValues.items() if x[0] in [y["stageId"] for y in self.zoneId_to_stages[zone]]]
+                stage_toPrint = [x for x in stageValues.items() if target_forPrint in self.stageId_to_name[x[0]]]
+                Header = "検索内容 = " + target_forPrint
                 msg_list = [Header]
                 for item in stage_toPrint:
-                    try:
-                        dropItem = stage_Category_zh_to_ja[[x for x in StageCategoryDict.keys() if self.stageId_to_name[item[0]] in StageCategoryDict[x]['Stages']][0]]
-                    except IndexError as e:
-                        dropItem = "不明 または 幣&作戦記録"
+                    dropItemCategoryList = [x for x in StageCategoryDict.keys() if self.stageId_to_name[item[0]] in StageCategoryDict[x]['Stages']]
                     toPrint_item = [
                         ["```マップ名       : ",self.stageId_to_name[item[0]]],
-                        ["主ドロップ     : ",dropItem],
                         ["総合{1}効率    : {0:.1f}%".format(100*item[1],modeWord)],
+                    ]
+                    if len(dropItemCategoryList) == 0:
+                        toPrint_item.append(["主ドロップ情報未登録"])
+                    else:
+                        for dropItemCategory in dropItemCategoryList:
+                            targetItemIndex = [ValueTarget.index(x) for x in StageCategoryDict[dropItemCategory]["Items"]]
+                            targetItemValues = seedValues[targetItemIndex]
+                            toPrint_item.append(["{0}: {0:.1f}".format(left(15,dropItemCategory+"効率"),\
+                                100*np.dot(targetItemValues,self.stage_dict[item[0]]["array"][targetItemIndex])/self.stage_dict[item[0]][selection])])
+                    toPrint_item += [
                         ["{0}消費       :".format(modeWord),str(self.stage_dict[item[0]][selection])],
                         ["95%信頼区間(2σ): {0:.1f}%".format(100*stageSD95[item[0]])],
                         ["昇進効率       : {0:.1f}%".format(100*np.dot(exclude_Videos_Values,self.stage_dict[item[0]]["array"][4:])/self.stage_dict[item[0]][selection])],
@@ -805,14 +810,14 @@ class RiseiCalculator(object):
                 for item in es_toPrint:
                     try:
                         maxIndex = np.argmax(self.event_dict[item[0]]["array"])
-                        dropItem = self.item_zh_to_ja[ValueTarget[maxIndex]]
+                        dropItemCategory = self.item_zh_to_ja[ValueTarget[maxIndex]]
                     except IndexError as e:
-                        dropItem = "不明"
+                        dropItemCategory = "不明"
                     toPrint_item = [
                         ["```マップ名       : ",self.stageId_to_name[item[0]]+("(Re)" if "re_" in self.eventStages[self.eventIds.index(item[0])]["zoneId"] else "")],
                         ["イベント名     : ",self.zoneId_to_Name_ja[self.eventStages[self.eventIds.index(item[0])]["zoneId"]]],
                         ["総合{1}効率   : {0:.1f}%".format(100*item[1],modeWord)],
-                        ["主ドロップ     : ",dropItem],
+                        ["主ドロップ     : ",dropItemCategory],
                         ["ドロップ率     : {0:.2f}%".format(100*self.event_dict[item[0]]["array"][maxIndex])],
                         ["理性消費       : ",str(self.event_dict[item[0]]["apCost"])],
                         ["時間消費(倍速) :", str(self.event_dict[item[0]]["timeCost"]/2.0)],
@@ -915,18 +920,18 @@ rc = None
     name = 'riseicalculator',
     description = '理性価値表計算',
     options = [
-        Option("target","どの素材を計算してほしい？",3,True,choices = [
+        Option("target","どの項目を計算してほしい？",3,True,choices = [
             OptionChoice("基準マップ","basemaps"),
             OptionChoice("理性価値表","sanValueLists"),
             OptionChoice("昇進素材別検索(target_item指定)","items"),
-            OptionChoice("章別検索(target_zone指定)","zone"),
+            OptionChoice("通常ステージ検索(event_code指定)","zone"),
             OptionChoice("イベント検索(event_code指定)","events"),
             OptionChoice("初級資格証効率表","te2List"),
             OptionChoice("上級資格証効率表","te3List"),
             OptionChoice("特別引換証効率表","specialList"),
             OptionChoice("契約賞金引換効率表(CC#9)","ccList"),
         ]),
-        Option("target_item","素材名指定",3,choices = [
+        Option("target_item","検索したい素材名",3,choices = [
             OptionChoice("源岩","源岩"),
             OptionChoice('装置',"装置"),
             OptionChoice('エステル',"酯"),
@@ -943,19 +948,7 @@ rc = None
             OptionChoice('溶剤',"溶剂"),
             OptionChoice('切削液',"切削液")
         ]),
-        Option("target_zone","章指定",3,choices = [
-            OptionChoice("1","main_1"),
-            OptionChoice('2',"main_2"),
-            OptionChoice('3',"main_3"),
-            OptionChoice('4',"main_4"),
-            OptionChoice('5',"main_5"),
-            OptionChoice('6',"main_6"),
-            OptionChoice('7',"main_7"),
-            OptionChoice('8',"main_8"),
-            OptionChoice('9',"main_9"),
-            OptionChoice('10',"main_10")
-        ]),
-        Option("event_code","イベントコード指定",3),
+        Option("event_code","マップ名の中に含まれる文字列",3),
         Option("mode","計算モード選択",3,choices = [OptionChoice("Sanity","Sanity"),OptionChoice("Time","Time")]),
         Option("min_times","計算に必要な最小サンプル数",4),
         Option("min_basetimes","基準マップとして選ばれるために必要な最小サンプル数",4),
@@ -971,7 +964,7 @@ rc = None
     guild_ids = test_guilds
 )
 
-async def riseicalculator(inter,target,target_item = None,target_zone = None,event_code = "", mode="Sanity",min_times=1000,min_basetimes=3000,max_items=-1,csv_file = False, ls_ce = '6',cache_time = 30):
+async def riseicalculator(inter,target,target_item = None,event_code = "", mode="Sanity",min_times=1000,min_basetimes=3000,max_items=-1,csv_file = False, ls_ce = '6',cache_time = 30):
     msg = ""
     global rc
     try:
@@ -979,9 +972,9 @@ async def riseicalculator(inter,target,target_item = None,target_zone = None,eve
             if target_item is None:
                 msg = "アイテム名を指定してください"
                 return
-        elif(target == "zone"):
-            if target_zone is None:
-                msg = "章名を指定してください"
+        elif(target in ["zone","events"]):
+            if event_code is "":
+                msg = "ステージ名を指定してください"
                 return
         await inter.reply("target={0},mode={1},min_times={2},min_basetimes={3},max_items={4},csv_file={5},ls_ce={6}\n".format(\
             target,mode,min_times,min_basetimes,max_items,csv_file,ls_ce)+\
@@ -989,7 +982,7 @@ async def riseicalculator(inter,target,target_item = None,target_zone = None,eve
         if rc == None or cache_time < 0:
             #print(rc)
             rc = RiseiCalculator(minTimes = min_times, baseMinTimes = min_basetimes,LS_CE=ls_ce,Mode=mode)
-        msg = rc.Calc(to_print=target,target_forPrint={"items":target_item,"zone":target_zone,"events":event_code}[target] if target in ["items","zone","events"] else "",\
+        msg = rc.Calc(to_print=target,target_forPrint={"items":target_item,"zone":event_code,"events":event_code}[target] if target in ["items","zone","events"] else "",\
             cacheTime=cache_time,parameters={"mode":mode,"min_times":min_times,"min_basetimes":min_basetimes,"max_items":max_items,"ls_ce":ls_ce})
         return
     except Exception as e:
