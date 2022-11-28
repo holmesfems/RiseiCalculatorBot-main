@@ -100,7 +100,6 @@ class RiseiCalculator(object):
                  ConvertionDR=0.18,
                  minTimes = 1000,
                  baseMinTimes = 3000,
-                 display_main_only=True,
                  LS_CE='6',
                  Mode = 'Sanity',
                  ):
@@ -115,7 +114,6 @@ class RiseiCalculator(object):
             path_rules: string. local path to the composing rules data.
         """
         self.get_item_id()
-        self.display_main_only = display_main_only
         self.ConvertionDR = ConvertionDR
         self.minTimes = minTimes
         self.baseMinTimes = baseMinTimes
@@ -127,8 +125,8 @@ class RiseiCalculator(object):
         self.name_to_index = {x:ValueTarget.index(x) for x in ValueTarget}
         self.id_to_index = {x:self.name_to_index[self.item_id_to_name[x]["zh"]] for x in [self.item_name_to_id["zh"][y] for y in ValueTarget]}
         self.TotalCount = len(ValueTarget)
-        self._GetMatrixNFormula()
-        self._getValidStageList()
+        #self._GetMatrixNFormula()
+        #self._getValidStageList()
         self.UpdatedTime = datetime.datetime.now()
         #self.update(force=update)
 
@@ -499,22 +497,25 @@ class RiseiCalculator(object):
     def Calc(self,to_print = "",target_forPrint = "",cacheTime = 30,parameters = {}):
         need_reCalculate = False
         self.nowTime = datetime.datetime.now()
-        if (self.nowTime - self.UpdatedTime > datetime.timedelta(minutes=cacheTime) and cacheTime > 0) or \
-        (self.minTimes,self.Mode,self.baseMinTimes) != (parameters["min_times"],parameters["mode"],parameters["min_basetimes"]):
-            self.minTimes,self.Mode,self.baseMinTimes = (parameters["min_times"],parameters["mode"],parameters["min_basetimes"])
-            self._GetMatrixNFormula()
-            self._getValidStageList()
-            self.UpdatedTime = self.nowTime
-            need_reCalculate = True
-        else:
-            try: #read cache
+        try:
+            if (self.nowTime - self.UpdatedTime > datetime.timedelta(minutes=cacheTime) and cacheTime > 0) or \
+            (self.minTimes,self.Mode,self.baseMinTimes) != (parameters["min_times"],parameters["mode"],parameters["min_basetimes"]):
+            #若干ロジック上の問題があるかもしれない
+                    self.minTimes,self.Mode,self.baseMinTimes = (parameters["min_times"],parameters["mode"],parameters["min_basetimes"])
+                    need_reCalculate = True
+            else:
+                #read cache
                 ConvertionMatrix,ConvertionRisei,ConvertionDiv = (self.ConvertionMatrix,self.ConvertionRisei,self.ConvertionDiv)
                 ConstStageMatrix,ConstStageRisei,ConstStageDiv = (self.ConstageMatrix,self.ConstStageRisei,self.ConstStageDiv)
                 stageMatrix,stageRisei,stageDiv = (self.stageMatrix,self.stageRisei,self.stageDiv)
                 seeds = self.seeds
-            except:
-                need_reCalculate = True
+        except:
+            # self.Convertion等未定義などの場合はここに飛ぶ
+            need_reCalculate = True
         if need_reCalculate:
+            self._GetMatrixNFormula()
+            self._getValidStageList()
+            self.UpdatedTime = self.nowTime
             ConvertionMatrix,ConvertionRisei,ConvertionDiv = self._GetConvertionMatrix()
             self.ConvertionMatrix,self.ConvertionRisei,self.ConvertionDiv = (ConvertionMatrix,ConvertionRisei,ConvertionDiv) #cache
             ConstStageMatrix,ConstStageRisei,ConstStageDiv = self._GetConstStageMatrix()
@@ -555,10 +556,9 @@ class RiseiCalculator(object):
                 targetCategories = self._getCategoryFromStageId(maxValue[0])
                 print('基準マップ差し替え：ターゲットカテゴリ',targetCategories)
                 if len(targetCategories) == 0:
-                    print('カテゴリから外れたマップを検出、計算を中断します')
-                    print('マップ'+self.stageId_to_name[maxValue[0]]+'は、何を稼ぐステージですか？')
-                    print('RiseiCalculator.pyで、228行あたりを編集し、情報を追加してください')
-                    return
+                    msg = 'カテゴリから外れたマップを検出、計算を中断します\n'
+                    msg += 'マップ'+self.stageId_to_name[maxValue[0]]+'は、何を稼ぐステージですか？\n'
+                    return msg
                 maxValuesDict = {}
                 for item in targetCategories:
                     newSeeds = np.copy(seeds)
