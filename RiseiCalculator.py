@@ -712,7 +712,7 @@ class RiseiCalculator(object):
                         ["主ドロップ     : ",dropItemCategory],
                         ["ドロップ率     : {0:.2f}%".format(100*self.event_dict[item[0]]["array"][maxIndex])],
                         ["理性消費       : ",str(self.event_dict[item[0]]["apCost"])],
-                        ["時間消費(倍速) :", str(self.event_dict[item[0]]["timeCost"]/2.0)],
+                        ["時間消費(倍速) : ", str(self.event_dict[item[0]]["timeCost"]/2.0)],
                         #ドロップアイテム推定
                         ["分間入手数     : {0:.2f}".format(self.event_dict[item[0]]["array"][maxIndex]/self.event_dict[item[0]]["timeCost"]*120)],
                         ["試行数         : ",str(self.event_dict[item[0]]["maxTimes"]),"```"],
