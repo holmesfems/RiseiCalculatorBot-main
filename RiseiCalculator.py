@@ -904,7 +904,7 @@ async def riseicalculator(inter,target,target_item = "",event_code = "", mode="S
                 description = item,
                 color = 0x2BE02B
             )
-            inter.send(embed)
+            await inter.send(embed)
             #await inter.followup
         if rc != None:
             createdTime = "\n作成時間:\t{0}".format(rc.UpdatedTime)
