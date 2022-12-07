@@ -883,7 +883,7 @@ async def riseicalculator(inter,target,target_item = "",event_code = "", mode="S
         for item in stack_trace:
             msg += item
     finally:
-        channel = inter.channel()
+        #channel = inter.channel()
         print(msg)
         max_length = 1900
         if type(msg) == type(str()):
