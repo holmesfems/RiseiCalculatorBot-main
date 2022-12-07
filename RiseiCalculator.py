@@ -898,13 +898,15 @@ async def riseicalculator(inter,target,target_item = "",event_code = "", mode="S
                         chunks[-1] += item
                     else:
                         chunks.append(item)
+        embeds = []
         for item in chunks:
             embed = discord.Embed(
                 title = "reply",
                 description = item,
                 color = 0x2BE02B
             )
-            await inter.followup(embed = embed)
+            embeds.append(embed)
+        await inter.followup(embeds = embeds)
             #await inter.followup
         if rc != None:
             createdTime = "\n作成時間:\t{0}".format(rc.UpdatedTime)
