@@ -883,6 +883,7 @@ async def riseicalculator(inter,target,target_item = "",event_code = "", mode="S
         for item in stack_trace:
             msg += item
     finally:
+        channel = inter.channel()
         print(msg)
         max_length = 1900
         if type(msg) == type(str()):
@@ -898,7 +899,13 @@ async def riseicalculator(inter,target,target_item = "",event_code = "", mode="S
                     else:
                         chunks.append(item)
         for item in chunks:
-                await inter.followup(item)
+            embed = discord.Embed(
+                title = "reply",
+                description = item,
+                color = 0x2BE02B
+            )
+            inter.send(embed)
+            #await inter.followup
         if rc != None:
             createdTime = "\n作成時間:\t{0}".format(rc.UpdatedTime)
             await inter.followup(createdTime,file = discord.File('BaseStages.csv') if csv_file else None)
