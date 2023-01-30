@@ -760,7 +760,7 @@ class RiseiCalculator(object):
                 return specialList
             elif(to_print == "ccList"):
                 #契約賞金引換証
-                ccNumber = '9'
+                ccNumber = '10'
                 Price_CC = list()
                 try:
                     with open('price_cc{0}.txt'.format(ccNumber), 'r', encoding='utf8') as f:
@@ -824,7 +824,7 @@ rc = None
             OptionChoice("初級資格証効率表","te2List"),
             OptionChoice("上級資格証効率表","te3List"),
             OptionChoice("特別引換証効率表","specialList"),
-            OptionChoice("契約賞金引換効率表(CC#9)","ccList"),
+            OptionChoice("契約賞金引換効率表(CC#10)","ccList"),
         ]),
         Option("target_item","検索したい素材名",3,choices = \
             [OptionChoice(StageCategoryDict[x]["to_ja"],x) for x in StageCategoryDict.keys()]
@@ -886,6 +886,8 @@ async def riseicalculator(inter,target,target_item = "",event_code = "", mode="S
         #channel = inter.channel()
         print(msg)
         max_length = 1900
+        title = "reply"
+        color = 0x8be02b
         if type(msg) == type(str()):
             chunks = [msg[i:i+max_length] for i in range(0, len(msg), max_length)]
         elif type(msg) == type(list()):
@@ -898,12 +900,19 @@ async def riseicalculator(inter,target,target_item = "",event_code = "", mode="S
                         chunks[-1] += item
                     else:
                         chunks.append(item)
+        elif type(msg) == type(dict()):
+            title = msg["title"]
+            chunks = msg["msgList"]
+            try:
+                color = msg["color"] 
+            except:
+                color = 0x8be02b
         embeds = []
         for item in chunks:
             embed = discord.Embed(
-                title = "reply",
+                title = title,
                 description = item,
-                color = 0x2BE02B
+                color = color
             )
             embeds.append(embed)
         await inter.followup(embeds = embeds)
