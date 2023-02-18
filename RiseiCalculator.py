@@ -183,7 +183,7 @@ class RiseiCalculator(object):
         """
         AllstageList = get_json("stages")
         #イベントステージを除外
-        ExclusionList = ["main_10_tough","main_11","main_11_tough"]
+        ExclusionList = ["main_10_tough","main_11","main_11_tough","permanent_sidestory_10_zone1"]
         MainStageList = [x for x in AllstageList if x["stageType"] in ["MAIN","SUB"] and x["zoneId"] not in ExclusionList]
         #常設イベントステージ
         MainStageList += [x for x in AllstageList if x["stageType"] in ["ACTIVITY"] and "permanent" in x["zoneId"]]
