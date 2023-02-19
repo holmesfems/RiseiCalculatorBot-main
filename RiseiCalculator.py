@@ -186,7 +186,7 @@ class RiseiCalculator(object):
         ExclusionList = ["main_10_tough","main_11","main_11_tough","permanent_sidestory_10_zone1"]
         MainStageList = [x for x in AllstageList if x["stageType"] in ["MAIN","SUB"] and x["zoneId"] not in ExclusionList]
         #常設イベントステージ
-        MainStageList += [x for x in AllstageList if x["stageType"] in ["ACTIVITY"] and "permanent" in x["zoneId"]]
+        MainStageList += [x for x in AllstageList if x["stageType"] in ["ACTIVITY"] and "permanent" in x["zoneId"] and x["zoneId"] not in ExclusionList]
         EventStageList = [x for x in AllstageList if x["stageType"] in ["ACTIVITY"] \
             and "permanent" not in x["zoneId"] \
             and "act" in x["zoneId"] \
