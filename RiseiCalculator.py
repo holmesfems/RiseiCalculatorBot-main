@@ -12,6 +12,7 @@ from io import StringIO
 from discord.ext import commands
 from dislash import slash_commands, Option, OptionType,OptionChoice
 import unicodedata
+from collections import ChainMap
 
 def left(digit, msg):
     for c in msg:
@@ -47,12 +48,20 @@ Item_rarity2 = [
     '晶体元件','半自然溶剂','化合切削液',
 ]
 
+Item_rarity2_new = [
+    '转质盐组'
+]
+
 Item_rarity3 = [
     '提纯源岩','改量装置','聚酸酯块', 
     '糖聚块','异铁块','酮阵列', 
     '白马醇','三水锰矿','五水研磨石',
     'RMA70-24','聚合凝胶','炽合金块',
     '晶体电路','精炼溶剂','切削原液',
+]
+
+Item_rarity3_new = [
+    '转质盐聚块'
 ]
 
 ValueTarget = [
@@ -77,11 +86,46 @@ ValueTarget = [
     '技巧概要·卷1', '技巧概要·卷2', '技巧概要·卷3',
 ]
 
+ValueTarget_new = [
+    '转质盐组','转质盐聚块','烧结核凝晶'
+]
+
 #ドロップアイテム&ステージのカテゴリ情報を入手
 StageCategoryDict = json.load(open("StageCategoryDict.json","r"))
 
 #一部理論値と実際のクリア時間が乖離しているステージで個別修正
 minClearTimeInjection = json.load(open("minClearTimeInjection.json","r"))
+
+#大陸版実装済み、グロ版未実装のステージまとめ 実装次第削除してOK
+new_zone = [
+    'main_11', #11章
+    'permanent_sidestory_10_zone1', #NL
+    'permanent_sidestory_11_zone1', #BI
+    'permanent_sidestory_12_zone1', #IW
+]
+
+#大陸版基準、グロ版基準調整用
+def get_Global_Mainland(ParamName,glob):
+    if glob:
+        return eval(ParamName)
+    else:
+        return eval(ParamName) + eval(ParamName+'_new')
+
+def get_Item_rarity2(glob):
+    return get_Global_Mainland("Item_rarity2",glob)
+
+def get_Item_rarity3(glob):
+    return get_Global_Mainland("Item_rarity3",glob)
+
+def get_ValueTarget(glob):
+    return get_Global_Mainland("ValueTarget",glob)
+
+def get_StageCategoryDict(glob):
+    if glob:
+        return StageCategoryDict["main"]
+    else:
+        return ChainMap(StageCategoryDict["main"],StageCategoryDict["new"])
+    
 
 #カテゴリを中国語から日本語へ変換
 #stage_Category_zh_to_ja = json.load(open("stage_Category_zh_to_ja.json","r"))
@@ -102,6 +146,7 @@ class RiseiCalculator(object):
                  baseMinTimes = 3000,
                  LS_CE='6',
                  Mode = 'Sanity',
+                 Global = True,
                  ):
         """
         Object initialization.
@@ -120,11 +165,12 @@ class RiseiCalculator(object):
         self.TargetServer = TargetServer
         self.Mode = Mode
         self.LS_CE = LS_CE
+        self.Global = Global
         
 
-        self.name_to_index = {x:ValueTarget.index(x) for x in ValueTarget}
-        self.id_to_index = {x:self.name_to_index[self.item_id_to_name[x]["zh"]] for x in [self.item_name_to_id["zh"][y] for y in ValueTarget]}
-        self.TotalCount = len(ValueTarget)
+        self.name_to_index = {x:get_ValueTarget(self.Global).index(x) for x in get_ValueTarget(self.Global)}
+        self.id_to_index = {x:self.name_to_index[self.item_id_to_name[x]["zh"]] for x in [self.item_name_to_id["zh"][y] for y in get_ValueTarget(self.Global)]}
+        self.TotalCount = len(get_ValueTarget(self.Global))
         #self._GetMatrixNFormula()
         #self._getValidStageList()
         self.UpdatedTime = datetime.datetime.now()
@@ -183,16 +229,16 @@ class RiseiCalculator(object):
         """
         AllstageList = get_json("stages")
         #イベントステージを除外
-        ExclusionList = ["main_10_tough","main_11","main_11_tough","permanent_sidestory_10_zone1"]
-        MainStageList = [x for x in AllstageList if x["stageType"] in ["MAIN","SUB"] and x["zoneId"] not in ExclusionList]
+        ExclusionList = new_zone if self.Global else []
+        MainStageList = [x for x in AllstageList if x["stageType"] in ["MAIN","SUB"] and x["zoneId"] not in ExclusionList and "tough" not in x["zoneId"]]
         #常設イベントステージ
         MainStageList += [x for x in AllstageList if x["stageType"] in ["ACTIVITY"] and "permanent" in x["zoneId"] and x["zoneId"] not in ExclusionList]
         EventStageList = [x for x in AllstageList if x["stageType"] in ["ACTIVITY"] \
             and "permanent" not in x["zoneId"] \
             and "act" in x["zoneId"] \
-            and "gacha" not in x["stageId"]\
+            and "gacha" not in x["stageId"] \
             #ウルサスの子供を除外
-            and "act10d5" not in x["zoneId"]
+            and "act10d5" not in x["zoneId"] 
         ]
 
         #minClearTimeInjection
@@ -205,7 +251,7 @@ class RiseiCalculator(object):
         #print(MainStageList)
         MainStageIdList = [x["stageId"] for x in MainStageList]
         EventStageIdList = [x["stageId"] for x in EventStageList]
-        itemFilter = ",".join([self.item_name_to_id["zh"][x] for x in ValueTarget])
+        itemFilter = ",".join([self.item_name_to_id["zh"][x] for x in get_ValueTarget(self.Global)])
 
         additionalHeader = {"itemFilter":itemFilter,"server":self.TargetServer,"show_closed_zones":"true"}
         #ドロップデータ取得
@@ -266,7 +312,7 @@ class RiseiCalculator(object):
     
         # 素材合成換算
         for item in self.formula:
-            if item["name"] not in ValueTarget:
+            if item["name"] not in get_ValueTarget(self.Global):
                 continue
             arr = np.zeros(self.TotalCount)
             arr[self.name_to_index[item["name"]]] = -1
@@ -277,7 +323,7 @@ class RiseiCalculator(object):
             #副産物を考慮
             exarr = np.zeros(self.TotalCount)
             for exItem in item["extraOutcome"]:
-                if exItem["name"] not in ValueTarget:
+                if exItem["name"] not in get_ValueTarget(self.Global):
                     continue
                 exarr[self.name_to_index[exItem["name"]]] = exItem["weight"]/item["totalWeight"]
             
@@ -414,8 +460,8 @@ class RiseiCalculator(object):
         self.event_stages = list(self.event_dict.keys())
         #self.event_stages_getindex = {x:self.event_stages.index(x) for x in self.event_stages}
         #add 'ValidIds' for StageCategory
-        self.category_ValidIds = {x:[y for y in self.valid_stages if self.stage_dict[y]["name"] in StageCategoryDict[x]['Stages']] for x in StageCategoryDict.keys()}
-        self.category_BaseIds = {x:[y for y in self.valid_baseStages if self.stage_baseDict[y]["name"] in StageCategoryDict[x]['Stages']] for x in StageCategoryDict.keys()}
+        self.category_ValidIds = {x:[y for y in self.valid_stages if self.stage_dict[y]["name"] in get_StageCategoryDict(self.Global)[x]['Stages']] for x in get_StageCategoryDict(self.Global).keys()}
+        self.category_BaseIds = {x:[y for y in self.valid_baseStages if self.stage_baseDict[y]["name"] in get_StageCategoryDict(self.Global)[x]['Stages']] for x in get_StageCategoryDict(self.Global).keys()}
 
         #for item in StageCategoryDict.keys():
         #    StageCategoryDict[item]['ValidIds'] = [x for x in self.valid_stages if self.stage_dict[x]["name"] in StageCategoryDict[item]['Stages']]
@@ -492,16 +538,16 @@ class RiseiCalculator(object):
         return res
         
     def _getCategoryFromStageId(self,stageId):
-        return [x for x in StageCategoryDict.keys() if self.stageId_to_name[stageId] in StageCategoryDict[x]['Stages']]
+        return [x for x in get_StageCategoryDict(self.Global).keys() if self.stageId_to_name[stageId] in get_StageCategoryDict(self.Global)[x]['Stages']]
 
     def Calc(self,to_print = "",target_forPrint = "",cacheTime = 30,parameters = {}):
         need_reCalculate = False
         self.nowTime = datetime.datetime.now()
         try:
             if (self.nowTime - self.UpdatedTime > datetime.timedelta(minutes=cacheTime) and cacheTime > 0) or \
-            (self.minTimes,self.Mode,self.baseMinTimes) != (parameters["min_times"],parameters["mode"],parameters["min_basetimes"]):
+            (self.minTimes,self.Mode,self.baseMinTimes,self.Global) != (parameters["min_times"],parameters["mode"],parameters["min_basetimes"],parameters["is_global"]):
             #若干ロジック上の問題があるかもしれない
-                    self.minTimes,self.Mode,self.baseMinTimes = (parameters["min_times"],parameters["mode"],parameters["min_basetimes"])
+                    self.minTimes,self.Mode,self.baseMinTimes,self.Global = (parameters["min_times"],parameters["mode"],parameters["min_basetimes"],parameters["is_global"])
                     need_reCalculate = True
             else:
                 #read cache
@@ -532,8 +578,8 @@ class RiseiCalculator(object):
             while(abs(det) < 50):
                 seeds = [-1]*stages_need
                 for i in range(stages_need):
-                    nowCategory = list(StageCategoryDict.keys())[i]
-                    print(i,StageCategoryDict[nowCategory])
+                    nowCategory = list(get_StageCategoryDict(self.Global).keys())[i]
+                    print(i,get_StageCategoryDict(self.Global)[nowCategory])
                     randomStageId = random.choice(self.category_BaseIds[nowCategory])
                     seeds[i] = self.valid_stages_getindex[randomStageId]
                 stageMatrix, stageRisei,stageDiv = self._getStageMatrix(seeds)
@@ -562,7 +608,7 @@ class RiseiCalculator(object):
                 maxValuesDict = {}
                 for item in targetCategories:
                     newSeeds = np.copy(seeds)
-                    targetIndex = list(StageCategoryDict.keys()).index(item)
+                    targetIndex = list(get_StageCategoryDict(self.Global).keys()).index(item)
                     newSeeds[targetIndex] = self.valid_stages_getindex[maxValue[0]]
                     #print(newSeeds)
                     newMatrix,newRisei,newDiv = self._getStageMatrix(newSeeds)
@@ -577,7 +623,7 @@ class RiseiCalculator(object):
                 #最大理性効率が最も小さいものが、一番良い差し替え
                 print('差し替え後、最大効率一覧:',maxValuesDict)
                 best_maxValue = min(maxValuesDict.items(),key = lambda x:x[1][1])
-                targetIndex = list(StageCategoryDict.keys()).index(best_maxValue[0])
+                targetIndex = list(get_StageCategoryDict(self.Global).keys()).index(best_maxValue[0])
                 seeds[targetIndex] = self.valid_stages_getindex[maxValue[0]]
                 print('差し替え完了、現在の最大効率マップ:',best_maxValue)
                 maxValue = best_maxValue[1]
@@ -595,7 +641,7 @@ class RiseiCalculator(object):
         xDivs = self._getMaterialDiv((ConvertionMatrix,ConstStageMatrix,stageMatrix),(ConvertionDiv,ConstStageDiv,stageDiv),seedValues)
         xSD95 = self._divToSD95(xDivs)
         stageSD95 = self._getStageValueSD95((ConvertionMatrix,ConstStageMatrix,stageMatrix),(ConvertionDiv,ConstStageDiv,stageDiv),seedValues,seeds)
-        name_to_Value = {ValueTarget[x]:(seedValues[x],xSD95[x]) for x in range(self.TotalCount)}                
+        name_to_Value = {get_ValueTarget(self.Global)[x]:(seedValues[x],xSD95[x]) for x in range(self.TotalCount)}                
         exclude_Videos_Values = seedValues[4:]
 
         #print("*******計算結果*********")
@@ -603,7 +649,7 @@ class RiseiCalculator(object):
             modeWord = {"Sanity":"理性","Time":"時間"}[self.Mode]
             selection = {"Sanity":"apCost","Time":"timeCost"}[self.Mode]
             if(to_print == "basemaps"):
-                basemaps = "基準マップ一覧:`{0}`".format({StageCategoryDict[x]["to_ja"]:self._seed2StageName(seeds)[list(StageCategoryDict.keys()).index(x)] for x in StageCategoryDict.keys()})
+                basemaps = "基準マップ一覧:`{0}`".format({get_StageCategoryDict(self.Global)[x]["to_ja"]:self._seed2StageName(seeds)[list(get_StageCategoryDict(self.Global).keys()).index(x)] for x in get_StageCategoryDict(self.Global).keys()})
                 return basemaps
             #print("基準マップ分散:")
             #for i in range(len(StageCategoryDict.keys())):
@@ -621,15 +667,15 @@ class RiseiCalculator(object):
                 sanValueLists = sanValueLists.getvalue()
                 return sanValueLists
             elif(to_print == "items"):
-                if target_forPrint not in StageCategoryDict.keys():
+                if target_forPrint not in get_StageCategoryDict(self.Global).keys():
                     return "無効なカテゴリ:" + target_forPrint
             #print("\n***********************\n")
             #print(sorted_stageValues)
             #print("カテゴリ別効率順:")
                 category = target_forPrint
-                Header = StageCategoryDict[category]["to_ja"] + ": 理性価値(中級)={0:.3f}±{1:.3f}\n".format(name_to_Value[StageCategoryDict[category]['MainItem']][0],name_to_Value[StageCategoryDict[category]['MainItem']][1])
+                Header = get_StageCategoryDict(self.Global)[category]["to_ja"] + ": 理性価値(中級)={0:.3f}±{1:.3f}\n".format(name_to_Value[get_StageCategoryDict(self.Global)[category]['MainItem']][0],name_to_Value[get_StageCategoryDict(self.Global)[category]['MainItem']][1])
                 stage_toPrint = [x for x in sorted_stageValues if x[0] in self.category_ValidIds[category]]
-                targetItemIndex = [ValueTarget.index(x) for x in StageCategoryDict[category]["Items"]]
+                targetItemIndex = [get_ValueTarget(self.Global).index(x) for x in get_StageCategoryDict(self.Global)[category]["Items"]]
                 targetItemValues = seedValues[targetItemIndex]
                 cnt = 0
                 msg_list = [Header]
@@ -660,7 +706,7 @@ class RiseiCalculator(object):
                 Header = "検索内容 = " + target_forPrint
                 msg_list = [Header]
                 for item in stage_toPrint:
-                    dropItemCategoryList = [x for x in StageCategoryDict.keys() if self.stageId_to_name[item[0]] in StageCategoryDict[x]['Stages']]
+                    dropItemCategoryList = [x for x in get_StageCategoryDict(self.Global).keys() if self.stageId_to_name[item[0]] in get_StageCategoryDict(self.Global)[x]['Stages']]
                     toPrint_item = [
                         ["```マップ名       : ",self.stageId_to_name[item[0]]],
                         ["総合{1}効率    : {0:.1f}%".format(100*item[1],modeWord)],
@@ -670,9 +716,9 @@ class RiseiCalculator(object):
                         toPrint_item.append(["主ドロップ情報未登録"])
                     else:
                         for dropItemCategory in dropItemCategoryList:
-                            targetItemIndex = [ValueTarget.index(x) for x in StageCategoryDict[dropItemCategory]["Items"]]
+                            targetItemIndex = [get_ValueTarget(self.Global).index(x) for x in get_StageCategoryDict(self.Global)[dropItemCategory]["Items"]]
                             targetItemValues = seedValues[targetItemIndex]
-                            toPrint_item.append(["{0}: {1:.1f}%".format(left(15,StageCategoryDict[dropItemCategory]["to_ja"]+"効率"),\
+                            toPrint_item.append(["{0}: {1:.1f}%".format(left(15,get_StageCategoryDict(self.Global)[dropItemCategory]["to_ja"]+"効率"),\
                                 100*np.dot(targetItemValues,self.stage_dict[item[0]]["array"][targetItemIndex])/self.stage_dict[item[0]][selection])])
                     toPrint_item += [
                         ["{0}消費       : ".format(modeWord),str(self.stage_dict[item[0]][selection])],
@@ -702,7 +748,7 @@ class RiseiCalculator(object):
                 for item in es_toPrint:
                     try:
                         maxIndex = np.argmax(self.event_dict[item[0]]["array"])
-                        dropItemCategory = self.item_zh_to_ja[ValueTarget[maxIndex]]
+                        dropItemCategory = self.item_zh_to_ja[get_ValueTarget(self.Global)[maxIndex]]
                     except IndexError as e:
                         dropItemCategory = "不明"
                     toPrint_item = [
@@ -725,7 +771,7 @@ class RiseiCalculator(object):
             elif(to_print == "te2List"):
             #資格証効率計算
             #初級資格証
-                ticket_efficiency2 = {x:name_to_Value[x][0]/Price[x] for x in Item_rarity2}
+                ticket_efficiency2 = {x:name_to_Value[x][0]/Price[x] for x in get_Item_rarity2(self.Global)}
                 ticket_efficiency2_sorted = {key:(value,xSD95[self.name_to_index[key]]/Price[key]) for key,value in sorted(ticket_efficiency2.items(),key=lambda x:x[1],reverse=True)}
 
                 te2List = "初級資格証効率：```"
@@ -737,7 +783,7 @@ class RiseiCalculator(object):
 
             elif(to_print == "te3List"):
                 #上級資格証
-                ticket_efficiency3 = {x:name_to_Value[x][0]/Price[x] for x in Item_rarity3}
+                ticket_efficiency3 = {x:name_to_Value[x][0]/Price[x] for x in get_Item_rarity3(self.Global)}
                 ticket_efficiency3_sorted = {key:(value,xSD95[self.name_to_index[key]]/Price[key]) for key,value in sorted(ticket_efficiency3.items(),key=lambda x:x[1],reverse=True)}
 
                 te3List = "上級資格証効率：```"
@@ -749,7 +795,7 @@ class RiseiCalculator(object):
 
             elif(to_print == "specialList"):
                 #特別引換証
-                ticket_efficiency_special = {x:name_to_Value[x][0]/Price_Special[x] for x in Item_rarity2 + Item_rarity3}
+                ticket_efficiency_special = {x:name_to_Value[x][0]/Price_Special[x] for x in get_Item_rarity2(self.Global) + get_Item_rarity3(self.Global)}
                 ticket_efficiency_special_sorted = {key:(value,xSD95[self.name_to_index[key]]/Price_Special[key]) for key,value in sorted(ticket_efficiency_special.items(),key=lambda x:x[1],reverse=True)}
 
                 specialList = "特別引換証効率：```"
@@ -770,7 +816,7 @@ class RiseiCalculator(object):
                 except FileNotFoundError as e:
                     return "CC#{0}の交換値段が未設定です！".format(ccNumber)
                 ccList  = "契約賞金引換効率(CC#{0})：```".format(ccNumber)
-                ticket_efficiency_CC = [[x[0],(name_to_Value[x[0]][0]/x[1],xSD95[self.name_to_index[x[0]]]/x[1]),x[2]] for x in Price_CC if x[0] in ValueTarget]
+                ticket_efficiency_CC = [[x[0],(name_to_Value[x[0]][0]/x[1],xSD95[self.name_to_index[x[0]]]/x[1]),x[2]] for x in Price_CC if x[0] in get_ValueTarget(self.Global)]
                 ticket_efficiency_CC_sorted = sorted(ticket_efficiency_CC,key=lambda x:x[1][0],reverse=True)
                 to_print = []
                 for item in ticket_efficiency_CC_sorted:
@@ -784,12 +830,12 @@ class RiseiCalculator(object):
         finally:
             if need_reCalculate:
                 #メインデータの書き出し
-                Columns_Name = [self.item_zh_to_ja[x] for x in ValueTarget] + ['理性消費']
+                Columns_Name = [self.item_zh_to_ja[x] for x in get_ValueTarget(self.Global)] + ['理性消費']
                 Rows_Name_Convertion = ['経験値換算1','経験値換算2','経験値換算3','純金換算'] +\
-                    ['合成-'+self.item_zh_to_ja[x['name']] for x in self.formula if x['name'] in ValueTarget] +\
+                    ['合成-'+self.item_zh_to_ja[x['name']] for x in self.formula if x['name'] in get_ValueTarget(self.Global)] +\
                     ['スキル本換算1','スキル本換算2']
                 Rows_Name_ConstStage = {'5':['LS-5','CE-5','CA-5'],'6':['LS-6','CE-6','CA-5']}[self.LS_CE]
-                Rows_Name_Stages = [StageCategoryDict[list(StageCategoryDict.keys())[x]]["to_ja"] + self._seed2StageName(seeds)[x] for x in range(stages_need)]
+                Rows_Name_Stages = [get_StageCategoryDict(self.Global)[list(get_StageCategoryDict(self.Global).keys())[x]]["to_ja"] + self._seed2StageName(seeds)[x] for x in range(stages_need)]
                 Rows_Name = Rows_Name_Convertion+Rows_Name_ConstStage+Rows_Name_Stages + ['理性価値']
                 #print(Columns_Name)
                 #print(Rows_Name)
@@ -827,7 +873,7 @@ rc = None
             OptionChoice("契約賞金引換効率表(CC#10)","ccList"),
         ]),
         Option("target_item","検索したい素材名",3,choices = \
-            [OptionChoice(StageCategoryDict[x]["to_ja"],x) for x in StageCategoryDict.keys()]
+            [OptionChoice(get_StageCategoryDict(False)[x]["to_ja"],x) for x in get_StageCategoryDict(False).keys()]
         ),
         Option("event_code","マップ名の中に含まれる文字列",3),
         Option("mode","計算モード選択",3,choices = [OptionChoice("Sanity","Sanity"),OptionChoice("Time","Time")]),
@@ -836,17 +882,19 @@ rc = None
         Option("max_items","表示するマップの数",4),
         Option("csv_file",'理性価値表CSVファイルを添付する',5),
         
-        Option("ls_ce","LS,CEステージの番号",3,choices=[
-            OptionChoice('5(Legacy)','5'),
-            OptionChoice('6','6')
-        ]),
+        #Option("ls_ce","LS,CEステージの番号",3,choices=[
+        #    OptionChoice('6','6')
+        #]),
+        Option("is_global","True:グローバル版基準の計算、False:大陸版の新ステージと新素材を入れた計算",5),
+
         Option("cache_time","計算キャッシュを保持する時間(分)",4)
     ],
     guild_ids = test_guilds
 )
 
-async def riseicalculator(inter,target,target_item = "",event_code = "", mode="Sanity",min_times=1000,min_basetimes=3000,max_items=15,csv_file = False, ls_ce = '6',cache_time = 30):
+async def riseicalculator(inter,target,target_item = "",event_code = "", mode="Sanity",min_times=1000,min_basetimes=3000,max_items=15,csv_file = False,is_global=True,cache_time = 30):
     msg = ""
+    ls_ce = '6'
     global rc
     try:
         if(target == "items"):
@@ -862,9 +910,9 @@ async def riseicalculator(inter,target,target_item = "",event_code = "", mode="S
         "計算開始、しばらくお待ちください...")
         if rc == None or cache_time < 0:
             #print(rc)
-            rc = RiseiCalculator(minTimes = min_times, baseMinTimes = min_basetimes,LS_CE=ls_ce,Mode=mode)
+            rc = RiseiCalculator(minTimes = min_times, baseMinTimes = min_basetimes,LS_CE=ls_ce,Mode=mode,Global=is_global)
         msg = rc.Calc(to_print=target,target_forPrint={"items":target_item,"zone":event_code,"events":event_code}[target] if target in ["items","zone","events"] else "",\
-            cacheTime=cache_time,parameters={"mode":mode,"min_times":min_times,"min_basetimes":min_basetimes,"max_items":max_items,"ls_ce":ls_ce})
+            cacheTime=cache_time,parameters={"mode":mode,"min_times":min_times,"min_basetimes":min_basetimes,"max_items":max_items,"ls_ce":ls_ce,"is_global":is_global})
         return
     except Exception as e:
         ex_type, ex_value, ex_traceback = sys.exc_info()
