@@ -168,9 +168,7 @@ class RiseiCalculator(object):
         self.Global = Global
         
 
-        self.name_to_index = {x:get_ValueTarget(self.Global).index(x) for x in get_ValueTarget(self.Global)}
-        self.id_to_index = {x:self.name_to_index[self.item_id_to_name[x]["zh"]] for x in [self.item_name_to_id["zh"][y] for y in get_ValueTarget(self.Global)]}
-        self.TotalCount = len(get_ValueTarget(self.Global))
+        
         #self._GetMatrixNFormula()
         #self._getValidStageList()
         self.UpdatedTime = datetime.datetime.now()
@@ -227,6 +225,10 @@ class RiseiCalculator(object):
         """
         import formula data and matrix data
         """
+        self.name_to_index = {x:get_ValueTarget(self.Global).index(x) for x in get_ValueTarget(self.Global)}
+        self.id_to_index = {x:self.name_to_index[self.item_id_to_name[x]["zh"]] for x in [self.item_name_to_id["zh"][y] for y in get_ValueTarget(self.Global)]}
+        self.TotalCount = len(get_ValueTarget(self.Global))
+        
         AllstageList = get_json("stages")
         #イベントステージを除外
         ExclusionList = new_zone if self.Global else []
