@@ -190,9 +190,11 @@ class RiseiCalculator(object):
         EventStageList = [x for x in AllstageList if x["stageType"] in ["ACTIVITY"] \
             and "permanent" not in x["zoneId"] \
             and "act" in x["zoneId"] \
-            and "gachabox" not in x["stageId"]\
+            and "gacha" not in x["stageId"]\
             #ウルサスの子供を除外
             and "act10d5" not in x["zoneId"]
+            #錬金無限池を除外
+
         ]
 
         #minClearTimeInjection
