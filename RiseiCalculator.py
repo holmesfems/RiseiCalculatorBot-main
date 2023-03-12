@@ -229,13 +229,20 @@ class RiseiCalculator(object):
         self.id_to_index = {x:self.name_to_index[self.item_id_to_name[x]["zh"]] for x in [self.item_name_to_id["zh"][y] for y in get_ValueTarget(self.Global)]}
         self.TotalCount = len(get_ValueTarget(self.Global))
         
-        AllstageList = get_json("stages")
+        AllStageList = get_json("stages")
+
+        #minClearTimeInjection
+        for i in range(len(AllStageList)):
+            inject = minClearTimeInjection.get(AllStageList[i]["code"])
+            if inject != None:
+                MainStageList[i]["minClearTime"] = inject*1000
+
         #イベントステージを除外
         ExclusionList = new_zone if self.Global else []
-        MainStageList = [x for x in AllstageList if x["stageType"] in ["MAIN","SUB"] and x["zoneId"] not in ExclusionList and "tough" not in x["zoneId"]]
+        MainStageList = [x for x in AllStageList if x["stageType"] in ["MAIN","SUB"] and x["zoneId"] not in ExclusionList and "tough" not in x["zoneId"]]
         #常設イベントステージ
-        MainStageList += [x for x in AllstageList if x["stageType"] in ["ACTIVITY"] and "permanent" in x["zoneId"] and x["zoneId"] not in ExclusionList]
-        EventStageList = [x for x in AllstageList if x["stageType"] in ["ACTIVITY"] \
+        MainStageList += [x for x in AllStageList if x["stageType"] in ["ACTIVITY"] and "permanent" in x["zoneId"] and x["zoneId"] not in ExclusionList]
+        EventStageList = [x for x in AllStageList if x["stageType"] in ["ACTIVITY"] \
             and "permanent" not in x["zoneId"] \
             and "act" in x["zoneId"] \
             and "gacha" not in x["stageId"] \
@@ -243,12 +250,7 @@ class RiseiCalculator(object):
             and "act10d5" not in x["zoneId"] 
         ]
 
-        #minClearTimeInjection
-        for i in range(len(MainStageList)):
-            for item in minClearTimeInjection.keys():
-                if MainStageList[i]["code"] == item:
-                    MainStageList[i]["minClearTime"] = minClearTimeInjection[item]*1000
-                    break
+        
 
         #print(MainStageList)
         MainStageIdList = [x["stageId"] for x in MainStageList]
