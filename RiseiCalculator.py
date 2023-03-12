@@ -235,7 +235,7 @@ class RiseiCalculator(object):
         for i in range(len(AllStageList)):
             inject = minClearTimeInjection.get(AllStageList[i]["code"])
             if inject != None:
-                MainStageList[i]["minClearTime"] = inject*1000
+                AllStageList[i]["minClearTime"] = inject*1000
 
         #イベントステージを除外
         ExclusionList = new_zone if self.Global else []
