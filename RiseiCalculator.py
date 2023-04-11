@@ -135,7 +135,7 @@ def get_json(s,AdditionalReq=None):
         s += "?" + "&".join(['%s=%s'%(x,AdditionalReq[x]) for x in AdditionalReq])
         print("request:"+s)
     req = urllib.request.Request(penguin_url + s, None, headers)
-    with urllib.request.urlopen(req, timeout=5) as response:
+    with urllib.request.urlopen(req, timeout=10) as response:
         return json.loads(response.read().decode())
 
 class RiseiCalculator(object):
