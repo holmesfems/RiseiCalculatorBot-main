@@ -99,6 +99,7 @@ minClearTimeInjection = json.load(open("minClearTimeInjection.json","r"))
 #大陸版実装済み、グロ版未実装のステージまとめ 実装次第削除してOK
 new_zone = [
     'main_11', #11章
+    'main_12', #12章
     'permanent_sidestory_10_zone1', #NL
     'permanent_sidestory_11_zone1', #BI
     'permanent_sidestory_12_zone1', #IW
