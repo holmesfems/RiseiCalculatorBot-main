@@ -931,7 +931,7 @@ async def riseicalculator(inter,target,target_item = "",event_code = "", mode="S
             stack_trace.append("File : %s , Line : %d, Func.Name : %s, Message : %s\n" % (trace[0], trace[1], trace[2], trace[3]))
         msg = "想定外のエラー:\n"
         msg += "Exception type : %s \n" % ex_type.__name__
-        msg += "Exception message : %s" % ex_value
+        msg += "Exception message : %s\n" % ex_value
         msg += "Stack trace:\n"
         for item in stack_trace:
             msg += item
