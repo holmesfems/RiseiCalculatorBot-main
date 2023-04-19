@@ -256,15 +256,17 @@ class RiseiCalculator(object):
         #print(MainStageList)
         MainStageIdList = [x["stageId"] for x in MainStageList]
         EventStageIdList = [x["stageId"] for x in EventStageList]
-        itemFilter = ",".join([self.item_name_to_id["zh"][x] for x in get_ValueTarget(self.Global)])
+        #itemFilter = ",".join([self.item_name_to_id["zh"][x] for x in get_ValueTarget(self.Global)])
+        #additionalHeader = {"itemFilter":itemFilter,"server":self.TargetServer,"show_closed_zones":"true"}
 
-        additionalHeader = {"itemFilter":itemFilter,"server":self.TargetServer,"show_closed_zones":"true"}
+        itemFilter = [self.item_name_to_id["zh"][x] for x in get_ValueTarget(self.Global)]
+        additionalHeader = {"server":self.TargetServer,"show_closed_zones":"true"}
         #ドロップデータ取得
-        matrix = get_json('result/matrix',additionalHeader)
+        matrix = get_json('result/matrix',additionalHeader) #一回目ここで死んでる
         #合成レシピ 副産物確率取得
         formula = get_json('formula')
         zones = get_json('zones')
-        self.matrix = [x for x in matrix["matrix"] if x["stageId"] in MainStageIdList + EventStageIdList]
+        self.matrix = [x for x in matrix["matrix"] if x["stageId"] in MainStageIdList + EventStageIdList and x["itemId"] in itemFilter]
         #print(self.matrix)
         self.formula = formula
         self.stages = MainStageList
