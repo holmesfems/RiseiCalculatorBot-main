@@ -46,10 +46,11 @@ Item_rarity2 = [
     '扭转醇','轻锰矿','研磨石',
     'RMA70-12','凝胶','炽合金',
     '晶体元件','半自然溶剂','化合切削液',
+    '转质盐组'
 ]
 
 Item_rarity2_new = [
-    '转质盐组'
+    
 ]
 
 Item_rarity3 = [
@@ -58,10 +59,11 @@ Item_rarity3 = [
     '白马醇','三水锰矿','五水研磨石',
     'RMA70-24','聚合凝胶','炽合金块',
     '晶体电路','精炼溶剂','切削原液',
+    '转质盐聚块'
 ]
 
 Item_rarity3_new = [
-    '转质盐聚块'
+    
 ]
 
 ValueTarget = [
@@ -82,12 +84,13 @@ ValueTarget = [
     '晶体元件', '晶体电路',
     '半自然溶剂','精炼溶剂',
     '化合切削液','切削原液',
+    '转质盐组','转质盐聚块','烧结核凝晶',
     '聚合剂', '双极纳米片', 'D32钢','晶体电子单元',
     '技巧概要·卷1', '技巧概要·卷2', '技巧概要·卷3',
 ]
 
 ValueTarget_new = [
-    '转质盐组','转质盐聚块','烧结核凝晶'
+    
 ]
 
 #ドロップアイテム&ステージのカテゴリ情報を入手
@@ -98,7 +101,7 @@ minClearTimeInjection = json.load(open("minClearTimeInjection.json","r"))
 
 #大陸版実装済み、グロ版未実装のステージまとめ 実装次第削除してOK
 new_zone = [
-    'main_11', #11章
+#    'main_11', #11章
     'main_12', #12章
     'permanent_sidestory_10_zone1', #NL
     'permanent_sidestory_11_zone1', #BI
@@ -126,7 +129,6 @@ def get_StageCategoryDict(glob):
         return StageCategoryDict["main"]
     else:
         return ChainMap(StageCategoryDict["main"],StageCategoryDict["new"])
-    
 
 #カテゴリを中国語から日本語へ変換
 #stage_Category_zh_to_ja = json.load(open("stage_Category_zh_to_ja.json","r"))
@@ -250,9 +252,6 @@ class RiseiCalculator(object):
             #ウルサスの子供を除外
             and "act10d5" not in x["zoneId"] 
         ]
-
-        
-
         #print(MainStageList)
         MainStageIdList = [x["stageId"] for x in MainStageList]
         EventStageIdList = [x["stageId"] for x in EventStageList]
