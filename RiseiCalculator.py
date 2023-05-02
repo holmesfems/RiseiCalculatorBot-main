@@ -778,7 +778,7 @@ class RiseiCalculator(object):
                         ["総合{1}効率   : {0:.1f}%".format(100*item[1],modeWord)],
                         ["主ドロップ     : ",dropItemCategory],
                         ["ドロップ率     : {0:.2f}%".format(100*self.event_dict[item[0]]["array"][maxIndex])],
-                        ["試行数         : ",str(self.event_dict[item[0]]["maxTimes"]),"```"],
+                        ["試行数         : ",str(self.event_dict[item[0]]["maxTimes"])],
                         ["理性消費       : ",str(self.event_dict[item[0]]["apCost"])],
                     ]
                     if self.event_dict[item[0]]["timeCost"] != None:
@@ -787,6 +787,7 @@ class RiseiCalculator(object):
                             #ドロップアイテム推定
                             ["分間入手数     : {0:.2f}".format(self.event_dict[item[0]]["array"][maxIndex]/self.event_dict[item[0]]["timeCost"]*120)],
                         ]
+                    toPrint_item += ["```"]
                     msg_list.append("\n".join(["".join(x) for x in toPrint_item]))
                     cnt = len(msg_list)
                     if(parameters["max_items"]>0 and cnt>=parameters["max_items"]):
