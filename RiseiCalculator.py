@@ -440,10 +440,17 @@ class RiseiCalculator(object):
                 #print(item["stageId"])
                 stage_info["apCost"] = self.allStages[self.allIds.index(item["stageId"])]["apCost"]
                 stage_info["name"] = self.stageId_to_name[item["stageId"]]
-                stage_info["timeCost"] = self.allStages[self.allIds.index(item["stageId"])]["minClearTime"]/1000.0
+                if self.allStages[self.allIds.index(item["stageId"])]["minClearTime"] is None:
+                    stage_info["timeCost"] = None
+                else:
+                    stage_info["timeCost"] = self.allStages[self.allIds.index(item["stageId"])]["minClearTime"]/1000.0
                 stage_info["array"][self.name_to_index["龙门币1000"]] = stage_info["apCost"] *0.012
                 stage_info["minTimes"] = 0
                 stage_info["maxTimes"] = 0
+                #目的の消費値がNoneの場合、計算に入れない
+                selection = {"Sanity":"apCost","Time":"timeCost"}[self.Mode]
+                if stage_info[selection] is None:
+                    continue
                 stage_dict[item["stageId"]] = stage_info
             
             prob = item["quantity"]/item["times"]
@@ -456,6 +463,7 @@ class RiseiCalculator(object):
                 stage_dict[item["stageId"]]["minTimes"] = item["times"]
             if stage_dict[item["stageId"]]["maxTimes"] == 0 or item["times"] > stage_dict[item["stageId"]]["maxTimes"]:
                 stage_dict[item["stageId"]]["maxTimes"] = item["times"]
+            
         #print(stage_dict)
         #試行回数条件を満たしているステージのみ出力&Id順にソートしておく
         self.stage_dict_all = {key:value for key,value in sorted(stage_dict.items(),key=lambda x:x[0])}
@@ -556,7 +564,6 @@ class RiseiCalculator(object):
             if (self.nowTime - self.UpdatedTime > datetime.timedelta(minutes=cacheTime) and cacheTime > 0) or \
             (self.minTimes,self.Mode,self.baseMinTimes,self.Global) != (parameters["min_times"],parameters["mode"],parameters["min_basetimes"],parameters["is_global"]):
             #若干ロジック上の問題があるかもしれない
-                    self.minTimes,self.Mode,self.baseMinTimes,self.Global = (parameters["min_times"],parameters["mode"],parameters["min_basetimes"],parameters["is_global"])
                     need_reCalculate = True
             else:
                 #read cache
@@ -570,6 +577,7 @@ class RiseiCalculator(object):
         if need_reCalculate:
             self._GetMatrixNFormula()
             self._getValidStageList()
+            
             self.UpdatedTime = self.nowTime
             ConvertionMatrix,ConvertionRisei,ConvertionDiv = self._GetConvertionMatrix()
             self.ConvertionMatrix,self.ConvertionRisei,self.ConvertionDiv = (ConvertionMatrix,ConvertionRisei,ConvertionDiv) #cache
@@ -641,6 +649,8 @@ class RiseiCalculator(object):
             stageMatrix,stageRisei,stageDiv = self._getStageMatrix(seeds)
             self.stageMatrix,self.stageRisei,self.stageDiv = (stageMatrix,stageRisei,stageDiv) #save Cache
             self.seeds = seeds
+            #計算成功後、前回の入力パラメータを保存
+            self.minTimes,self.Mode,self.baseMinTimes,self.Global = (parameters["min_times"],parameters["mode"],parameters["min_basetimes"],parameters["is_global"])
 
         seedValues = self._getValues((ConvertionMatrix,ConstStageMatrix,stageMatrix),[ConvertionRisei,ConstStageRisei,stageRisei])
         stageValues = self._getStageValues(seedValues)
@@ -693,7 +703,8 @@ class RiseiCalculator(object):
                     toPrint_item = [
                         ["```マップ名       : ",self.stageId_to_name[item[0]],],
                         ["{1}効率       : {0:.1f}%".format(100*item[1],modeWord)],
-                        ["{0}消費       : ".format(modeWord),str(self.stage_dict[item[0]][selection])],
+                        ["理性消費       : ".format(modeWord),str(self.stage_dict[item[0]]["apCost"])],
+                        ["時間消費       : ".format(modeWord),str(self.stage_dict[item[0]]["timeCost"])],
                         ["95%信頼区間(2σ): {0:.1f}%".format(100*stageSD95[item[0]])],
                         ["主素材効率     : {0:.1f}%".format(100*np.dot(targetItemValues,self.stage_dict[item[0]]["array"][targetItemIndex])/self.stage_dict[item[0]][selection])],
                         ["昇進効率       : {0:.1f}%".format(100*np.dot(exclude_Videos_Values,self.stage_dict[item[0]]["array"][4:])/self.stage_dict[item[0]][selection])],
@@ -730,7 +741,8 @@ class RiseiCalculator(object):
                             toPrint_item.append(["{0}: {1:.1f}%".format(left(15,get_StageCategoryDict(self.Global)[dropItemCategory]["to_ja"]+"効率"),\
                                 100*np.dot(targetItemValues,self.stage_dict[item[0]]["array"][targetItemIndex])/self.stage_dict[item[0]][selection])])
                     toPrint_item += [
-                        ["{0}消費       : ".format(modeWord),str(self.stage_dict[item[0]][selection])],
+                        ["理性消費       : ".format(modeWord),str(self.stage_dict[item[0]]["apCost"])],
+                        ["時間消費       : ".format(modeWord),str(self.stage_dict[item[0]]["timeCost"])],
                         ["昇進効率       : {0:.1f}%".format(100*np.dot(exclude_Videos_Values,self.stage_dict[item[0]]["array"][4:])/self.stage_dict[item[0]][selection])],
                         ["試行数         : ",str(self.stage_dict[item[0]]["maxTimes"])],
                         ["最小試行数     : ",str(self.stage_dict[item[0]]["minTimes"]),"```"],
@@ -766,12 +778,15 @@ class RiseiCalculator(object):
                         ["総合{1}効率   : {0:.1f}%".format(100*item[1],modeWord)],
                         ["主ドロップ     : ",dropItemCategory],
                         ["ドロップ率     : {0:.2f}%".format(100*self.event_dict[item[0]]["array"][maxIndex])],
-                        ["理性消費       : ",str(self.event_dict[item[0]]["apCost"])],
-                        ["時間消費(倍速) : ", str(self.event_dict[item[0]]["timeCost"]/2.0)],
-                        #ドロップアイテム推定
-                        ["分間入手数     : {0:.2f}".format(self.event_dict[item[0]]["array"][maxIndex]/self.event_dict[item[0]]["timeCost"]*120)],
                         ["試行数         : ",str(self.event_dict[item[0]]["maxTimes"]),"```"],
+                        ["理性消費       : ",str(self.event_dict[item[0]]["apCost"])],
                     ]
+                    if self.event_dict[item[0]]["timeCost"] != None:
+                        toPrint_item += [
+                            ["時間消費(倍速) : ", str(self.event_dict[item[0]]["timeCost"]/2.0)],
+                            #ドロップアイテム推定
+                            ["分間入手数     : {0:.2f}".format(self.event_dict[item[0]]["array"][maxIndex]/self.event_dict[item[0]]["timeCost"]*120)],
+                        ]
                     msg_list.append("\n".join(["".join(x) for x in toPrint_item]))
                     cnt = len(msg_list)
                     if(parameters["max_items"]>0 and cnt>=parameters["max_items"]):
