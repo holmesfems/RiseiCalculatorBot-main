@@ -565,6 +565,7 @@ class RiseiCalculator(object):
             (self.minTimes,self.Mode,self.baseMinTimes,self.Global) != (parameters["min_times"],parameters["mode"],parameters["min_basetimes"],parameters["is_global"]):
             #若干ロジック上の問題があるかもしれない
                     need_reCalculate = True
+                    
             else:
                 #read cache
                 ConvertionMatrix,ConvertionRisei,ConvertionDiv = (self.ConvertionMatrix,self.ConvertionRisei,self.ConvertionDiv)
@@ -575,9 +576,14 @@ class RiseiCalculator(object):
             # self.Convertion等未定義などの場合はここに飛ぶ
             need_reCalculate = True
         if need_reCalculate:
-            self._GetMatrixNFormula()
-            self._getValidStageList()
-            
+            ParamBackup = (self.minTimes,self.Mode,self.baseMinTimes,self.Global)
+            self.minTimes,self.Mode,self.baseMinTimes,self.Global = (parameters["min_times"],parameters["mode"],parameters["min_basetimes"],parameters["is_global"])
+            try:
+                self._GetMatrixNFormula()
+                self._getValidStageList()
+            except Exception as e:
+                self.minTimes,self.Mode,self.baseMinTimes,self.Global = ParamBackup
+                raise e
             self.UpdatedTime = self.nowTime
             ConvertionMatrix,ConvertionRisei,ConvertionDiv = self._GetConvertionMatrix()
             self.ConvertionMatrix,self.ConvertionRisei,self.ConvertionDiv = (ConvertionMatrix,ConvertionRisei,ConvertionDiv) #cache
@@ -650,7 +656,7 @@ class RiseiCalculator(object):
             self.stageMatrix,self.stageRisei,self.stageDiv = (stageMatrix,stageRisei,stageDiv) #save Cache
             self.seeds = seeds
             #計算成功後、前回の入力パラメータを保存
-            self.minTimes,self.Mode,self.baseMinTimes,self.Global = (parameters["min_times"],parameters["mode"],parameters["min_basetimes"],parameters["is_global"])
+            #self.minTimes,self.Mode,self.baseMinTimes,self.Global = (parameters["min_times"],parameters["mode"],parameters["min_basetimes"],parameters["is_global"])
 
         seedValues = self._getValues((ConvertionMatrix,ConstStageMatrix,stageMatrix),[ConvertionRisei,ConstStageRisei,stageRisei])
         stageValues = self._getStageValues(seedValues)
