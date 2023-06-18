@@ -564,7 +564,7 @@ class RiseiCalculator(object):
             if (self.nowTime - self.UpdatedTime > datetime.timedelta(minutes=cacheTime) and cacheTime > 0) or \
             (self.minTimes,self.Mode,self.baseMinTimes,self.Global) != (parameters["min_times"],parameters["mode"],parameters["min_basetimes"],parameters["is_global"]):
             #若干ロジック上の問題があるかもしれない
-                    need_reCalculate = True
+                need_reCalculate = True
                     
             else:
                 #read cache
@@ -837,7 +837,7 @@ class RiseiCalculator(object):
                 return specialList
             elif(to_print == "ccList"):
                 #契約賞金引換証
-                ccNumber = '10'
+                ccNumber = '11'
                 Price_CC = list()
                 try:
                     with open('price_cc{0}.txt'.format(ccNumber), 'r', encoding='utf8') as f:
@@ -901,7 +901,7 @@ rc = None
             OptionChoice("初級資格証効率表","te2List"),
             OptionChoice("上級資格証効率表","te3List"),
             OptionChoice("特別引換証効率表","specialList"),
-            OptionChoice("契約賞金引換効率表(CC#10)","ccList"),
+            OptionChoice("契約賞金引換効率表(CC#11)","ccList"),
         ]),
         Option("target_item","検索したい素材名",3,choices = \
             [OptionChoice(get_StageCategoryDict(False)[x]["to_ja"],x) for x in get_StageCategoryDict(False).keys()]
