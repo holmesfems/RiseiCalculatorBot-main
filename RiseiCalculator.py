@@ -137,9 +137,16 @@ def get_json(s,AdditionalReq=None):
     if not AdditionalReq == None:
         s += "?" + "&".join(['%s=%s'%(x,AdditionalReq[x]) for x in AdditionalReq])
         print("request:"+s)
-    req = urllib.request.Request(penguin_url + s, None, headers)
-    with urllib.request.urlopen(req, timeout=10) as response: #謎に一回目だけTimeout なぜ
-        return json.loads(response.read().decode())
+    Err = None
+    for _ in range(5):
+        try:
+            req = urllib.request.Request(penguin_url + s, None, headers)
+            with urllib.request.urlopen(req, timeout=10) as response: #謎に一回目だけTimeout なぜ
+                return json.loads(response.read().decode())
+        except TimeoutError as e:
+            Err = e
+    raise Err
+        
 
 class RiseiCalculator(object):
     def __init__(self,
