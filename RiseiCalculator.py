@@ -145,7 +145,7 @@ def get_json(s,AdditionalReq=None):
             req = urllib.request.Request(penguin_url + s, None, headers)
             with urllib.request.urlopen(req, timeout=10) as response: #謎に一回目だけTimeout なぜ
                 return json.loads(response.read().decode())
-        except TimeoutError as e:
+        except Exception as e:
             Err = e
     raise Err
         
