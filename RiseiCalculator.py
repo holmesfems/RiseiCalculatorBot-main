@@ -103,9 +103,11 @@ minClearTimeInjection = json.load(open("minClearTimeInjection.json","r"))
 new_zone = [
 #    'main_11', #11章
     'main_12', #12章
-    'permanent_sidestory_10_zone1', #NL
-    'permanent_sidestory_11_zone1', #BI
+#    'permanent_sidestory_10_zone1', #NL
+#    'permanent_sidestory_11_zone1', #BI
     'permanent_sidestory_12_zone1', #IW
+    'permanent_sidestory_12_zone1', #GA
+    'permanent_sub_5_zone1', #CW
 ]
 
 #大陸版基準、グロ版基準調整用
@@ -886,6 +888,7 @@ class RiseiCalculator(object):
                 df.to_csv('BaseStages.csv',encoding='utf-8-sig')
                 print("基準マップデータをBaseStages.csvに保存しました")
 
+
 TOKEN = os.environ["BOT_TOKEN"]
 ID = os.environ["BOT_ID"]
 url_botCommands = "https://discord.com/api/v8/applications/{0}/commands".format(ID)
@@ -895,6 +898,64 @@ client = commands.Bot(command_prefix = '/')
 slash = slash_commands.SlashClient(client)
 test_guilds = [int(os.environ["GUILD_ID"])]
 rc = None
+
+async def replyToDiscord(inter,msg,csv_file=False):
+    print(msg)
+    max_length = 1900
+    title = "reply"
+    color = 0x8be02b
+    if type(msg) == type(str()):
+        chunks = [msg[i:i+max_length] for i in range(0, len(msg), max_length)]
+    elif type(msg) == type(list()):
+        chunks = []
+        for item in msg:
+            if len(chunks) == 0:
+                chunks.append(item)
+            else:
+                if(len(chunks[-1])+len(item)) <= max_length:
+                    chunks[-1] += item
+                else:
+                    chunks.append(item)
+    elif type(msg) == type(dict()):
+        title = msg["title"]
+        chunks = msg["msgList"]
+        try:
+            color = msg["color"] 
+        except:
+            color = 0x8be02b
+    embeds = []
+    for item in chunks:
+        embed = discord.Embed(
+            title = title,
+            description = item,
+            color = color
+        )
+        embeds.append(embed)
+    await inter.followup(embeds = embeds)
+        #await inter.followup
+    if rc != None:
+        createdTime = "\n作成時間:\t{0}".format(rc.UpdatedTime)
+        await inter.followup(createdTime,file = discord.File('BaseStages.csv') if csv_file else None)
+
+def showException():
+    ex_type, ex_value, ex_traceback = sys.exc_info()
+    # Extract unformatter stack traces as tuples
+    trace_back = traceback.extract_tb(ex_traceback)
+
+    # Format stacktrace
+    stack_trace = list()
+
+    for trace in trace_back:
+        stack_trace.append("File : %s , Line : %d, Func.Name : %s, Message : %s\n" % (trace[0], trace[1], trace[2], trace[3]))
+    msg = "想定外のエラー:\n"
+    msg += "Exception type : %s \n" % ex_type.__name__
+    msg += "Exception message : %s\n" % ex_value
+    msg += "Stack trace:\n"
+    for item in stack_trace:
+        msg += item
+    return msg
+
+
 @slash.command(
     name = 'riseicalculator',
     description = '理性価値表計算',
@@ -953,61 +1014,55 @@ async def riseicalculator(inter,target,target_item = "",event_code = "", mode="S
             cacheTime=cache_time,parameters={"mode":mode,"min_times":min_times,"min_basetimes":min_basetimes,"max_items":max_items,"ls_ce":ls_ce,"is_global":is_global})
         return
     except Exception as e:
-        ex_type, ex_value, ex_traceback = sys.exc_info()
-        # Extract unformatter stack traces as tuples
-        trace_back = traceback.extract_tb(ex_traceback)
-
-        # Format stacktrace
-        stack_trace = list()
-
-        for trace in trace_back:
-            stack_trace.append("File : %s , Line : %d, Func.Name : %s, Message : %s\n" % (trace[0], trace[1], trace[2], trace[3]))
-        msg = "想定外のエラー:\n"
-        msg += "Exception type : %s \n" % ex_type.__name__
-        msg += "Exception message : %s\n" % ex_value
-        msg += "Stack trace:\n"
-        for item in stack_trace:
-            msg += item
+        msg = showException()
     finally:
         #channel = inter.channel()
-        print(msg)
-        max_length = 1900
-        title = "reply"
-        color = 0x8be02b
-        if type(msg) == type(str()):
-            chunks = [msg[i:i+max_length] for i in range(0, len(msg), max_length)]
-        elif type(msg) == type(list()):
-            chunks = []
-            for item in msg:
-                if len(chunks) == 0:
-                    chunks.append(item)
-                else:
-                    if(len(chunks[-1])+len(item)) <= max_length:
-                        chunks[-1] += item
-                    else:
-                        chunks.append(item)
-        elif type(msg) == type(dict()):
-            title = msg["title"]
-            chunks = msg["msgList"]
-            try:
-                color = msg["color"] 
-            except:
-                color = 0x8be02b
-        embeds = []
-        for item in chunks:
-            embed = discord.Embed(
-                title = title,
-                description = item,
-                color = color
-            )
-            embeds.append(embed)
-        await inter.followup(embeds = embeds)
-            #await inter.followup
-        if rc != None:
-            createdTime = "\n作成時間:\t{0}".format(rc.UpdatedTime)
-            await inter.followup(createdTime,file = discord.File('BaseStages.csv') if csv_file else None)
+        await replyToDiscord(inter,msg,csv_file)
 
     #print(rc.convert_rules)
+
+@slash.command(
+    name = 'riseiMaterials',
+    description = '昇進素材別検索(target_item指定)',
+    options = [
+        Option("target_item","検索したい素材名",3,True,choices = \
+            [OptionChoice(get_StageCategoryDict(False)[x]["to_ja"],x) for x in get_StageCategoryDict(False).keys()]
+        ),
+        Option("mode","計算モード選択",3,choices = [OptionChoice("Sanity","Sanity"),OptionChoice("Time","Time")]),
+        Option("min_times","計算に必要な最小サンプル数",4),
+        Option("min_basetimes","基準マップとして選ばれるために必要な最小サンプル数",4),
+        Option("max_items","表示するマップの数",4),
+        Option("csv_file",'理性価値表CSVファイルを添付する',5),
+        
+        #Option("ls_ce","LS,CEステージの番号",3,choices=[
+        #    OptionChoice('6','6')
+        #]),
+        Option("is_global","True:グローバル版基準の計算、False:大陸版の新ステージと新素材を入れた計算",5),
+        Option("cache_time","計算キャッシュを保持する時間(分)",4)
+    ],
+    guild_ids = test_guilds
+)
+
+async def riseiMaterials(inter,target_item, mode="Sanity",min_times=1000,min_basetimes=3000,max_items=15,csv_file = False,is_global=True,cache_time = 30):
+    msg = ""
+    ls_ce = '6'
+    global rc
+    target = "items"
+    try:
+        await inter.reply("target={0},mode={1},min_times={2},min_basetimes={3},max_items={4},csv_file={5},ls_ce={6}\n".format(\
+            target,mode,min_times,min_basetimes,max_items,csv_file,ls_ce)+\
+        "計算開始、しばらくお待ちください...")
+        if rc == None or cache_time < 0:
+            #print(rc)
+            rc = RiseiCalculator(minTimes = min_times, baseMinTimes = min_basetimes,LS_CE=ls_ce,Mode=mode,Global=is_global)
+        msg = rc.Calc(to_print=target,target_forPrint=target_item,\
+            cacheTime=cache_time,parameters={"mode":mode,"min_times":min_times,"min_basetimes":min_basetimes,"max_items":max_items,"ls_ce":ls_ce,"is_global":is_global})
+        return
+    except Exception as e:
+        msg = showException()
+    finally:
+        #channel = inter.channel()
+        await replyToDiscord(inter,msg,csv_file)
 
 @client.event
 async def on_ready():
