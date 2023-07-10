@@ -1022,7 +1022,7 @@ async def riseicalculator(inter,target,target_item = "",event_code = "", mode="S
     #print(rc.convert_rules)
 
 @slash.command(
-    name = 'riseiMaterials',
+    name = 'riseimaterials',
     description = '昇進素材別検索(target_item指定)',
     options = [
         Option("target_item","検索したい素材名",3,True,choices = \
@@ -1043,7 +1043,7 @@ async def riseicalculator(inter,target,target_item = "",event_code = "", mode="S
     guild_ids = test_guilds
 )
 
-async def riseiMaterials(inter,target_item, mode="Sanity",min_times=1000,min_basetimes=3000,max_items=15,csv_file = False,is_global=True,cache_time = 30):
+async def riseimaterials(inter,target_item, mode="Sanity",min_times=1000,min_basetimes=3000,max_items=15,csv_file = False,is_global=True,cache_time = 30):
     msg = ""
     ls_ce = '6'
     global rc
