@@ -169,31 +169,14 @@ async def tagAutoComplete(inter:Interaction,current:str):
     name = "recruitsim",
     description = '公開求人検索',
 )
-@app_commands.describe(
-    tag1 = "1個めのタグ",
-    tag2 = "2個めのタグ",
-    tag3 = "3個めのタグ",
-    tag4 = "4個めのタグ",
-    tag5 = "5個めのタグ",
-    min_star = "星〇以上確定のみを表示"
-)
-@app_commands.choices(
-    min_star = [Choice(name = str(x+1),value = x+1) for x in range(6)]
-)
-@app_commands.autocomplete(
-    tag1 = tagAutoComplete,
-    tag2 = tagAutoComplete,
-    tag3 = tagAutoComplete,
-    tag4 = tagAutoComplete,
-    tag5 = tagAutoComplete
-)
-async def recruitsim(inter:Interaction, tag1:str, tag2:str=None,
-                             tag3:str=None, tag4:str=None, tag5:str=None ,min_star:Choice[int]=1):
+async def recruitsim(inter:Interaction):
     try:
-        await inter.response.send_message("計算開始、しばらくお待ちください")
-        safeList = [safeCallChoiceVal(x) for x in [tag1,tag2,tag3,tag4,tag5]]
-        _min_star = safeCallChoiceVal(min_star)
-        msg = recruitDoProcess(safeList,_min_star)
+        view = discord.ui.View
+        view.add_item(discord.ui.Select(options=[discord.SelectOption(label = x) for x in tagNameList]))
+        await inter.response.send_message(view=view)
+        #safeList = [safeCallChoiceVal(x) for x in [tag1,tag2,tag3,tag4,tag5]]
+        #_min_star = safeCallChoiceVal(min_star)
+        #msg = recruitDoProcess(safeList,_min_star)
         return
     except:
         msg = showException()
