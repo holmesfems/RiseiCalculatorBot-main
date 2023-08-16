@@ -52,7 +52,7 @@ class Operator:
         self.stars = int(operatorJson["stars"])
 
     def __repr__(self):
-        return self.name+"(★ {0})".format(self.stars)
+        return self.name+"(★{0})".format(self.stars)
 
 with open("./recruitment/recruitmentOperators.json","rb") as file:
     operatorDB = yaml.safe_load(file)["main"]
@@ -61,7 +61,11 @@ with open("./recruitment/recruitmentOperators.json","rb") as file:
 with open("./recruitment/tagList.json","rb") as file:
     tagList = yaml.safe_load(file)
 
-tagNameList = tagList["eliteTags"]+tagList["jobTags"]+tagList["positionTags"]+tagList["otherTags"]
+eliteTags = tagList["eliteTags"]
+jobTags = tagList["jobTags"]
+otherTags = tagList["positionTags"]+tagList["otherTags"]
+
+tagNameList = eliteTags + jobTags + otherTags
 
 def createTag(tagName):
     if tagName in tagList["eliteTags"]:
