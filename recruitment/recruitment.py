@@ -135,8 +135,8 @@ def searchMapToStringChunks(searchMap):
         chunks.append(chunk)
     return chunks
             
-def recruitDoProcess(tag1,tag2,tag3,tag4,tag5,minStar):
-    inputList = list(filter(lambda x:x is not None and x!="",[tag1,tag2,tag3,tag4,tag5]))
+def recruitDoProcess(inputTagList,minStar):
+    inputList = list(filter(lambda x:x is not None and x!="",inputTagList))
     if(minStar is None): minStar = 1
     searchMap = createSearchMap(inputList,operatorDB,minStar)
     chunks = searchMapToStringChunks(searchMap)
