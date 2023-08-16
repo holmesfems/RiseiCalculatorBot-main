@@ -4,7 +4,7 @@ import itertools
 class RecruitTag:
     def __init__(self,tagName):
         self.name = tagName
-    
+
     def containedIn(operator):
         pass
 
@@ -133,8 +133,9 @@ def toStrList(list):
 
 def searchMapToStringChunks(searchMap):
     chunks = []
-    lenSorted = sorted(searchMap.items(),key=lambda x:len(x[1]))
-    starSorted = sorted(lenSorted,key=lambda x:minStar(x[1]),reverse=True)
+    keyLenSorted = sorted(searchMap.items(),key=lambda x:len(x[0]),reverse=True)
+    valueLenSorted = sorted(keyLenSorted,key=lambda x:len(x[1]))
+    starSorted = sorted(valueLenSorted,key=lambda x:minStar(x[1],3),reverse=True)
     for (key,value) in starSorted:
         valueSortedByStar = sorted(value,key=lambda x:x.stars,reverse=True)
         minStarValue = minStar(valueSortedByStar,3)
