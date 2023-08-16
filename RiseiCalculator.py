@@ -179,6 +179,8 @@ async def recruitsim(inter:Interaction):
         view.add_item(jobTagsSelect)
         view.add_item(otherTagsSelect)
         await inter.response.send_message(view=view)
+        selected = eliteTagsSelect.values + jobTagsSelect.values + otherTagsSelect.values
+        print(selected)
         #safeList = [safeCallChoiceVal(x) for x in [tag1,tag2,tag3,tag4,tag5]]
         #_min_star = safeCallChoiceVal(min_star)
         #msg = recruitDoProcess(safeList,_min_star)
