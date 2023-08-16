@@ -150,7 +150,13 @@ async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choic
 
     #print(rc.convert_rules)
 
-tagChoices = [Choice(name = x, value = x) for x in tagNameList]
+async def tagAutoComplete(inter:Interaction,current:str)->list[app_commands.Choice]:
+    nameList = tagNameList
+    return [Choice(name = x, value=x) 
+            for x in nameList if current.lower() in tagNameList.lower()
+
+    ]
+
 #recruitcal = app_commands.CommandTree(client)
 @tree.command(
     name = "recruitsim",
@@ -165,15 +171,17 @@ tagChoices = [Choice(name = x, value = x) for x in tagNameList]
     min_star = "星〇以上確定のみを表示"
 )
 @app_commands.choices(
-    tag1 = tagChoices,
-    tag2 = tagChoices,
-    tag3 = tagChoices,
-    tag4 = tagChoices,
-    tag5 = tagChoices,
     min_star = [Choice(name = str(x+1),value = x+1) for x in range(6)]
 )
-async def recruitsim(inter:Interaction, tag1:Choice[str], tag2:Choice[str]=None,
-                             tag3:Choice[str]=None, tag4:Choice[str]=None, tag5:Choice[str]=None ,min_star:Choice[int]=1):
+@app_commands.autocomplete(
+    tag1 = tagAutoComplete,
+    tag2 = tagAutoComplete,
+    tag3 = tagAutoComplete,
+    tag4 = tagAutoComplete,
+    tag5 = tagAutoComplete
+)
+async def recruitsim(inter:Interaction, tag1:str, tag2:str=None,
+                             tag3:str=None, tag4:str=None, tag5:str=None ,min_star:Choice[int]=1):
     try:
         await inter.response.send_message("計算開始、しばらくお待ちください")
         safeList = [safeCallChoiceVal(x) for x in [tag1,tag2,tag3,tag4,tag5]]
