@@ -2,6 +2,7 @@ import os, sys
 import discord
 from discord import app_commands,Interaction
 from discord.app_commands import Choice
+from discord.utils import MISSING
 import traceback
 from riseiCalculatorProcess import *
 from recruitment.recruitment import *
@@ -172,6 +173,9 @@ def showException():
     test_guilds
 )
 """
+def safeCallChoiceVal(choice:Choice):
+    return choice.value if(choice == choice) else None
+
 @slash.command(
     description = '理性価値表計算',
 )
@@ -202,14 +206,14 @@ def showException():
     target_item = [Choice(name=get_StageCategoryDict(False)[x]["to_ja"],value=x) for x in get_StageCategoryDict(False).keys()],
     mode = [Choice(name="Sanity",value ="Sanity"),Choice(name="Time",value ="Time")]
 )
-async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choice[str]=None,
-                          event_code:str = None, mode:Choice[str]="Sanity",min_times:int=1000,min_basetimes:int=3000,max_items:int=15,csv_file:bool = False,is_global:bool=True,cache_time:int = 30):
+async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choice[str]=MISSING,
+                          event_code:str = MISSING, mode:Choice[str]="Sanity",min_times:int=1000,min_basetimes:int=3000,max_items:int=15,csv_file:bool = False,is_global:bool=True,cache_time:int = 30):
     msg = ""
     ls_ce = '6'
     global rc
-    target = target.value
-    target_item = target_item.value
-    mode = mode.value
+    target = safeCallChoiceVal(target)
+    target_item = safeCallChoiceVal(target_item)
+    mode = safeCallChoiceVal(mode)
     try:
         if(target == "items"):
             if target_item == "":
