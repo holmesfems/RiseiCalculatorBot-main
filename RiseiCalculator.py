@@ -1,3 +1,4 @@
+from ast import List
 import os, sys
 import discord
 from discord import app_commands,Interaction
@@ -150,7 +151,7 @@ async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choic
 
     #print(rc.convert_rules)
 
-async def tagAutoComplete(inter:Interaction,current:str)->list[app_commands.Choice]:
+async def tagAutoComplete(inter:Interaction,current:str)->List[app_commands.Choice]:
     nameList = tagNameList
     return [Choice(name = x, value=x) 
             for x in nameList if current.lower() in tagNameList.lower()
