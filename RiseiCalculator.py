@@ -154,7 +154,7 @@ async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choic
 async def tagAutoComplete(inter:Interaction,current:str):
     nameList = tagNameList
     return [Choice(name = x, value=x) 
-            for x in nameList if current.lower() in tagNameList.lower()
+            for x in nameList if current in x
     ]
 
 #recruitcal = app_commands.CommandTree(client)
