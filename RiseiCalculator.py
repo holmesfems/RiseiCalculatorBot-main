@@ -172,7 +172,7 @@ async def tagAutoComplete(inter:Interaction,current:str):
 async def recruitsim(inter:Interaction):
     try:
         view = discord.ui.View()
-        view.add_item(item=discord.ui.Select(options=[discord.SelectOption(label = x) for x in otherTags]))
+        view.add_item(item=discord.ui.Select(options=[discord.SelectOption(label = x) for x in otherTags],max_values=5))
         await inter.response.send_message(view=view)
         #safeList = [safeCallChoiceVal(x) for x in [tag1,tag2,tag3,tag4,tag5]]
         #_min_star = safeCallChoiceVal(min_star)
