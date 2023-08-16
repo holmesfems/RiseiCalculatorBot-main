@@ -172,7 +172,12 @@ async def tagAutoComplete(inter:Interaction,current:str):
 async def recruitsim(inter:Interaction):
     try:
         view = discord.ui.View()
-        view.add_item(item=discord.ui.Select(options=[discord.SelectOption(label = x) for x in otherTags],max_values=5))
+        eliteTagsSelect = discord.ui.Select(options=[discord.SelectOption(label = x) for x in otherTags],min_values=0,max_values=2,placeholder="エリートタグ選択")
+        jobTagsSelect = discord.ui.Select(options=[discord.SelectOption(label = x) for x in jobTags],min_values=0,max_values=5,placeholder="職タグ選択")
+        otherTagsSelect = discord.ui.Select(options=[discord.SelectOption(label = x) for x in otherTags],min_values=0,max_values=5,placeholder="その他タグ選択")
+        view.add_item(eliteTagsSelect)
+        view.add_item(jobTagsSelect)
+        view.add_item(otherTagsSelect)
         await inter.response.send_message(view=view)
         #safeList = [safeCallChoiceVal(x) for x in [tag1,tag2,tag3,tag4,tag5]]
         #_min_star = safeCallChoiceVal(min_star)
