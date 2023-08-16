@@ -84,6 +84,7 @@ def safeCallChoiceVal(choice):
 appCmd = app_commands.CommandTree(client)
 
 @app_commands.command(
+    name = "riseicalculator",
     description = '理性価値表計算',
 )
 @app_commands.describe(
