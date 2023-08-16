@@ -1,6 +1,6 @@
 import numpy as np
 import numpy.linalg as LA
-import urllib.request, json, time, os, copy, sys
+import urllib.request, json, sys
 import random
 import pandas as pd
 import math
@@ -9,6 +9,7 @@ from io import StringIO
 import unicodedata
 from collections import ChainMap
 from riseiCalculatorProcess import *
+import yaml
 
 def left(digit, msg):
     for c in msg:
@@ -90,10 +91,12 @@ ValueTarget_new = [
 ]
 
 #ドロップアイテム&ステージのカテゴリ情報を入手
-StageCategoryDict = json.load(open("StageCategoryDict.json","r"))
+with open("StageCategoryDict.json","rb") as file:
+    StageCategoryDict = yaml.safe_load(file)
 
 #一部理論値と実際のクリア時間が乖離しているステージで個別修正
-minClearTimeInjection = json.load(open("minClearTimeInjection.json","r"))
+with open("minClearTimeInjection.json","r") as file:
+    minClearTimeInjection = yaml.safe_load(file)
 
 #大陸版実装済み、グロ版未実装のステージまとめ 実装次第削除してOK
 new_zone = [

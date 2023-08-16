@@ -203,7 +203,7 @@ def showException():
     mode = [Choice(name="Sanity",value ="Sanity"),Choice(name="Time",value ="Time")]
 )
 async def riseicalculator(inter:discord.Interaction,target:Choice[str],target_item:Choice[str]=None,
-                          event_code:str = None, mode="Sanity",min_times=1000,min_basetimes=3000,max_items=15,csv_file = False,is_global=True,cache_time = 30):
+                          event_code:str = None, mode:str="Sanity",min_times:int=1000,min_basetimes:int=3000,max_items:int=15,csv_file:bool = False,is_global:bool=True,cache_time:int = 30):
     msg = ""
     ls_ce = '6'
     global rc
