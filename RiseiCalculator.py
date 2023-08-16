@@ -9,8 +9,8 @@ from recruitment.recruitment import *
 TOKEN = os.environ["BOT_TOKEN"]
 ID = os.environ["BOT_ID"]
 url_botCommands = "https://discord.com/api/v8/applications/{0}/commands".format(ID)
-
-client = commands.Bot(command_prefix = '/')
+intents=discord.Intents.all()
+client = commands.Bot(intents=intents,command_prefix = '/')
 
 slash = slash_commands.SlashClient(client)
 test_guilds = [int(os.environ["GUILD_ID"])]
