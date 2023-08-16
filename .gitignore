@@ -1,1 +1,3 @@
 bot_token.env
+__pycache__
+recruitment/__pycache__
