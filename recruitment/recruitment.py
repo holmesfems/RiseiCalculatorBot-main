@@ -131,7 +131,7 @@ def searchMapToStringChunks(searchMap):
         valueStrList = toStrList(valueSortedByStar)
         keyMsg = "+".join(keyStrList)
         valueMsg = ",".join(valueStrList)
-        chunk = keyMsg+" -> '''"+valueMsg+"'''"
+        chunk = keyMsg+" -> ```"+valueMsg+"```"
         chunks.append(chunk)
     return chunks
             
