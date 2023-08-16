@@ -101,11 +101,17 @@ def satisfyTags(operator,tagClassList):
 
 def maxStar(operatorList):
     starList = [operator.stars for operator in operatorList]
-    return max(starList)
+    if(starList): return max(starList)
+    return 0
 
 def minStar(operatorList,least:int = 1):
-    starList = [operator.stars for operator in operatorList if operator.stars >= least]
-    return min(starList)
+    allstarList = [operator.stars for operator in operatorList]
+    starList = [x for x in allstarList if x>=least]
+    if(starList):
+        return min(starList)
+    if(allstarList):
+        return min(allstarList)
+    return 0
 
 def operatorListStarsMEThan(stars):
     return [operator for operator in operatorDB if operator.stars >= stars]
