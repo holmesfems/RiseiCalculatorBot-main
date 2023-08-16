@@ -1,6 +1,6 @@
 import os, sys
 import discord
-from discord import app_commands,Integration
+from discord import app_commands,Interaction
 from discord.app_commands import Choice
 import traceback
 from riseiCalculatorProcess import *
@@ -16,7 +16,7 @@ slash = app_commands.CommandTree(client)
 test_guilds = [int(os.environ["GUILD_ID"])]
 rc = None
 
-async def replyToDiscord(inter,msg):
+async def replyToDiscord(inter:Interaction,msg):
     print(msg)
     max_length = 1900
     title = "reply"
@@ -48,13 +48,13 @@ async def replyToDiscord(inter,msg):
             color = color
         )
         embeds.append(embed)
-    await inter.followup(embeds = embeds)
+    await inter.followup.send(embeds = embeds)
         #await inter.followup
 
-async def showUpdateTime(inter,csv_file):
+async def showUpdateTime(inter:Interaction,csv_file):
     if rc != None:
         createdTime = "\n作成時間:\t{0}".format(rc.UpdatedTime)
-        await inter.followup(createdTime,file = discord.File('BaseStages.csv') if csv_file else None)
+        await inter.followup.send(createdTime,file = discord.File('BaseStages.csv') if csv_file else None)
 
 def showException():
     ex_type, ex_value, ex_traceback = sys.exc_info()
@@ -202,7 +202,7 @@ def showException():
     target_item = [Choice(name=get_StageCategoryDict(False)[x]["to_ja"],value=x) for x in get_StageCategoryDict(False).keys()],
     mode = [Choice(name="Sanity",value ="Sanity"),Choice(name="Time",value ="Time")]
 )
-async def riseicalculator(inter:discord.Interaction,target:Choice[str],target_item:Choice[str]=None,
+async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choice[str]=None,
                           event_code:str = None, mode:str="Sanity",min_times:int=1000,min_basetimes:int=3000,max_items:int=15,csv_file:bool = False,is_global:bool=True,cache_time:int = 30):
     msg = ""
     ls_ce = '6'
@@ -216,7 +216,7 @@ async def riseicalculator(inter:discord.Interaction,target:Choice[str],target_it
             if event_code == "":
                 msg = "ステージ名を指定してください"
                 return
-        await inter.reply("target={0},mode={1},min_times={2},min_basetimes={3},max_items={4},csv_file={5},ls_ce={6}\n".format(\
+        await inter.response("target={0},mode={1},min_times={2},min_basetimes={3},max_items={4},csv_file={5},ls_ce={6}\n".format(\
             target,mode,min_times,min_basetimes,max_items,csv_file,ls_ce)+\
         "計算開始、しばらくお待ちください...")
         if rc == None or cache_time < 0:
