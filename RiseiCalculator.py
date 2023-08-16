@@ -151,12 +151,18 @@ async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choic
 
     #print(rc.convert_rules)
 
-async def tagAutoComplete(inter:Interaction,current:str):
+def autoGuide(current:str):
     if current == "": return ["エリートタグ","職タグ","その他タグ"]
     if current == "エリートタグ": return eliteTags
     if current == "職タグ": return jobTags
     if current == "その他タグ": return otherTags
     return [x for x in tagNameList if current in x]
+
+def createChoice(list):
+    return [Choice(name = item,value=item) for item in list]
+
+async def tagAutoComplete(inter:Interaction,current:str):
+    return createChoice(autoGuide(current))
 
 #recruitcal = app_commands.CommandTree(client)
 @tree.command(
