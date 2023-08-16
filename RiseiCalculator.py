@@ -83,7 +83,7 @@ def safeCallChoiceVal(choice):
 
 appCmd = app_commands.CommandTree(client)
 
-@appCmd.command(
+@app_commands.command(
     description = '理性価値表計算',
 )
 @app_commands.describe(
@@ -154,7 +154,7 @@ async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choic
 
 tagChoices = [Choice(name = x, value = x) for x in tagNameList]
 #recruitcal = app_commands.CommandTree(client)
-@appCmd.command(
+@app_commands.command(
     name = "recruitsim",
     description = '公開求人検索',
 )
