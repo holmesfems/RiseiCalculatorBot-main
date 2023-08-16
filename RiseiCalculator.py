@@ -114,9 +114,6 @@ tree = app_commands.CommandTree(client)
     target_item = [Choice(name=get_StageCategoryDict(False)[x]["to_ja"],value=x) for x in get_StageCategoryDict(False).keys()],
     mode = [Choice(name="Sanity",value ="Sanity"),Choice(name="Time",value ="Time")]
 )
-@app_commands.guilds(
-    GUILD_ID
-)
 async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choice[str]=None,
                           event_code:str = None, mode:Choice[str]="Sanity",min_times:int=1000,min_basetimes:int=3000,max_items:int=15,csv_file:bool = False,is_global:bool=True,cache_time:int = 30):
     msg = ""
@@ -175,9 +172,6 @@ tagChoices = [Choice(name = x, value = x) for x in tagNameList]
     tag5 = tagChoices,
     min_star = [Choice(name = str(x+1),value = x+1) for x in range(6)]
 )
-@app_commands.guilds(
-    GUILD_ID
-)
 async def recruitsim(inter:Interaction, tag1:Choice[str], tag2:Choice[str]=None,
                              tag3:Choice[str]=None, tag4:Choice[str]=None, tag5:Choice[str]=None ,min_star:Choice[int]=1):
     try:
@@ -192,7 +186,7 @@ async def recruitsim(inter:Interaction, tag1:Choice[str], tag2:Choice[str]=None,
 
 @client.event
 async def on_ready():
-    await tree.sync(guild=discord.Object(id = GUILD_ID))
+    await tree.sync()
     print('Botでログインしました')
     
 client.run(TOKEN)
