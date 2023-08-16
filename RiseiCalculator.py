@@ -216,7 +216,7 @@ async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choic
             if event_code == "":
                 msg = "ステージ名を指定してください"
                 return
-        await inter.response("target={0},mode={1},min_times={2},min_basetimes={3},max_items={4},csv_file={5},ls_ce={6}\n".format(\
+        await inter.response.send_message("target={0},mode={1},min_times={2},min_basetimes={3},max_items={4},csv_file={5},ls_ce={6}\n".format(\
             target,mode,min_times,min_basetimes,max_items,csv_file,ls_ce)+\
         "計算開始、しばらくお待ちください...")
         if rc == None or cache_time < 0:
