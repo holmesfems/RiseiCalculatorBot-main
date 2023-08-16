@@ -192,7 +192,8 @@ async def recruitsim(inter:Interaction, tag1:str, tag2:str=None,
     try:
         await inter.response.send_message("計算開始、しばらくお待ちください")
         safeList = [safeCallChoiceVal(x) for x in [tag1,tag2,tag3,tag4,tag5]]
-        msg = recruitDoProcess(safeList,min_star)
+        _min_star = safeCallChoiceVal(min_star)
+        msg = recruitDoProcess(safeList,_min_star)
         return
     except:
         msg = showException()

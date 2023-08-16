@@ -52,7 +52,7 @@ class Operator:
         self.stars = int(operatorJson["stars"])
 
     def __repr__(self):
-        return self.name+"(★{0})".format(self.stars)
+        return "★{0}".format(self.stars)+self.name
 
 with open("./recruitment/recruitmentOperators.json","rb") as file:
     operatorDB = yaml.safe_load(file)["main"]
@@ -103,8 +103,8 @@ def maxStar(operatorList):
     starList = [operator.stars for operator in operatorList]
     return max(starList)
 
-def minStar(operatorList):
-    starList = [operator.stars for operator in operatorList]
+def minStar(operatorList,least:int = 1):
+    starList = [operator.stars for operator in operatorList if operator.stars >= least]
     return min(starList)
 
 def operatorListStarsMEThan(stars):
@@ -131,11 +131,12 @@ def searchMapToStringChunks(searchMap):
     starSorted = sorted(lenSorted,key=lambda x:minStar(x[1]),reverse=True)
     for (key,value) in starSorted:
         valueSortedByStar = sorted(value,key=lambda x:x.stars,reverse=True)
+        minStarValue = minStar(valueSortedByStar,3)
         keyStrList = toStrList(key)
         valueStrList = toStrList(valueSortedByStar)
         keyMsg = "+".join(keyStrList)
         valueMsg = ",".join(valueStrList)
-        chunk = keyMsg+" -> ```"+valueMsg+"```\n"
+        chunk = keyMsg+" -> ★{0}".format(minStarValue)+ "```"+valueMsg+"```\n"
         chunks.append(chunk)
     return chunks
             
