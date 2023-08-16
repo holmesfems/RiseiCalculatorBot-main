@@ -1,18 +1,18 @@
 import os, sys
 import discord
-from discord.ext import commands
+from discord import app_commands,Integration
+from discord.app_commands import Choice
 import traceback
-from dislash import slash_commands, Option, OptionType,OptionChoice
 from riseiCalculatorProcess import *
 from recruitment.recruitment import *
 
 TOKEN = os.environ["BOT_TOKEN"]
 ID = os.environ["BOT_ID"]
 url_botCommands = "https://discord.com/api/v8/applications/{0}/commands".format(ID)
-intents=discord.Intents.all()
-client = commands.Bot(intents=intents,command_prefix = '/')
+intents=discord.Intents.default()
+client = discord.Client(intents=intents,command_prefix = '/')
+slash = app_commands.CommandTree(client)
 
-slash = slash_commands.SlashClient(client)
 test_guilds = [int(os.environ["GUILD_ID"])]
 rc = None
 
@@ -74,10 +74,71 @@ def showException():
         msg += item
     return msg
 
-
+"""
 @slash.command(
     name = 'riseicalculator',
     description = '理性価値表計算',
+    parameters = [
+        Parameter(
+            name = "target",
+            description = "どの項目を計算してほしい？",
+            autocomplete = True,
+            required = True,
+            choices = [
+                Choice(name = "基準マップ", value = "basemaps"),
+                Choice(name = "理性価値表", value = "sanValueLists"),
+                Choice(name = "昇進素材別検索(target_item指定)",value = "items"),
+                Choice(name = "通常ステージ検索(event_code指定)",value = "zone"),
+                Choice(name = "イベント検索(event_code指定)",value = "events"),
+                Choice(name = "初級資格証効率表",value = "te2List"),
+                Choice(name = "上級資格証効率表",value = "te3List"),
+                Choice(name = "特別引換証効率表",value = "specialList"),
+                Choice(name = "契約賞金引換効率表(CC#11)",value = "ccList"),
+            ],
+            type = AppCommandOptionType.string
+        ),
+        Parameter(
+            name = "target_item",
+            description = "検索したい素材名",
+            autocomplete = True,
+            choices = [Choice(name=get_StageCategoryDict(False)[x]["to_ja"],value=x) for x in get_StageCategoryDict(False).keys()],
+            type = AppCommandOptionType.string
+        ),
+        Parameter(
+            name = "event_code",
+            description = "マップ名の中に含まれる文字列",
+            type = AppCommandOptionType.string
+        ),
+        Parameter(
+            name = "mode",
+            description = "計算モード選択",
+            autocomplete = True,
+            choices = [Choice(name="Sanity",value ="Sanity"),Choice(name="Time",value ="Time")],
+            type = AppCommandOptionType.string
+        ),
+        Parameter(
+            name = "min_times",
+            description = "計算に必要な最小サンプル数",
+
+        )
+    ]
+)
+@discord.app_commands.describe(
+    target = "どの項目を計算してほしい？",
+    target_item = "検索したい素材名",
+    event_code = "マップ名の中に含まれる文字列",
+    mode = "計算モード選択",
+    min_times = "計算に必要な最小サンプル数",
+    min_basetimes = "基準マップとして選ばれるために必要な最小サンプル数",
+    max_items = "表示するマップの数",
+    csv_file = "理性価値表CSVファイルを添付する",
+    is_global = "True:グローバル版基準の計算、False:大陸版の新ステージと新素材を入れた計算",
+    cache_time = "計算キャッシュを保持する時間(分)"
+)
+@discord.app_commands.choices(
+    target = 
+    target_item = [Choice(name=get_StageCategoryDict(False)[x]["to_ja"],value=x) for x in get_StageCategoryDict(False).keys()]
+)
     options = [
         Option("target","どの項目を計算してほしい？",3,True,choices = [
             OptionChoice("基準マップ","basemaps"),
@@ -107,10 +168,42 @@ def showException():
 
         Option("cache_time","計算キャッシュを保持する時間(分)",4)
     ],
-    guild_ids = test_guilds
+@discord.app_commands.guilds(
+    test_guilds
 )
-
-async def riseicalculator(inter,target,target_item = "",event_code = "", mode="Sanity",min_times=1000,min_basetimes=3000,max_items=15,csv_file = False,is_global=True,cache_time = 30):
+"""
+@slash.command(
+    description = '理性価値表計算',
+)
+@app_commands.describe(
+    target = "どの項目を計算してほしい？",
+    target_item = "検索したい素材名",
+    event_code = "マップ名の中に含まれる文字列",
+    mode = "計算モード選択",
+    min_times = "計算に必要な最小サンプル数",
+    min_basetimes = "基準マップとして選ばれるために必要な最小サンプル数",
+    max_items = "表示するマップの数",
+    csv_file = "理性価値表CSVファイルを添付する",
+    is_global = "True:グローバル版基準の計算、False:大陸版の新ステージと新素材を入れた計算",
+    cache_time = "計算キャッシュを保持する時間(分)"
+)
+@app_commands.choices(
+    target = [
+        Choice(name = "基準マップ", value = "basemaps"),
+        Choice(name = "理性価値表", value = "sanValueLists"),
+        Choice(name = "昇進素材別検索(target_item指定)",value = "items"),
+        Choice(name = "通常ステージ検索(event_code指定)",value = "zone"),
+        Choice(name = "イベント検索(event_code指定)",value = "events"),
+        Choice(name = "初級資格証効率表",value = "te2List"),
+        Choice(name = "上級資格証効率表",value = "te3List"),
+        Choice(name = "特別引換証効率表",value = "specialList"),
+        Choice(name = "契約賞金引換効率表(CC#11)",value = "ccList"),
+    ],
+    target_item = [Choice(name=get_StageCategoryDict(False)[x]["to_ja"],value=x) for x in get_StageCategoryDict(False).keys()],
+    mode = [Choice(name="Sanity",value ="Sanity"),Choice(name="Time",value ="Time")]
+)
+async def riseicalculator(inter:discord.Interaction,target:Choice[str],target_item:Choice[str]=None,
+                          event_code:str = None, mode="Sanity",min_times=1000,min_basetimes=3000,max_items=15,csv_file = False,is_global=True,cache_time = 30):
     msg = ""
     ls_ce = '6'
     global rc
@@ -141,7 +234,7 @@ async def riseicalculator(inter,target,target_item = "",event_code = "", mode="S
         
 
     #print(rc.convert_rules)
-
+"""
 @slash.command(
     name = 'riseimaterials',
     description = '昇進素材別検索(target_item指定)',
@@ -220,9 +313,10 @@ async def recruitCalculator(inter, tag1, tag2="", tag3="", tag4="", tag5="",min_
         msg = showException()
     finally:
         await replyToDiscord(inter,msg)
-
+"""
 @client.event
 async def on_ready():
     print('Botでログインしました')
+    await slash.sync()
 
 client.run(TOKEN)
