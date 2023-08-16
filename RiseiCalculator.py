@@ -173,8 +173,10 @@ def showException():
     test_guilds
 )
 """
-def safeCallChoiceVal(choice:Choice):
-    return choice.value if(choice == choice) else None
+def safeCallChoiceVal(choice):
+    if type(choice) == type(Choice):
+        return choice.value
+    return choice
 
 @slash.command(
     description = '理性価値表計算',
@@ -206,8 +208,8 @@ def safeCallChoiceVal(choice:Choice):
     target_item = [Choice(name=get_StageCategoryDict(False)[x]["to_ja"],value=x) for x in get_StageCategoryDict(False).keys()],
     mode = [Choice(name="Sanity",value ="Sanity"),Choice(name="Time",value ="Time")]
 )
-async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choice[str]=MISSING,
-                          event_code:str = MISSING, mode:Choice[str]="Sanity",min_times:int=1000,min_basetimes:int=3000,max_items:int=15,csv_file:bool = False,is_global:bool=True,cache_time:int = 30):
+async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choice[str]=None,
+                          event_code:str = None, mode:Choice[str]="Sanity",min_times:int=1000,min_basetimes:int=3000,max_items:int=15,csv_file:bool = False,is_global:bool=True,cache_time:int = 30):
     msg = ""
     ls_ce = '6'
     global rc
