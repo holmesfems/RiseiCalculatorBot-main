@@ -81,9 +81,9 @@ def safeCallChoiceVal(choice):
         return choice
     return None
 
-appCmd = app_commands.CommandTree(client)
+tree = app_commands.CommandTree(client)
 
-@app_commands.command(
+@tree.command(
     name = "riseicalculator",
     description = '理性価値表計算',
 )
@@ -115,7 +115,7 @@ appCmd = app_commands.CommandTree(client)
     mode = [Choice(name="Sanity",value ="Sanity"),Choice(name="Time",value ="Time")]
 )
 @app_commands.guilds(
-    GUILD_ID
+    {GUILD_ID}
 )
 async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choice[str]=None,
                           event_code:str = None, mode:Choice[str]="Sanity",min_times:int=1000,min_basetimes:int=3000,max_items:int=15,csv_file:bool = False,is_global:bool=True,cache_time:int = 30):
@@ -155,7 +155,7 @@ async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choic
 
 tagChoices = [Choice(name = x, value = x) for x in tagNameList]
 #recruitcal = app_commands.CommandTree(client)
-@app_commands.command(
+@tree.command(
     name = "recruitsim",
     description = '公開求人検索',
 )
@@ -176,7 +176,7 @@ tagChoices = [Choice(name = x, value = x) for x in tagNameList]
     min_star = [Choice(name = str(x+1),value = x+1) for x in range(6)]
 )
 @app_commands.guilds(
-    GUILD_ID
+    {GUILD_ID}
 )
 async def recruitsim(inter:Interaction, tag1:Choice[str], tag2:Choice[str]=None,
                              tag3:Choice[str]=None, tag4:Choice[str]=None, tag5:Choice[str]=None ,min_star:Choice[int]=1):
@@ -192,7 +192,7 @@ async def recruitsim(inter:Interaction, tag1:Choice[str], tag2:Choice[str]=None,
 
 @client.event
 async def on_ready():
-    await appCmd.sync()
+    await tree.sync(guild=discord.Object(id = {GUILD_ID}))
     print('Botでログインしました')
     
 client.run(TOKEN)
