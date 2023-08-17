@@ -202,7 +202,6 @@ class RecruitView(discord.ui.View):
         self.otherTags = select.values
         await inter.response.send_message("")
         
-    
     @discord.ui.button(
         label="検索開始",style=discord.ButtonStyle.primary
     )
@@ -211,7 +210,7 @@ class RecruitView(discord.ui.View):
         if(selectedList):
             await inter.response.send_message("計算開始、しばらくお待ちください")
             msg = recruitDoProcess(selectedList,1)
-            replyToDiscord(inter,msg)
+            await replyToDiscord(inter,msg)
         else:
             await inter.response.send_message("")
 
