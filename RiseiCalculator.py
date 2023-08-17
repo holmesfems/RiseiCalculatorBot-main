@@ -178,8 +178,8 @@ class RecruitView(discord.ui.View):
         min_values=0,max_values=2
     )
     async def elite_selected(self,inter:Interaction,select:discord.ui.Select):
-        await inter.response.send_message("")
         self.eliteTags = select.values
+        await inter.response.send_message("")
     
     @discord.ui.select(
         cls=discord.ui.Select,
@@ -188,8 +188,9 @@ class RecruitView(discord.ui.View):
         min_values=0,max_values=5
     )
     async def job_selected(self,inter:Interaction,select:discord.ui.Select):
-        await inter.response.send_message("")
         self.jobTags = select.values
+        await inter.response.send_message("")
+        
     
     @discord.ui.select(
         cls=discord.ui.Select,
@@ -198,8 +199,9 @@ class RecruitView(discord.ui.View):
         min_values=0,max_values=5
     )
     async def other_selected(self,inter:Interaction,select:discord.ui.Select):
-        await inter.response.send_message("")
         self.otherTags = select.values
+        await inter.response.send_message("")
+        
     
     @discord.ui.button(
         label="検索開始",style=discord.ButtonStyle.primary
@@ -207,7 +209,7 @@ class RecruitView(discord.ui.View):
     async def excecute(self,inter:Interaction,button:discord.ui.Button):
         selectedList = self.eliteTags+self.jobTags+self.otherTags
         if(selectedList):
-            await inter.response.send_message("")
+            await inter.response.send_message("計算開始、しばらくお待ちください")
             msg = recruitDoProcess(selectedList,1)
             replyToDiscord(inter,msg)
         else:
