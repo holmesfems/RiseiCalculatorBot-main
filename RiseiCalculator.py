@@ -204,7 +204,7 @@ class RecruitView(discord.ui.View):
     @discord.ui.button(
         label="検索開始",style=discord.ButtonStyle.primary
     )
-    async def excecute(self,button:discord.ui.Button, inter:Interaction):
+    async def excecute(self,inter:Interaction,button:discord.ui.Button):
         selectedList = self.eliteTags+self.jobTags+self.otherTags
         if(selectedList):
             await inter.response.send_message("")
