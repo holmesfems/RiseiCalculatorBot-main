@@ -104,13 +104,14 @@ def maxStar(operatorList):
     if(starList): return max(starList)
     return 0
 
-def minStar(operatorList,least:int = 1):
-    allstarList = [operator.stars for operator in operatorList]
+def minStar(operatorList,least:int = 3):
+    allstarList = list(dict.fromkeys([operator.stars for operator in operatorList]))
     starList = [x for x in allstarList if x>=least]
+    restList = [x for x in allstarList if x not in starList]
     if(starList):
         return min(starList)
-    if(allstarList):
-        return min(allstarList)
+    if(restList):
+        return max(restList)
     return 0
 
 def operatorListStarsMEThan(stars):
@@ -124,7 +125,7 @@ def createSearchMap(tagNameList,targetOperatorList,minStarToShow):
     searchMap = {}
     for combination in tagCombinations:
         satisfies = [operator for operator in targetOperatorList if satisfyTags(operator,combination)]
-        if(satisfies and minStar(satisfies)>=minStarToShow):
+        if(satisfies and minStar(satisfies,3)>=minStarToShow):
             searchMap[combination] = satisfies
     return searchMap
 
@@ -132,11 +133,14 @@ def toStrList(list):
     return [str(x) for x in list]
 
 def searchMapToStringChunks(searchMap):
+    if(not searchMap):
+        return ["条件を満たす組み合わせはありません"]
     chunks = []
     keyLenSorted = sorted(searchMap.items(),key=lambda x:len(x[0]),reverse=True)
     valueLenSorted = sorted(keyLenSorted,key=lambda x:len(x[1]))
-    starSorted = sorted(valueLenSorted,key=lambda x:minStar(x[1],3),reverse=True)
-    for (key,value) in starSorted:
+    maxstarSorted = sorted(valueLenSorted,key=lambda x:maxStar(x[1]),reverse=True)
+    minstarSorted = sorted(maxstarSorted,key=lambda x:minStar(x[1],3),reverse=True)
+    for (key,value) in minstarSorted:
         valueSortedByStar = sorted(value,key=lambda x:x.stars,reverse=True)
         minStarValue = minStar(valueSortedByStar,3)
         keyStrList = toStrList(key)
@@ -148,7 +152,8 @@ def searchMapToStringChunks(searchMap):
     return chunks
             
 def recruitDoProcess(inputTagList,minStar):
-    inputList = list(filter(lambda x:x is not None and x!="",inputTagList))
+    inputList = list(filter(lambda x:x is not None and x in tagNameList,inputTagList))
+    inputList = sorted(inputList,key=lambda x:tagNameList.index(x))
     if(minStar is None): minStar = 1
     searchMap = createSearchMap(inputList,operatorDB,minStar)
     chunks = searchMapToStringChunks(searchMap)

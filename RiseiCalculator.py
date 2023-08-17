@@ -179,7 +179,7 @@ class RecruitView(discord.ui.View):
     )
     async def elite_selected(self,inter:Interaction,select:discord.ui.Select):
         self.eliteTags = select.values
-        await inter.response.send_message("")
+        await inter.response.defer()
     
     @discord.ui.select(
         cls=discord.ui.Select,
@@ -189,7 +189,7 @@ class RecruitView(discord.ui.View):
     )
     async def job_selected(self,inter:Interaction,select:discord.ui.Select):
         self.jobTags = select.values
-        await inter.response.send_message("")
+        await inter.response.defer()
         
     
     @discord.ui.select(
@@ -200,10 +200,22 @@ class RecruitView(discord.ui.View):
     )
     async def other_selected(self,inter:Interaction,select:discord.ui.Select):
         self.otherTags = select.values
-        await inter.response.send_message("")
-        
+        await inter.response.defer()
+    
     @discord.ui.button(
-        label="検索開始",style=discord.ButtonStyle.primary
+        label="★4確定のみ",style=discord.ButtonStyle.primary
+    )
+    async def excecute(self,inter:Interaction,button:discord.ui.Button):
+        selectedList = self.eliteTags+self.jobTags+self.otherTags
+        if(selectedList):
+            await inter.response.defer(thinking=True)
+            msg = recruitDoProcess(selectedList,4)
+            await replyToDiscord(inter,msg)
+        else:
+            await inter.response.defer()
+
+    @discord.ui.button(
+        label="すべて表示",style=discord.ButtonStyle.secondary
     )
     async def excecute(self,inter:Interaction,button:discord.ui.Button):
         selectedList = self.eliteTags+self.jobTags+self.otherTags
@@ -212,7 +224,7 @@ class RecruitView(discord.ui.View):
             msg = recruitDoProcess(selectedList,1)
             await replyToDiscord(inter,msg)
         else:
-            await inter.response.send_message("")
+            await inter.response.defer()
 
 #recruitcal = app_commands.CommandTree(client)
 @tree.command(
