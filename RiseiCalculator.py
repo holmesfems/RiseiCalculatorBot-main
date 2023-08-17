@@ -205,7 +205,7 @@ class RecruitView(discord.ui.View):
     @discord.ui.button(
         label="★4確定のみ",style=discord.ButtonStyle.primary
     )
-    async def excecute(self,inter:Interaction,button:discord.ui.Button):
+    async def excecute2(self,inter:Interaction,button:discord.ui.Button):
         selectedList = self.eliteTags+self.jobTags+self.otherTags
         if(selectedList):
             await inter.response.defer(thinking=True)
