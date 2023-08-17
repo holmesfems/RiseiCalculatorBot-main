@@ -164,31 +164,64 @@ def createChoice(list):
 async def tagAutoComplete(inter:Interaction,current:str):
     return createChoice(autoGuide(current))
 
+class RecruitView(discord.ui.View):
+    def __init__(self,timeout=180):
+        super().__init__(timeout=timeout)
+        self.eliteTags = []
+        self.jobTags = []
+        self.otherTags = []
+    
+    @discord.ui.select(
+        cls=discord.ui.Select,
+        placeholder="エリートタグ選択",
+        options=[discord.SelectOption(label = x) for x in eliteTags],
+        min_values=0,max_values=2
+    )
+    async def elite_selected(self,inter:Interaction,select:discord.ui.Select):
+        await inter.response.send_message("")
+        self.eliteTags = select.values
+    
+    @discord.ui.select(
+        cls=discord.ui.Select,
+        placeholder="職タグ選択",
+        options=[discord.SelectOption(label = x) for x in jobTags],
+        min_values=0,max_values=5
+    )
+    async def job_selected(self,inter:Interaction,select:discord.ui.Select):
+        await inter.response.send_message("")
+        self.jobTags = select.values
+    
+    @discord.ui.select(
+        cls=discord.ui.Select,
+        placeholder="その他タグ選択",
+        options=[discord.SelectOption(label = x) for x in otherTags],
+        min_values=0,max_values=5
+    )
+    async def other_selected(self,inter:Interaction,select:discord.ui.Select):
+        await inter.response.send_message("")
+        self.otherTags = select.values
+    
+    @discord.ui.button(
+        label="検索開始",style=discord.ButtonStyle.primary
+    )
+    async def excecute(self,button:discord.ui.Button, inter:Interaction):
+        selectedList = self.eliteTags+self.jobTags+self.otherTags
+        if(selectedList):
+            await inter.response.send_message("")
+            msg = recruitDoProcess(selectedList,1)
+            replyToDiscord(inter,msg)
+
 #recruitcal = app_commands.CommandTree(client)
 @tree.command(
     name = "recruitsim",
     description = '公開求人検索',
 )
 async def recruitsim(inter:Interaction):
-    try:
-        view = discord.ui.View()
-        eliteTagsSelect = discord.ui.Select(options=[discord.SelectOption(label = x) for x in otherTags],min_values=0,max_values=2,placeholder="エリートタグ選択")
-        jobTagsSelect = discord.ui.Select(options=[discord.SelectOption(label = x) for x in jobTags],min_values=0,max_values=5,placeholder="職タグ選択")
-        otherTagsSelect = discord.ui.Select(options=[discord.SelectOption(label = x) for x in otherTags],min_values=0,max_values=5,placeholder="その他タグ選択")
-        view.add_item(eliteTagsSelect)
-        view.add_item(jobTagsSelect)
-        view.add_item(otherTagsSelect)
-        await inter.response.send_message(view=view)
-        selected = eliteTagsSelect.values + jobTagsSelect.values + otherTagsSelect.values
-        print(selected)
-        #safeList = [safeCallChoiceVal(x) for x in [tag1,tag2,tag3,tag4,tag5]]
-        #_min_star = safeCallChoiceVal(min_star)
-        #msg = recruitDoProcess(safeList,_min_star)
-        return
-    except:
-        msg = showException()
-    finally:
-        await replyToDiscord(inter,msg)
+    await inter.response.send_message(view=RecruitView())
+    #safeList = [safeCallChoiceVal(x) for x in [tag1,tag2,tag3,tag4,tag5]]
+    #_min_star = safeCallChoiceVal(min_star)
+    #msg = recruitDoProcess(safeList,_min_star)
+    return
 
 @client.event
 async def on_ready():
