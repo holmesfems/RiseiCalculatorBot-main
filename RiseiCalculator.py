@@ -220,7 +220,7 @@ class RecruitView(discord.ui.View):
     description = '公開求人検索',
 )
 async def recruitsim(inter:Interaction):
-    await inter.response.send_message(view=RecruitView())
+    await inter.response.send_message(view=RecruitView(),ephemeral=True,delete_after=300.0)
     #safeList = [safeCallChoiceVal(x) for x in [tag1,tag2,tag3,tag4,tag5]]
     #_min_star = safeCallChoiceVal(min_star)
     #msg = recruitDoProcess(safeList,_min_star)
