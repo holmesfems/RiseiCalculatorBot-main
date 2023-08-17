@@ -210,6 +210,8 @@ class RecruitView(discord.ui.View):
             await inter.response.send_message("")
             msg = recruitDoProcess(selectedList,1)
             replyToDiscord(inter,msg)
+        else:
+            await inter.response.send_message("")
 
 #recruitcal = app_commands.CommandTree(client)
 @tree.command(
