@@ -117,7 +117,16 @@ def minStar(operatorList,least:int = 3):
 def operatorListStarsMEThan(stars):
     return [operator for operator in operatorDB if operator.stars >= stars]
 
-def createSearchMap(tagNameList,targetOperatorList,minStarToShow,equals = False):
+def isIndependent(key,keyList):
+    for item in keyList:
+        if allAinBnotEq(item,key):
+            return False
+    return True
+
+def clearSearchMap(redundantMap):
+    return {key:value for (key,value) in redundantMap if isIndependent(key,redundantMap.keys())}
+
+def createSearchMap(tagNameList,targetOperatorList,minStarToShow,equals = False,clearRedundant = False):
     tagClasses = createTagList(tagNameList)
     tagCombinations = list()
     for i in range(3):
@@ -132,7 +141,10 @@ def createSearchMap(tagNameList,targetOperatorList,minStarToShow,equals = False)
                     searchMap[combination] = satisfies
             elif(_minStar==minStarToShow):
                 searchMap[combination] = [x for x in satisfies if x.stars == minStarToShow]
-    return searchMap
+    if(clearRedundant):
+        return clearSearchMap(searchMap)
+    else:
+        return searchMap
 
 def toStrList(list):
     return [str(x) for x in list]
@@ -145,21 +157,11 @@ def allAinBnotEq(a:tuple,b:tuple):
             return False
     return True
 
-def isIndependent(key,keyList):
-    for item in keyList:
-        if allAinBnotEq(item,key):
-            return False
-    return True
-
-def clearSearchMap(redundantMap):
-    return {key:value for key,value in redundantMap if isIndependent(key,redundantMap.keys())}
-
 def searchMapToStringChunks(searchMap):
     if(not searchMap):
         return ["条件を満たす組み合わせはありません"]
     chunks = []
-    smartMap = clearSearchMap(searchMap)
-    keyLenSorted = sorted(smartMap.items(),key=lambda x:len(x[0]),reverse=True)
+    keyLenSorted = sorted(searchMap.items(),key=lambda x:len(x[0]),reverse=True)
     valueLenSorted = sorted(keyLenSorted,key=lambda x:len(x[1]))
     maxstarSorted = sorted(valueLenSorted,key=lambda x:maxStar(x[1]),reverse=True)
     minstarSorted = sorted(maxstarSorted,key=lambda x:minStar(x[1],3),reverse=True)
@@ -198,8 +200,7 @@ def mapToMsgChunksHighStars(combineList):
     if(not combineList):
         return ["条件を満たす組み合わせはありません"]
     chunks = []
-    smartList = clearSearchMap(combineList)
-    keySorted = sorted(smartList.items(),key=lambda x:compareTagTupleKey(x[0]))
+    keySorted = sorted(combineList.items(),key=lambda x:compareTagTupleKey(x[0]))
     for (key,value) in keySorted:
         keyStrList = toStrList(key)
         keyMsg = "+".join(keyStrList)
@@ -214,7 +215,7 @@ def showHighStars(minStar:int = 4):
     if(not combineList):
         #最低の星が満たすやつを探す
         searchList = jobTags + otherTags
-        allCombineList = createSearchMap(searchList,operatorDB,minStar,equals=True)
+        allCombineList = createSearchMap(searchList,operatorDB,minStar,equals=True,clearRedundant=True)
         starCombineListMap[minStar] = allCombineList
         combineList = allCombineList
     chunks = mapToMsgChunksHighStars(combineList)
