@@ -206,13 +206,13 @@ class RecruitView(discord.ui.View):
         label="★4確定のみ",style=discord.ButtonStyle.primary
     )
     async def excecuteHighRare(self,inter:Interaction,button:discord.ui.Button):
-        await self.execute(self,inter,button,4)
+        await self.execute(inter,button,4)
 
     @discord.ui.button(
         label="すべて表示",style=discord.ButtonStyle.secondary
     )
     async def excecuteAll(self,inter:Interaction,button:discord.ui.Button):
-        await self.execute(self,inter,button,1)
+        await self.execute(inter,button,1)
     
     async def execute(self,inter:Interaction,button:discord.ui.Button,minstar:int):
         selectedList = self.eliteTags+self.jobTags+self.otherTags
