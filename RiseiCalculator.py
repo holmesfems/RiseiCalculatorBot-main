@@ -205,23 +205,20 @@ class RecruitView(discord.ui.View):
     @discord.ui.button(
         label="★4確定のみ",style=discord.ButtonStyle.primary
     )
-    async def excecute2(self,inter:Interaction,button:discord.ui.Button):
-        selectedList = self.eliteTags+self.jobTags+self.otherTags
-        if(selectedList):
-            await inter.response.defer(thinking=True)
-            msg = recruitDoProcess(selectedList,4)
-            await replyToDiscord(inter,msg)
-        else:
-            await inter.response.defer()
+    async def excecuteHighRare(self,inter:Interaction,button:discord.ui.Button):
+        await self.execute(self,inter,button,4)
 
     @discord.ui.button(
         label="すべて表示",style=discord.ButtonStyle.secondary
     )
-    async def excecute(self,inter:Interaction,button:discord.ui.Button):
+    async def excecuteAll(self,inter:Interaction,button:discord.ui.Button):
+        await self.execute(self,inter,button,1)
+    
+    async def execute(self,inter:Interaction,button:discord.ui.Button,minstar:int):
         selectedList = self.eliteTags+self.jobTags+self.otherTags
         if(selectedList):
             await inter.response.defer(thinking=True)
-            msg = recruitDoProcess(selectedList,1)
+            msg = recruitDoProcess(selectedList,minstar)
             await replyToDiscord(inter,msg)
         else:
             await inter.response.defer()
