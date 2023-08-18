@@ -170,8 +170,7 @@ def mapToMsgChunksHighStars(combineList):
         return ["条件を満たす組み合わせはありません"]
     chunks = []
     keyLenSorted = sorted(combineList.items(),key=lambda x:len(x[0]),reverse=True)
-    valueLenSorted = sorted(keyLenSorted,key=lambda x:len(x[1]))
-    for (key,value) in valueLenSorted:
+    for (key,value) in keyLenSorted:
         keyStrList = toStrList(key)
         keyMsg = "+".join(keyStrList)
         valueStr = str(value[0])
