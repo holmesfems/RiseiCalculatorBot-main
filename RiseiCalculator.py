@@ -250,7 +250,7 @@ async def recruitsim(inter:Interaction):
 async def recruitlist(inter:Interaction, star:Choice[int]):
     _star = safeCallChoiceVal(star)
     await inter.response.defer(thinking=True)
-    msg = showHighStars(star)
+    msg = showHighStars(_star)
     await replyToDiscord(inter,msg)
 
 @client.event
