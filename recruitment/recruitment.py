@@ -117,7 +117,7 @@ def minStar(operatorList,least:int = 3):
 def operatorListStarsMEThan(stars):
     return [operator for operator in operatorDB if operator.stars >= stars]
 
-def createSearchMap(tagNameList,targetOperatorList,minStarToShow):
+def createSearchMap(tagNameList,targetOperatorList,minStarToShow,specialCompare = None):
     tagClasses = createTagList(tagNameList)
     tagCombinations = list()
     for i in range(3):
@@ -125,8 +125,13 @@ def createSearchMap(tagNameList,targetOperatorList,minStarToShow):
     searchMap = {}
     for combination in tagCombinations:
         satisfies = [operator for operator in targetOperatorList if satisfyTags(operator,combination)]
-        if(satisfies and minStar(satisfies,3)>=minStarToShow):
-            searchMap[combination] = satisfies
+        _minStar = minStar(satisfies,3)
+        if(satisfies):
+            if(not specialCompare):
+                if(_minStar>=minStarToShow):
+                    searchMap[combination] = satisfies
+            elif(specialCompare(_minStar,minStarToShow)):
+                searchMap[combination] = satisfies
     return searchMap
 
 def toStrList(list):
@@ -157,4 +162,35 @@ def recruitDoProcess(inputTagList,minStar):
     if(minStar is None): minStar = 1
     searchMap = createSearchMap(inputList,operatorDB,minStar)
     chunks = searchMapToStringChunks(searchMap)
+    return {"title":" ".join(inputList),"msgList":chunks}
+
+starCombineListMap = {}
+def mapToMsgChunksHighStars(combineList):
+    if(not combineList):
+        return ["条件を満たす組み合わせはありません"]
+    chunks = []
+    keyLenSorted = sorted(combineList.items(),key=lambda x:len(x[0]),reverse=True)
+    valueLenSorted = sorted(keyLenSorted,key=lambda x:len(x[1]))
+    for (key,value) in valueLenSorted:
+        keyStrList = toStrList(key)
+        keyMsg = "+".join(keyStrList)
+        valueStr = str(value[0])
+        chunk = keyMsg + " -> " + valueStr + "\n"
+        chunks.append(chunk)
     return chunks
+
+def showHighStars(minStar:int = 4):
+    global starCombineListMap
+    combineList = starCombineListMap.get(minStar,None)
+    if(not combineList):
+        #最低の星が満たすやつを探す
+        searchList = jobTags + otherTags
+        allCombineList = createSearchMap(searchList,operatorDB,minStar,lambda x,y:x==y)
+        starCombineListMap[minStar] = allCombineList
+    chunks = mapToMsgChunksHighStars(combineList)
+    return {
+        "title":"★{0}確定タグ一覧",
+        "msgList":chunks
+    }
+
+    

@@ -35,12 +35,9 @@ async def replyToDiscord(inter:Interaction,msg):
                 else:
                     chunks.append(item)
     elif type(msg) == type(dict()):
-        title = msg["title"]
-        chunks = msg["msgList"]
-        try:
-            color = msg["color"] 
-        except:
-            color = 0x8be02b
+        title = msg.get("title",title)
+        chunks = msg.get("msgList",[])
+        color = msg.get("color",0x8be02b)
     embeds = []
     for item in chunks:
         embed = discord.Embed(
@@ -226,7 +223,7 @@ class RecruitView(discord.ui.View):
 #recruitcal = app_commands.CommandTree(client)
 @tree.command(
     name = "recruitsim",
-    description = '公開求人検索 UI画面が出るのでそのままお使いください',
+    description = "公開求人検索 UI画面が出るのでそのままお使いください",
 )
 async def recruitsim(inter:Interaction):
     await inter.response.send_message(view=RecruitView(),ephemeral=True,delete_after=300.0)
@@ -234,6 +231,22 @@ async def recruitsim(inter:Interaction):
     #_min_star = safeCallChoiceVal(min_star)
     #msg = recruitDoProcess(safeList,_min_star)
     return
+
+@tree.command(
+    name = "recruitlist",
+    description = "★4 ★5確定タグ組み合わせを表示"
+)
+@app_commands.describe(
+    star = "星の数"
+)
+@app_commands.choices(
+    star = [Choice(name="4",value=4), Choice(name="5",value=5)]
+)
+async def recruitlist(inter:Interaction, star:Choice[int]):
+    _star = safeCallChoiceVal(star)
+    await inter.response.defer(thinking=True)
+    msg = showHighStars(star)
+    await replyToDiscord(msg)
 
 @client.event
 async def on_ready():
