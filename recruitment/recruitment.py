@@ -166,7 +166,7 @@ def recruitDoProcess(inputTagList,minStar):
 
 starCombineListMap = {}
 def compareTagKey(tag:str):
-    tagNameList.index(tag) if tag in tagNameList else -1
+    return tagNameList.index(tag) if tag in tagNameList else -1
 
 def compareTagTupleKey(tagTuple:tuple):
     num = len(tagTuple)
