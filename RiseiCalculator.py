@@ -22,7 +22,7 @@ def arrangementChunks(msgList, maxLength:int):
         if len(chunks) == 0:
             chunks.append(item)
         else:
-            if(len(chunks[-1])+len(item)) <= max_length:
+            if(len(chunks[-1])+len(item)) <= maxLength:
                 chunks[-1] += item
             else:
                 chunks.append(item)
