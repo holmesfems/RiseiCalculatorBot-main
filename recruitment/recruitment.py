@@ -131,7 +131,7 @@ def createSearchMap(tagNameList,targetOperatorList,minStarToShow,equals = False)
                 if(_minStar>=minStarToShow):
                     searchMap[combination] = satisfies
             elif(_minStar==minStarToShow):
-                searchMap[combination] = satisfies
+                searchMap[combination] = [x for x in satisfies if x.stars == minStarToShow]
     return searchMap
 
 def toStrList(list):
@@ -187,6 +187,7 @@ def showHighStars(minStar:int = 4):
         searchList = jobTags + otherTags
         allCombineList = createSearchMap(searchList,operatorDB,minStar,equals=True)
         starCombineListMap[minStar] = allCombineList
+        combineList = allCombineList
     chunks = mapToMsgChunksHighStars(combineList)
     return {
         "title":"★{0}確定タグ一覧".format(minStar),
