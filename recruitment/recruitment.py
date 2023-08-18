@@ -165,12 +165,24 @@ def recruitDoProcess(inputTagList,minStar):
     return {"title":" ".join(inputList),"msgList":chunks}
 
 starCombineListMap = {}
+def compareTagKey(tag:str):
+    tagNameList.index(tag) if tag in tagNameList else -1
+
+def compareTagTupleKey(tagTuple:tuple):
+    num = len(tagTuple)
+    order = len(tagNameList)
+    ret = 0
+    for i in range(num):
+        ret = ret * order
+        ret += compareTagKey(tagTuple[i])
+    return order
+
 def mapToMsgChunksHighStars(combineList):
     if(not combineList):
         return ["条件を満たす組み合わせはありません"]
     chunks = []
-    keyLenSorted = sorted(combineList.items(),key=lambda x:len(x[0]),reverse=True)
-    for (key,value) in keyLenSorted:
+    keySorted = sorted(combineList.items(),key=lambda x:compareTagTupleKey(x[0]))
+    for (key,value) in keySorted:
         keyStrList = toStrList(key)
         keyMsg = "+".join(keyStrList)
         valueStr = str(value[0])
