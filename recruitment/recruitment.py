@@ -137,11 +137,29 @@ def createSearchMap(tagNameList,targetOperatorList,minStarToShow,equals = False)
 def toStrList(list):
     return [str(x) for x in list]
 
+def allAinBnotEq(a:tuple,b:tuple):
+    if(len(a) >= len(b)):
+        return False
+    for item in a:
+        if item not in b:
+            return False
+    return True
+
+def isIndependent(key,keyList):
+    for item in keyList:
+        if allAinBnotEq(item,key):
+            return False
+    return True
+
+def clearSearchMap(redundantMap):
+    return {key:value for key,value in redundantMap if isIndependent(key,redundantMap.keys())}
+
 def searchMapToStringChunks(searchMap):
     if(not searchMap):
         return ["条件を満たす組み合わせはありません"]
     chunks = []
-    keyLenSorted = sorted(searchMap.items(),key=lambda x:len(x[0]),reverse=True)
+    smartMap = clearSearchMap(searchMap)
+    keyLenSorted = sorted(smartMap.items(),key=lambda x:len(x[0]),reverse=True)
     valueLenSorted = sorted(keyLenSorted,key=lambda x:len(x[1]))
     maxstarSorted = sorted(valueLenSorted,key=lambda x:maxStar(x[1]),reverse=True)
     minstarSorted = sorted(maxstarSorted,key=lambda x:minStar(x[1],3),reverse=True)
@@ -173,15 +191,15 @@ def compareTagTupleKey(tagTuple:tuple):
     order = len(tagNameList)
     ret = 0
     for i in range(num):
-        ret = ret * order
-        ret += compareTagKey(tagTuple[i])
+        ret += compareTagKey(tagTuple[i]) * order**(2-i)
     return order
 
 def mapToMsgChunksHighStars(combineList):
     if(not combineList):
         return ["条件を満たす組み合わせはありません"]
     chunks = []
-    keySorted = sorted(combineList.items(),key=lambda x:compareTagTupleKey(x[0]))
+    smartList = clearSearchMap(combineList)
+    keySorted = sorted(smartList.items(),key=lambda x:compareTagTupleKey(x[0]))
     for (key,value) in keySorted:
         keyStrList = toStrList(key)
         keyMsg = "+".join(keyStrList)
