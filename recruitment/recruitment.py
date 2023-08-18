@@ -194,7 +194,7 @@ def compareTagTupleKey(tagTuple:tuple):
     ret = 0
     for i in range(num):
         ret += compareTagKey(tagTuple[i]) * order**(2-i)
-    return order
+    return ret
 
 def mapToMsgChunksHighStars(combineList):
     if(not combineList):
