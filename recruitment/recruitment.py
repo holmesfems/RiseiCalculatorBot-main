@@ -124,7 +124,7 @@ def isIndependent(key,keyList):
     return True
 
 def clearSearchMap(redundantMap):
-    return {key:value for (key,value) in redundantMap if isIndependent(key,redundantMap.keys())}
+    return {key:value for (key,value) in redundantMap.items() if isIndependent(key,redundantMap.keys())}
 
 def createSearchMap(tagNameList,targetOperatorList,minStarToShow,equals = False,clearRedundant = False):
     tagClasses = createTagList(tagNameList)
