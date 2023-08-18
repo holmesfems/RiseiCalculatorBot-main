@@ -189,7 +189,7 @@ def showHighStars(minStar:int = 4):
         starCombineListMap[minStar] = allCombineList
     chunks = mapToMsgChunksHighStars(combineList)
     return {
-        "title":"★{0}確定タグ一覧",
+        "title":"★{0}確定タグ一覧".format(minStar),
         "msgList":chunks
     }
 

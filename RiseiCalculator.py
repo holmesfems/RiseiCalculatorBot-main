@@ -1,4 +1,3 @@
-from ast import List
 import os, sys
 import discord
 from discord import app_commands,Interaction
@@ -17,27 +16,33 @@ client = discord.Client(intents=intents,command_prefix = '/')
 
 rc = None
 
+def arrangementChunks(msgList, maxLength:int):
+    chunks = []
+    for item in msgList:
+        if len(chunks) == 0:
+            chunks.append(item)
+        else:
+            if(len(chunks[-1])+len(item)) <= max_length:
+                chunks[-1] += item
+            else:
+                chunks.append(item)
+    return chunks
+
 async def replyToDiscord(inter:Interaction,msg):
     print(msg)
-    max_length = 1900
+    maxLength = 1900
     title = "reply"
     color = 0x8be02b
     if type(msg) == type(str()):
-        chunks = [msg[i:i+max_length] for i in range(0, len(msg), max_length)]
+        chunks = [msg[i:i+maxLength] for i in range(0, len(msg), maxLength)]
     elif type(msg) == type(list()):
-        chunks = []
-        for item in msg:
-            if len(chunks) == 0:
-                chunks.append(item)
-            else:
-                if(len(chunks[-1])+len(item)) <= max_length:
-                    chunks[-1] += item
-                else:
-                    chunks.append(item)
+        chunks = arrangementChunks(msg,maxLength)
+        
     elif type(msg) == type(dict()):
         title = msg.get("title",title)
-        chunks = msg.get("msgList",[])
+        msgList = msg.get("msgList",[])
         color = msg.get("color",0x8be02b)
+        chunks = arrangementChunks(msgList,maxLength)
     embeds = []
     for item in chunks:
         embed = discord.Embed(
