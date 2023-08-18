@@ -117,7 +117,7 @@ def minStar(operatorList,least:int = 3):
 def operatorListStarsMEThan(stars):
     return [operator for operator in operatorDB if operator.stars >= stars]
 
-def createSearchMap(tagNameList,targetOperatorList,minStarToShow,specialCompare = None):
+def createSearchMap(tagNameList,targetOperatorList,minStarToShow,equals = False):
     tagClasses = createTagList(tagNameList)
     tagCombinations = list()
     for i in range(3):
@@ -127,10 +127,10 @@ def createSearchMap(tagNameList,targetOperatorList,minStarToShow,specialCompare 
         satisfies = [operator for operator in targetOperatorList if satisfyTags(operator,combination)]
         _minStar = minStar(satisfies,3)
         if(satisfies):
-            if(not specialCompare):
+            if(not equals):
                 if(_minStar>=minStarToShow):
                     searchMap[combination] = satisfies
-            elif(specialCompare(_minStar,minStarToShow)):
+            elif(_minStar==minStarToShow):
                 searchMap[combination] = satisfies
     return searchMap
 
@@ -185,7 +185,7 @@ def showHighStars(minStar:int = 4):
     if(not combineList):
         #最低の星が満たすやつを探す
         searchList = jobTags + otherTags
-        allCombineList = createSearchMap(searchList,operatorDB,minStar,lambda x,y:x==y)
+        allCombineList = createSearchMap(searchList,operatorDB,minStar,equals=True)
         starCombineListMap[minStar] = allCombineList
     chunks = mapToMsgChunksHighStars(combineList)
     return {
