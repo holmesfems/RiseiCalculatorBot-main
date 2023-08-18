@@ -220,7 +220,7 @@ class RecruitView(discord.ui.View):
     async def excecute(self,inter:Interaction,button:discord.ui.Button):
         selectedList = self.eliteTags+self.jobTags+self.otherTags
         if(selectedList):
-            await inter.response.send_message("計算開始、しばらくお待ちください")
+            await inter.response.defer(thinking=True)
             msg = recruitDoProcess(selectedList,1)
             await replyToDiscord(inter,msg)
         else:
@@ -229,7 +229,7 @@ class RecruitView(discord.ui.View):
 #recruitcal = app_commands.CommandTree(client)
 @tree.command(
     name = "recruitsim",
-    description = '公開求人検索',
+    description = '公開求人検索 UI画面が出るのでそのままお使いください',
 )
 async def recruitsim(inter:Interaction):
     await inter.response.send_message(view=RecruitView(),ephemeral=True,delete_after=300.0)
