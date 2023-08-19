@@ -51,6 +51,7 @@ def createEmbedList(msg):
             color = color
         )
         embeds.append(embed)
+    return embeds
 
 async def replyToDiscord(inter:Interaction,msg):
     embeds = createEmbedList(msg)
@@ -325,7 +326,7 @@ CHANNEL_ID_HAPPYBIRTHDAY = int(os.environ["CHANNEL_ID_HAPPYBIRTHDAY"])
 t_delta = datetime.timedelta(hours=9)  # 9時間
 JST = datetime.timezone(t_delta, 'JST')  # UTCから9時間差の「JST」タイムゾーン
 
-@tasks.loop(time=datetime.time(hour=23, minute=25, tzinfo=JST))
+@tasks.loop(time=datetime.time(hour=23, minute=28, tzinfo=JST))
 async def checkBirtyday():
     if(not CHANNEL_ID_HAPPYBIRTHDAY): return
     now=datetime.datetime.now(tz=JST)
