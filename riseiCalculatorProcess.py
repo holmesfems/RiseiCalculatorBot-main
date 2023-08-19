@@ -571,7 +571,7 @@ class RiseiCalculator(object):
         subItemList = categoryDict.get("SubItem",None)
         if(subItemList):
             subItemIndex = [get_ValueTarget(self.Global).index(x) for x in subItemList]
-            subItemOrder = categoryDict.get["SubOrder"]
+            subItemOrder = categoryDict["SubOrder"]
             for i in range(len(subItemIndex)):
                 ret.append((subItemIndex[i],1.0/subItemOrder[i]))
         ret.append((get_ValueTarget(self.Global).index(categoryDict["MainItem"]),1.0))
