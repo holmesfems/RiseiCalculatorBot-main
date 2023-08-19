@@ -3,9 +3,11 @@ import discord
 from discord import app_commands,Interaction
 from discord.app_commands import Choice
 from discord.utils import MISSING
-import traceback
+from discord.ext import tasks
+import traceback,zoneinfo
 from riseiCalculatorProcess import *
 from recruitment.recruitment import *
+import happybirthday.happybirthday as birthday
 
 TOKEN = os.environ["BOT_TOKEN"]
 ID = os.environ["BOT_ID"]
@@ -28,8 +30,7 @@ def arrangementChunks(msgList, maxLength:int):
                 chunks.append(item)
     return chunks
 
-async def replyToDiscord(inter:Interaction,msg):
-    print(msg)
+def createEmbedList(msg):
     maxLength = 1900
     title = "reply"
     color = 0x8be02b
@@ -37,7 +38,6 @@ async def replyToDiscord(inter:Interaction,msg):
         chunks = [msg[i:i+maxLength] for i in range(0, len(msg), maxLength)]
     elif type(msg) == type(list()):
         chunks = arrangementChunks(msg,maxLength)
-        
     elif type(msg) == type(dict()):
         title = msg.get("title",title)
         msgList = msg.get("msgList",[])
@@ -51,6 +51,9 @@ async def replyToDiscord(inter:Interaction,msg):
             color = color
         )
         embeds.append(embed)
+
+async def replyToDiscord(inter:Interaction,msg):
+    embeds = createEmbedList(msg)
     await inter.followup.send(embeds = embeds)
         #await inter.followup
 
@@ -317,9 +320,22 @@ async def recruitlist(inter:Interaction, star:Choice[int]):
     msg = showHighStars(_star)
     await replyToDiscord(inter,msg)
 
+CHANNEL_ID_HAPPYBIRTHDAY = int(os.environ["CHANNEL_ID_HAPPYBIRTHDAY"])
+
+@tasks.loop(time=datetime.time(hour=0, minute=0, tzinfo=zoneinfo.ZoneInfo("Asia/Tokyo")))
+async def checkBirtyday():
+    if(not CHANNEL_ID_HAPPYBIRTHDAY): return
+    now=datetime.datetime.now(tz=zoneinfo.ZoneInfo("Asia/Tokyo"))
+    msg = birthday.checkBirthday(now)
+    if(msg):
+        channel = client.get_channel(CHANNEL_ID_HAPPYBIRTHDAY)
+        embeds = createEmbedList(msg)
+        await channel.send(embeds=embeds)
+
 @client.event
 async def on_ready():
     await tree.sync()
+    checkBirtyday.start()
     print('Botでログインしました')
     
 client.run(TOKEN)
