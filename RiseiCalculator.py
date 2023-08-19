@@ -216,7 +216,7 @@ class RecruitView(discord.ui.View):
         if(selectedList):
             await inter.response.defer(thinking=True)
             msg = recruitDoProcess(selectedList,minstar)
-            await inter.followup.edit(name="")
+            await inter.followup.edit(name="test")
             await replyToDiscord(self.parent,msg)
         else:
             await inter.response.defer()
