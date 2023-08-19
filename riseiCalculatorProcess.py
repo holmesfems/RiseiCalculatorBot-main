@@ -717,14 +717,21 @@ class RiseiCalculator(object):
                     toPrint_item = [
                         ["```マップ名       : ",self.stageId_to_name[item[0]],],
                         ["{1}効率       : {0:.1f}%".format(100*item[1],modeWord)],
-                        ["理性消費       : ".format(modeWord),str(self.stage_dict[item[0]]["apCost"])],
-                        ["時間消費       : ".format(modeWord),str(self.stage_dict[item[0]]["timeCost"])],
+                        ["理性消費       : ",str(self.stage_dict[item[0]]["apCost"])],
+                        #["時間消費(倍速) : ".format(modeWord),str(self.stage_dict[item[0]]["timeCost"]/2)],
                         ["95%信頼区間(2σ): {0:.1f}%".format(100*stageSD95[item[0]])],
                         ["主素材効率     : {0:.1f}%".format(100*np.dot(targetItemValues,self.stage_dict[item[0]]["array"][targetItemIndex])/self.stage_dict[item[0]][selection])],
                         ["昇進効率       : {0:.1f}%".format(100*np.dot(exclude_Videos_Values,self.stage_dict[item[0]]["array"][4:])/self.stage_dict[item[0]][selection])],
                         ["試行数         : ",str(self.stage_dict[item[0]]["maxTimes"])],
-                        ["最小試行数     : ",str(self.stage_dict[item[0]]["minTimes"]),"```"],
+                        #["分間入手数     : ",str(self.stage_dict[item[0]]["minTimes"]),"```"],
                     ]
+                    if self.stage_dict[item[0]]["timeCost"] != None:
+                        toPrint_item += [
+                            ["時間消費(倍速) : ", str(self.stage_dict[item[0]]["timeCost"]/2.0)],
+                            #ドロップアイテム推定
+                            ["分間入手数     : {0:.2f}".format(self.stage_dict[item[0]]["array"][targetItemIndex]/self.stage_dict[item[0]]["timeCost"]*120)],
+                        ]
+                    toPrint_item += ["```"]
                     msg_list.append("\n".join(["".join(x) for x in toPrint_item]))
                     if(parameters["max_items"]>0 and cnt>=parameters["max_items"]):
                         break
@@ -754,13 +761,22 @@ class RiseiCalculator(object):
                             targetItemValues = seedValues[targetItemIndex]
                             toPrint_item.append(["{0}: {1:.1f}%".format(left(15,get_StageCategoryDict(self.Global)[dropItemCategory]["to_ja"]+"効率"),\
                                 100*np.dot(targetItemValues,self.stage_dict[item[0]]["array"][targetItemIndex])/self.stage_dict[item[0]][selection])])
+                            if self.stage_dict[item[0]]["timeCost"] != None:
+                                toPrint_item += [
+                                    ["分間入手数     : {0:.2f}".format(self.stage_dict[item[0]]["array"][targetItemIndex]/self.stage_dict[item[0]]["timeCost"]*120)],
+                                ]
                     toPrint_item += [
-                        ["理性消費       : ".format(modeWord),str(self.stage_dict[item[0]]["apCost"])],
-                        ["時間消費       : ".format(modeWord),str(self.stage_dict[item[0]]["timeCost"])],
+                        ["理性消費       : ",str(self.stage_dict[item[0]]["apCost"])]]
+                    if self.stage_dict[item[0]]["timeCost"] != None:
+                        toPrint_item += [
+                            ["時間消費(倍速) : ", str(self.stage_dict[item[0]]["timeCost"]/2.0)]]
+                    toPrint_item += [
                         ["昇進効率       : {0:.1f}%".format(100*np.dot(exclude_Videos_Values,self.stage_dict[item[0]]["array"][4:])/self.stage_dict[item[0]][selection])],
                         ["試行数         : ",str(self.stage_dict[item[0]]["maxTimes"])],
-                        ["最小試行数     : ",str(self.stage_dict[item[0]]["minTimes"]),"```"],
+                        #["最小試行数     : ",str(self.stage_dict[item[0]]["minTimes"]),"```"],
                     ]
+                    
+                    toPrint_item += ["```"]
                     msg_list.append("\n".join(["".join(x) for x in toPrint_item]))
                     cnt = len(msg_list)-1
                     if(parameters["max_items"]>0 and cnt>=parameters["max_items"]):
