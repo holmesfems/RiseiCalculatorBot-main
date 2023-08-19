@@ -119,7 +119,7 @@ modeChoice = [Choice(name="Sanity",value ="Sanity"),Choice(name="Time",value ="T
 
 @tree.command(
     name = "riseicalculator",
-    description = "理性価値表計算,設定項目が複雑なので非推奨。代わりにriseimetarials,riseistages,riseievents,riseilistsを使ってください",
+    description = "理性価値表計算,設定項目が複雑なので上級者向け。代わりに/riseimetarials,/riseistages,/riseievents,/riseilistsを使ってください",
 )
 @app_commands.describe(
     target = "どの項目を計算してほしい？",
