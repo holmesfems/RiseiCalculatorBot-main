@@ -4,7 +4,7 @@ from discord import app_commands,Interaction
 from discord.app_commands import Choice
 from discord.utils import MISSING
 from discord.ext import tasks
-import traceback,zoneinfo
+import traceback
 from riseiCalculatorProcess import *
 from recruitment.recruitment import *
 import happybirthday.happybirthday as birthday
@@ -322,10 +322,13 @@ async def recruitlist(inter:Interaction, star:Choice[int]):
 
 CHANNEL_ID_HAPPYBIRTHDAY = int(os.environ["CHANNEL_ID_HAPPYBIRTHDAY"])
 
-@tasks.loop(time=datetime.time(hour=0, minute=0, tzinfo=zoneinfo.ZoneInfo("Asia/Tokyo")))
+t_delta = datetime.timedelta(hours=9)  # 9時間
+JST = datetime.timezone(t_delta, 'JST')  # UTCから9時間差の「JST」タイムゾーン
+
+@tasks.loop(time=datetime.time(hour=0, minute=0, tzinfo=JST))
 async def checkBirtyday():
     if(not CHANNEL_ID_HAPPYBIRTHDAY): return
-    now=datetime.datetime.now(tz=zoneinfo.ZoneInfo("Asia/Tokyo"))
+    now=datetime.datetime.now(tz=JST)
     msg = birthday.checkBirthday(now)
     if(msg):
         channel = client.get_channel(CHANNEL_ID_HAPPYBIRTHDAY)

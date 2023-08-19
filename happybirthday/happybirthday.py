@@ -1,4 +1,4 @@
-import yaml,datetime,zoneinfo
+import yaml,datetime
 
 with open("happybirthday/birthdayRev.yaml","rb") as f:
     birthdayRevDict = yaml.safe_load(f)
