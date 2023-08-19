@@ -185,7 +185,7 @@ async def riseimaterials(inter:Interaction,stage:str,mode:Choice[str]="Sanity",i
 @app_commands.choices(
     mode = modeChoice
 )
-async def riseistages(inter:Interaction,stage:str,mode:Choice[str]=modeChoice[0],is_global:bool=True):
+async def riseistages(inter:Interaction,stage:str,mode:Choice[str]="Sanity",is_global:bool=True):
     _mode = safeCallChoiceVal(mode)
     await riseicalculatorMaster(inter,target="zone",event_code=stage,mode=_mode,is_global=is_global)
 
@@ -201,7 +201,7 @@ async def riseistages(inter:Interaction,stage:str,mode:Choice[str]=modeChoice[0]
 @app_commands.choices(
     mode = modeChoice
 )
-async def riseievents(inter:Interaction,stage:str,mode:Choice[str]=modeChoice[0],is_global:bool=True):
+async def riseievents(inter:Interaction,stage:str,mode:Choice[str]="Sanity",is_global:bool=True):
     _mode = safeCallChoiceVal(mode)
     await riseicalculatorMaster(inter,target="events",event_code=stage,mode=_mode,is_global=is_global)
 
@@ -226,7 +226,7 @@ async def riseievents(inter:Interaction,stage:str,mode:Choice[str]=modeChoice[0]
     ],
     mode = modeChoice
 )
-async def riseievents(inter:Interaction,target:Choice[str],mode:Choice[str]=modeChoice[0],is_global:bool=True,csv_file:bool=False):
+async def riseilists(inter:Interaction,target:Choice[str],mode:Choice[str]=modeChoice[0],is_global:bool=True,csv_file:bool=False):
     _mode = safeCallChoiceVal(mode)
     _target = safeCallChoiceVal(target)
     await riseicalculatorMaster(inter,target=_target,mode=_mode,is_global=is_global,csv_file=csv_file)
