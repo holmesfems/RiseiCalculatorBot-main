@@ -169,7 +169,7 @@ async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choic
 @app_commands.choices(
     mode = modeChoice
 )
-async def riseimaterials(inter:Interaction,stage:str,mode:Choice[str]=modeChoice[0],is_global:bool=True):
+async def riseimaterials(inter:Interaction,stage:str,mode:Choice[str]="Sanity",is_global:bool=True):
     _mode = safeCallChoiceVal(mode)
     await riseicalculatorMaster(inter,target="zone",event_code=stage,mode=_mode,is_global=is_global)
 
