@@ -728,6 +728,7 @@ class RiseiCalculator(object):
                     if self.stage_dict[item[0]]["timeCost"] != None:
                         toPrint_item += [
                             ["時間消費(倍速) : ", str(self.stage_dict[item[0]]["timeCost"]/2.0)],
+                            print(self.stage_dict[item[0]]["array"][targetItemIndex])
                             #ドロップアイテム推定
                             ["分間入手数     : {0:.2f}".format(self.stage_dict[item[0]]["array"][targetItemIndex]/self.stage_dict[item[0]]["timeCost"]*120)],
                         ]
