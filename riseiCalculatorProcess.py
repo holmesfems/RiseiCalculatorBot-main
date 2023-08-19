@@ -565,6 +565,19 @@ class RiseiCalculator(object):
     def _getCategoryFromStageId(self,stageId):
         return [x for x in get_StageCategoryDict(self.Global).keys() if self.stageId_to_name[stageId] in get_StageCategoryDict(self.Global)[x]['Stages']]
 
+    def _getSubitemOrderTuple(self,category):
+        categoryDict:dict = get_StageCategoryDict(self.Global)[category]
+        ret = []
+        subItemList = categoryDict.get("SubItem",None)
+        if(subItemList):
+            subItemIndex = [get_ValueTarget(self.Global).index(x) for x in subItemList]
+            subItemOrder = categoryDict.get["SubOrder"]
+            for i in range(len(subItemIndex)):
+                ret.append((subItemIndex[i],1.0/subItemOrder[i]))
+        ret.append((get_ValueTarget(self.Global).index(categoryDict["MainItem"]),1.0))
+        return ret
+            
+
     def Calc(self,to_print = "",target_forPrint = "",cacheTime = 30,parameters = {}):
         need_reCalculate = False
         self.nowTime = datetime.datetime.now()
@@ -709,8 +722,8 @@ class RiseiCalculator(object):
                 Header = get_StageCategoryDict(self.Global)[category]["to_ja"] + ": 理性価値(中級)={0:.3f}±{1:.3f}\n".format(name_to_Value[get_StageCategoryDict(self.Global)[category]['MainItem']][0],name_to_Value[get_StageCategoryDict(self.Global)[category]['MainItem']][1])
                 stage_toPrint = [x for x in sorted_stageValues if x[0] in self.category_ValidIds[category]]
                 targetItemIndex = [get_ValueTarget(self.Global).index(x) for x in get_StageCategoryDict(self.Global)[category]["Items"]]
-                mainTargetIndex = get_ValueTarget(self.Global).index(get_StageCategoryDict(self.Global)[category]["MainItem"])
                 targetItemValues = seedValues[targetItemIndex]
+                orderTuple = self._getSubitemOrderTuple(category)
                 cnt = 0
                 msg_list = [Header]
                 for item in stage_toPrint:
@@ -718,21 +731,28 @@ class RiseiCalculator(object):
                     toPrint_item = [
                         ["```マップ名       : ",self.stageId_to_name[item[0]],],
                         ["{1}効率       : {0:.1f}%".format(100*item[1],modeWord)],
-                        ["理性消費       : ",str(self.stage_dict[item[0]]["apCost"])],
+                        ["理性消費       : ",str(self.stage_dict[item[0]]["apCost"])]]
                         #["時間消費(倍速) : ".format(modeWord),str(self.stage_dict[item[0]]["timeCost"]/2)],
-                        ["95%信頼区間(2σ): {0:.1f}%".format(100*stageSD95[item[0]])],
-                        ["主素材効率     : {0:.1f}%".format(100*np.dot(targetItemValues,self.stage_dict[item[0]]["array"][targetItemIndex])/self.stage_dict[item[0]][selection])],
-                        ["昇進効率       : {0:.1f}%".format(100*np.dot(exclude_Videos_Values,self.stage_dict[item[0]]["array"][4:])/self.stage_dict[item[0]][selection])],
-                        ["試行数         : ",str(self.stage_dict[item[0]]["maxTimes"])],
-                        #["分間入手数     : ",str(self.stage_dict[item[0]]["minTimes"]),"```"],
-                    ]
                     if self.stage_dict[item[0]]["timeCost"] != None:
+                        #分入手数計算
+                        dropValues = 0
+                        for index,order in orderTuple:
+                            dropValues += self.stage_dict[item[0]]["array"][index] * order
+                        dropPerMin = dropValues/self.stage_dict[item[0]]["timeCost"]*120
                         toPrint_item += [
                             ["時間消費(倍速) : ", str(self.stage_dict[item[0]]["timeCost"]/2.0)],
                             #print(self.stage_dict[item[0]]["array"][targetItemIndex])
                             #ドロップアイテム推定
-                            ["分入手数(中級) : {0:.2f}".format(self.stage_dict[item[0]]["array"][mainTargetIndex]/self.stage_dict[item[0]]["timeCost"]*120)],
+                            ["分入手数(中級) : {0:.2f}".format(dropPerMin)],
                         ]
+                    toPrint_item += [
+                        ["主素材効率     : {0:.1f}%".format(100*np.dot(targetItemValues,self.stage_dict[item[0]]["array"][targetItemIndex])/self.stage_dict[item[0]][selection])],
+                        ["95%信頼区間(2σ): {0:.1f}%".format(100*stageSD95[item[0]])],
+                        ["昇進効率       : {0:.1f}%".format(100*np.dot(exclude_Videos_Values,self.stage_dict[item[0]]["array"][4:])/self.stage_dict[item[0]][selection])],
+                        ["試行数         : ",str(self.stage_dict[item[0]]["maxTimes"])],
+                        #["分間入手数     : ",str(self.stage_dict[item[0]]["minTimes"]),"```"],
+                    ]
+                    
                     toPrint_item += ["```"]
                     msg_list.append("\n".join(["".join(x) for x in toPrint_item]))
                     if(parameters["max_items"]>0 and cnt>=parameters["max_items"]):
