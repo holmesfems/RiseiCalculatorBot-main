@@ -100,9 +100,7 @@ async def riseicalculatorMaster(inter:Interaction,target:str,target_item:str=Non
             if event_code == "":
                 msg = "ステージ名を指定してください"
                 return
-        await inter.response.send_message("target={0},mode={1},min_times={2},min_basetimes={3},max_items={4},csv_file={5},ls_ce={6}\n".format(\
-            target,mode,min_times,min_basetimes,max_items,csv_file,ls_ce)+\
-        "計算開始、しばらくお待ちください...")
+        await inter.response.defer(thinking=True)
         if rc == None or cache_time < 0:
             #print(rc)
             rc = RiseiCalculator(minTimes = min_times, baseMinTimes = min_basetimes,LS_CE=ls_ce,Mode=mode,Global=is_global)
@@ -116,9 +114,12 @@ async def riseicalculatorMaster(inter:Interaction,target:str,target_item:str=Non
         await replyToDiscord(inter,msg)
         await showUpdateTime(inter,csv_file)
 
+targetItemChoice=[Choice(name=get_StageCategoryDict(False)[x]["to_ja"],value=x) for x in get_StageCategoryDict(False).keys()]
+modeChoice = [Choice(name="Sanity",value ="Sanity"),Choice(name="Time",value ="Time")]
+
 @tree.command(
     name = "riseicalculator",
-    description = '理性価値表計算',
+    description = "理性価値表計算,設定項目が複雑なので非推奨。代わりにriseimetarials,riseistages,riseievents,riseilistsを使ってください",
 )
 @app_commands.describe(
     target = "どの項目を計算してほしい？",
@@ -144,8 +145,8 @@ async def riseicalculatorMaster(inter:Interaction,target:str,target_item:str=Non
         Choice(name = "特別引換証効率表",value = "specialList"),
         Choice(name = "契約賞金引換効率表(CC#11)",value = "ccList"),
     ],
-    target_item = [Choice(name=get_StageCategoryDict(False)[x]["to_ja"],value=x) for x in get_StageCategoryDict(False).keys()],
-    mode = [Choice(name="Sanity",value ="Sanity"),Choice(name="Time",value ="Time")]
+    target_item = targetItemChoice,
+    mode = modeChoice
 )
 async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choice[str]=None,
                           event_code:str = None, mode:Choice[str]="Sanity",min_times:int=1000,min_basetimes:int=3000,max_items:int=15,csv_file:bool = False,is_global:bool=True,cache_time:int = 30):
@@ -155,6 +156,80 @@ async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choic
     await riseicalculatorMaster(inter,_target,_target_item,event_code,_mode,min_times,min_basetimes,max_items,csv_file,is_global,cache_time)
 
     #print(rc.convert_rules)
+
+@tree.command(
+    name="riseistages",
+    description="恒常ステージの理性効率を検索します。恒常サイドストーリーも対象。"
+)
+@app_commands.describe(
+    stage = "ステージ名を入力",
+    mode = "計算モード選択",
+    is_global = "True:グローバル版基準の計算(デフォルト)、False:大陸版の新ステージと新素材を入れた計算"
+)
+@app_commands.choices(
+    mode = modeChoice
+)
+async def riseimaterials(inter:Interaction,stage:str,mode:Choice[str]=modeChoice[0],is_global:bool=True):
+    _mode = safeCallChoiceVal(mode)
+    await riseicalculatorMaster(inter,target="zone",event_code=stage,mode=_mode,is_global=is_global)
+
+@tree.command(
+    name="riseistages",
+    description="恒常ステージの理性効率を検索します。恒常サイドストーリーも対象。"
+)
+@app_commands.describe(
+    stage = "ステージ名を入力(例:1-7 SV-8 など)",
+    mode = "計算モード選択",
+    is_global = "True:グローバル版基準の計算(デフォルト)、False:大陸版の新ステージと新素材を入れた計算"
+)
+@app_commands.choices(
+    mode = modeChoice
+)
+async def riseistages(inter:Interaction,stage:str,mode:Choice[str]=modeChoice[0],is_global:bool=True):
+    _mode = safeCallChoiceVal(mode)
+    await riseicalculatorMaster(inter,target="zone",event_code=stage,mode=_mode,is_global=is_global)
+
+@tree.command(
+    name="riseievents",
+    description="期間限定イベントの理性効率を検索します。過去の開催済みイベントや、将来の未開催イベントも対象。"
+)
+@app_commands.describe(
+    stage = "ステージ名を入力(例:SV-8 IW-8など)",
+    mode = "計算モード選択",
+    is_global = "True:グローバル版基準の計算(デフォルト)、False:大陸版の新ステージと新素材を入れた計算"
+)
+@app_commands.choices(
+    mode = modeChoice
+)
+async def riseievents(inter:Interaction,stage:str,mode:Choice[str]=modeChoice[0],is_global:bool=True):
+    _mode = safeCallChoiceVal(mode)
+    await riseicalculatorMaster(inter,target="events",event_code=stage,mode=_mode,is_global=is_global)
+
+@tree.command(
+    name="riseilists",
+    description="理性効率表を出力します。"
+)
+@app_commands.describe(
+    target = "表示する効率表を選んでください",
+    mode = "計算モード選択",
+    is_global = "True:グローバル版基準の計算(デフォルト)、False:大陸版の新ステージと新素材を入れた計算",
+    csv_file = "理性価値表CSVファイルを添付する"
+)
+@app_commands.choices(
+    target = [
+        Choice(name = "基準マップ", value = "basemaps"),
+        Choice(name = "理性価値表", value = "sanValueLists"),
+        Choice(name = "初級資格証効率表",value = "te2List"),
+        Choice(name = "上級資格証効率表",value = "te3List"),
+        Choice(name = "特別引換証効率表",value = "specialList"),
+        Choice(name = "契約賞金引換効率表(CC#11)",value = "ccList"),
+    ],
+    mode = modeChoice
+)
+async def riseievents(inter:Interaction,target:Choice[str],mode:Choice[str]=modeChoice[0],is_global:bool=True,csv_file:bool=False):
+    _mode = safeCallChoiceVal(mode)
+    _target = safeCallChoiceVal(target)
+    await riseicalculatorMaster(inter,target=_target,mode=_mode,is_global=is_global,csv_file=csv_file)
 
 class RecruitView(discord.ui.View):
     def __init__(self,timeout=180):
