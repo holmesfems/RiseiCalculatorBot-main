@@ -9,5 +9,5 @@ def checkBirthday(now:datetime.datetime):
     if(len(birthoperator) == 0): return
     else:
         title = ":birthday:お誕生日:birthday:おめでとう:tada:！！"
-        msg = "今日は" + "、".join([(x+"さん") if x!="アステシア" else "私" for x in birthoperator])+"の誕生日です！みんなでお祝い:tada:しましょ！"
+        msg = "今日は" + "、".join([(x+"さん") if x!="アステシア" else "私" for x in birthoperator])+"の誕生日よ！みんなでお祝い:tada:しましょ！"
         return {"title":title,"msgList":[msg]}
