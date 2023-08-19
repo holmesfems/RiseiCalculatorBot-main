@@ -86,6 +86,36 @@ def safeCallChoiceVal(choice):
 
 tree = app_commands.CommandTree(client)
 
+async def riseicalculatorMaster(inter:Interaction,target:str,target_item:str=None,
+                          event_code:str = None, mode:str="Sanity",min_times:int=1000,min_basetimes:int=3000,max_items:int=15,csv_file:bool = False,is_global:bool=True,cache_time:int = 30):
+    msg = ""
+    ls_ce = '6'
+    global rc
+    try:
+        if(target == "items"):
+            if target_item == "":
+                msg = "アイテム名を指定してください"
+                return
+        elif(target in ["zone","events"]):
+            if event_code == "":
+                msg = "ステージ名を指定してください"
+                return
+        await inter.response.send_message("target={0},mode={1},min_times={2},min_basetimes={3},max_items={4},csv_file={5},ls_ce={6}\n".format(\
+            target,mode,min_times,min_basetimes,max_items,csv_file,ls_ce)+\
+        "計算開始、しばらくお待ちください...")
+        if rc == None or cache_time < 0:
+            #print(rc)
+            rc = RiseiCalculator(minTimes = min_times, baseMinTimes = min_basetimes,LS_CE=ls_ce,Mode=mode,Global=is_global)
+        msg = rc.Calc(to_print=target,target_forPrint={"items":target_item,"zone":event_code,"events":event_code}[target] if target in ["items","zone","events"] else "",\
+            cacheTime=cache_time,parameters={"mode":_mode,"min_times":min_times,"min_basetimes":min_basetimes,"max_items":max_items,"ls_ce":ls_ce,"is_global":is_global})
+        return
+    except Exception as e:
+        msg = showException()
+    finally:
+        #channel = inter.channel()
+        await replyToDiscord(inter,msg)
+        await showUpdateTime(inter,csv_file)
+
 @tree.command(
     name = "riseicalculator",
     description = '理性価値表計算',
@@ -119,46 +149,12 @@ tree = app_commands.CommandTree(client)
 )
 async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choice[str]=None,
                           event_code:str = None, mode:Choice[str]="Sanity",min_times:int=1000,min_basetimes:int=3000,max_items:int=15,csv_file:bool = False,is_global:bool=True,cache_time:int = 30):
-    msg = ""
-    ls_ce = '6'
-    global rc
     _target = safeCallChoiceVal(target)
     _target_item = safeCallChoiceVal(target_item)
     _mode = safeCallChoiceVal(mode)
-    try:
-        if(target == "items"):
-            if target_item == "":
-                msg = "アイテム名を指定してください"
-                return
-        elif(target in ["zone","events"]):
-            if event_code == "":
-                msg = "ステージ名を指定してください"
-                return
-        await inter.response.send_message("target={0},mode={1},min_times={2},min_basetimes={3},max_items={4},csv_file={5},ls_ce={6}\n".format(\
-            _target,_mode,min_times,min_basetimes,max_items,csv_file,ls_ce)+\
-        "計算開始、しばらくお待ちください...")
-        if rc == None or cache_time < 0:
-            #print(rc)
-            rc = RiseiCalculator(minTimes = min_times, baseMinTimes = min_basetimes,LS_CE=ls_ce,Mode=mode,Global=is_global)
-        msg = rc.Calc(to_print=_target,target_forPrint={"items":_target_item,"zone":event_code,"events":event_code}[_target] if _target in ["items","zone","events"] else "",\
-            cacheTime=cache_time,parameters={"mode":_mode,"min_times":min_times,"min_basetimes":min_basetimes,"max_items":max_items,"ls_ce":ls_ce,"is_global":is_global})
-        return
-    except Exception as e:
-        msg = showException()
-    finally:
-        #channel = inter.channel()
-        await replyToDiscord(inter,msg)
-        await showUpdateTime(inter,csv_file)
-        
+    await riseicalculatorMaster(inter,_target,_target_item,event_code,_mode,min_times,min_basetimes,max_items,csv_file,is_global,cache_time)
 
     #print(rc.convert_rules)
-
-def autoGuide(current:str):
-    if current == "": return ["エリートタグ","職タグ","その他タグ"]
-    if current == "エリートタグ": return eliteTags
-    if current == "職タグ": return jobTags
-    if current == "その他タグ": return otherTags
-    return [x for x in tagNameList if current in x]
 
 class RecruitView(discord.ui.View):
     def __init__(self,timeout=180):
