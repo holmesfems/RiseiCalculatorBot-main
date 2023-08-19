@@ -161,12 +161,11 @@ def autoGuide(current:str):
     return [x for x in tagNameList if current in x]
 
 class RecruitView(discord.ui.View):
-    def __init__(self,parent:Interaction,timeout=180):
+    def __init__(self,timeout=180):
         super().__init__(timeout=timeout)
         self.eliteTags = []
         self.jobTags = []
         self.otherTags = []
-        self.parent = parent
     
     @discord.ui.select(
         cls=discord.ui.Select,
@@ -216,9 +215,7 @@ class RecruitView(discord.ui.View):
         if(selectedList):
             await inter.response.defer(thinking=True)
             msg = recruitDoProcess(selectedList,minstar)
-            #id = inter.message.id
-            #await inter.followup.delete_message(id)
-            await replyToDiscord(self.parent,msg)
+            await replyToDiscord(inter,msg)
         else:
             await inter.response.defer()
 
@@ -228,7 +225,7 @@ class RecruitView(discord.ui.View):
     description = "公開求人検索 UI画面が出るのでそのままお使いください",
 )
 async def recruitsim(inter:Interaction):
-    await inter.response.send_message(view=RecruitView(inter),ephemeral=True,delete_after=300.0)
+    await inter.response.send_message(view=RecruitView(),ephemeral=True,delete_after=300.0)
     #safeList = [safeCallChoiceVal(x) for x in [tag1,tag2,tag3,tag4,tag5]]
     #_min_star = safeCallChoiceVal(min_star)
     #msg = recruitDoProcess(safeList,_min_star)
