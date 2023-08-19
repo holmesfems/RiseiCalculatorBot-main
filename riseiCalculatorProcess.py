@@ -781,12 +781,16 @@ class RiseiCalculator(object):
                         for dropItemCategory in dropItemCategoryList:
                             targetItemIndex = [get_ValueTarget(self.Global).index(x) for x in get_StageCategoryDict(self.Global)[dropItemCategory]["Items"]]
                             targetItemValues = seedValues[targetItemIndex]
-                            mainTargetIndex = get_ValueTarget(self.Global).index(get_StageCategoryDict(self.Global)[dropItemCategory]["MainItem"])
+                            orderTuple = self._getSubitemOrderTuple(category)
+                            dropValues = 0
+                            for index,order in orderTuple:
+                                dropValues += self.stage_dict[item[0]]["array"][index] * order
+                            dropPerMin = dropValues/self.stage_dict[item[0]]["timeCost"]*120
                             toPrint_item += [["{0}: {1:.1f}%".format(left(15,get_StageCategoryDict(self.Global)[dropItemCategory]["to_ja"]+"効率"),\
                                 100*np.dot(targetItemValues,self.stage_dict[item[0]]["array"][targetItemIndex])/self.stage_dict[item[0]][selection])]]
                             if self.stage_dict[item[0]]["timeCost"] != None:
                                 toPrint_item += [
-                                    ["分入手数(中級) : {0:.2f}".format(self.stage_dict[item[0]]["array"][mainTargetIndex]/self.stage_dict[item[0]]["timeCost"]*120)],
+                                    ["分入手数(中級) : {0:.2f}".format(dropPerMin)],
                                 ]
                     toPrint_item += [
                         ["理性消費       : ",str(self.stage_dict[item[0]]["apCost"])]]
