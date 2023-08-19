@@ -1,7 +1,5 @@
 discord.py
-dislash.py
 pandas
 scipy
 requests
 pyyaml
-zoneinfo
