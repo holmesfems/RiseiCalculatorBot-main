@@ -781,7 +781,7 @@ class RiseiCalculator(object):
                         for dropItemCategory in dropItemCategoryList:
                             targetItemIndex = [get_ValueTarget(self.Global).index(x) for x in get_StageCategoryDict(self.Global)[dropItemCategory]["Items"]]
                             targetItemValues = seedValues[targetItemIndex]
-                            orderTuple = self._getSubitemOrderTuple(category)
+                            orderTuple = self._getSubitemOrderTuple(dropItemCategory)
                             dropValues = 0
                             for index,order in orderTuple:
                                 dropValues += self.stage_dict[item[0]]["array"][index] * order
