@@ -709,6 +709,7 @@ class RiseiCalculator(object):
                 Header = get_StageCategoryDict(self.Global)[category]["to_ja"] + ": 理性価値(中級)={0:.3f}±{1:.3f}\n".format(name_to_Value[get_StageCategoryDict(self.Global)[category]['MainItem']][0],name_to_Value[get_StageCategoryDict(self.Global)[category]['MainItem']][1])
                 stage_toPrint = [x for x in sorted_stageValues if x[0] in self.category_ValidIds[category]]
                 targetItemIndex = [get_ValueTarget(self.Global).index(x) for x in get_StageCategoryDict(self.Global)[category]["Items"]]
+                mainTargetIndex = get_ValueTarget(self.Global).index(get_StageCategoryDict(self.Global)[category]["MainItem"])
                 targetItemValues = seedValues[targetItemIndex]
                 cnt = 0
                 msg_list = [Header]
@@ -728,9 +729,9 @@ class RiseiCalculator(object):
                     if self.stage_dict[item[0]]["timeCost"] != None:
                         toPrint_item += [
                             ["時間消費(倍速) : ", str(self.stage_dict[item[0]]["timeCost"]/2.0)],
-                            print(self.stage_dict[item[0]]["array"][targetItemIndex])
+                            #print(self.stage_dict[item[0]]["array"][targetItemIndex])
                             #ドロップアイテム推定
-                            ["分間入手数     : {0:.2f}".format(self.stage_dict[item[0]]["array"][targetItemIndex]/self.stage_dict[item[0]]["timeCost"]*120)],
+                            ["分入手数(中級) : {0:.2f}".format(self.stage_dict[item[0]]["array"][mainTargetIndex]/self.stage_dict[item[0]]["timeCost"]*120)],
                         ]
                     toPrint_item += ["```"]
                     msg_list.append("\n".join(["".join(x) for x in toPrint_item]))
@@ -760,11 +761,12 @@ class RiseiCalculator(object):
                         for dropItemCategory in dropItemCategoryList:
                             targetItemIndex = [get_ValueTarget(self.Global).index(x) for x in get_StageCategoryDict(self.Global)[dropItemCategory]["Items"]]
                             targetItemValues = seedValues[targetItemIndex]
-                            toPrint_item.append(["{0}: {1:.1f}%".format(left(15,get_StageCategoryDict(self.Global)[dropItemCategory]["to_ja"]+"効率"),\
-                                100*np.dot(targetItemValues,self.stage_dict[item[0]]["array"][targetItemIndex])/self.stage_dict[item[0]][selection])])
+                            mainTargetIndex = get_ValueTarget(self.Global).index(get_StageCategoryDict(self.Global)[dropItemCategory]["MainItem"])
+                            toPrint_item += [["{0}: {1:.1f}%".format(left(15,get_StageCategoryDict(self.Global)[dropItemCategory]["to_ja"]+"効率"),\
+                                100*np.dot(targetItemValues,self.stage_dict[item[0]]["array"][targetItemIndex])/self.stage_dict[item[0]][selection])]]
                             if self.stage_dict[item[0]]["timeCost"] != None:
                                 toPrint_item += [
-                                    ["分間入手数     : {0:.2f}".format(self.stage_dict[item[0]]["array"][targetItemIndex]/self.stage_dict[item[0]]["timeCost"]*120)],
+                                    ["分入手数(中級) : {0:.2f}".format(self.stage_dict[item[0]]["array"][mainTargetIndex]/self.stage_dict[item[0]]["timeCost"]*120)],
                                 ]
                     toPrint_item += [
                         ["理性消費       : ",str(self.stage_dict[item[0]]["apCost"])]]
