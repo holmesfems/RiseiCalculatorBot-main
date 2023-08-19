@@ -303,7 +303,7 @@ async def recruitsim(inter:Interaction):
 
 @tree.command(
     name = "recruitlist",
-    description = "★4 ★5確定タグ組み合わせを表示"
+    description = "アークナイツ公開求人の高レア確定タグをすべて表示"
 )
 @app_commands.describe(
     star = "星の数"
