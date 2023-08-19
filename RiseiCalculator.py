@@ -158,20 +158,22 @@ async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choic
     #print(rc.convert_rules)
 
 @tree.command(
-    name="riseistages",
-    description="恒常ステージの理性効率を検索します。恒常サイドストーリーも対象。"
+    name="riseimaterials",
+    description="昇進素材の効率の良い恒常ステージを調べます。"
 )
 @app_commands.describe(
-    stage = "ステージ名を入力",
+    target_item = "昇進素材を選択",
     mode = "計算モード選択",
     is_global = "True:グローバル版基準の計算(デフォルト)、False:大陸版の新ステージと新素材を入れた計算"
 )
 @app_commands.choices(
+    target_item = targetItemChoice,
     mode = modeChoice
 )
-async def riseimaterials(inter:Interaction,stage:str,mode:Choice[str]="Sanity",is_global:bool=True):
+async def riseimaterials(inter:Interaction,target_item:Choice[str],mode:Choice[str]="Sanity",is_global:bool=True):
+    _target_item = safeCallChoiceVal(target_item)
     _mode = safeCallChoiceVal(mode)
-    await riseicalculatorMaster(inter,target="zone",event_code=stage,mode=_mode,is_global=is_global)
+    await riseicalculatorMaster(inter,target="items",target_item=_target_item,mode=_mode,is_global=is_global)
 
 @tree.command(
     name="riseistages",
