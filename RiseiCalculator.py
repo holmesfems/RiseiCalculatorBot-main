@@ -228,7 +228,7 @@ async def riseievents(inter:Interaction,stage:str,mode:Choice[str]="Sanity",is_g
     ],
     mode = modeChoice
 )
-async def riseilists(inter:Interaction,target:Choice[str],mode:Choice[str]=modeChoice[0],is_global:bool=True,csv_file:bool=False):
+async def riseilists(inter:Interaction,target:Choice[str],mode:Choice[str]="Sanity",is_global:bool=True,csv_file:bool=False):
     _mode = safeCallChoiceVal(mode)
     _target = safeCallChoiceVal(target)
     await riseicalculatorMaster(inter,target=_target,mode=_mode,is_global=is_global,csv_file=csv_file)
