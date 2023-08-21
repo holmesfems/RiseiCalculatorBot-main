@@ -344,6 +344,7 @@ async def on_ready():
     print('Botでログインしました')
     
 MAXLOG = 10
+MAXMSGLEN = 200
 OPENAI_CHANNELID = int(os.environ["OPENAI_CHANNELID"])
 @client.event
 async def on_message(message:discord.Message):
@@ -353,6 +354,12 @@ async def on_message(message:discord.Message):
     messages = [message async for message in messageable.history(limit = MAXLOG, after = datetime.datetime.now(tz=JST) - datetime.timedelta(minutes = 10),oldest_first=False)]
     toAI = [{"role": "assistant" if message.author.bot else "user", "content" : message.content} for message in messages]
     toAI.reverse()
+    def emptyFilter(msg): #空メッセージ、長すぎるメッセージを除外
+        content = msg["content"]
+        if content == "": return False
+        if len(content) > MAXMSGLEN: return False
+        return True
+    toAI = list(filter(emptyFilter,toAI))
     reply = chatbot.openaichat(toAI)
     if(reply):
         channel = client.get_channel(OPENAI_CHANNELID)
