@@ -350,7 +350,7 @@ async def on_message(message:discord.Message):
     if(message.channel.id != OPENAI_CHANNELID): return
     if(message.author.bot): return
     messageable = client.get_partial_messageable(OPENAI_CHANNELID)
-    messages = [message async for message in messageable.history(limit = MAXLOG, after = datetime.datetime.now(tz=JST) - datetime.timedelta(minute = 20))]
+    messages = [message async for message in messageable.history(limit = MAXLOG, after = datetime.datetime.now(tz=JST) - datetime.timedelta(minutes = 20))]
     toAI = [{"role": "assistant" if message.author.bot else "user", "content" : message.content} for message in messages]
     reply = chatbot.openaichat(toAI)
     if(reply):
