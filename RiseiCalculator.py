@@ -352,12 +352,10 @@ async def on_message(message:discord.Message):
     messageable = client.get_partial_messageable(OPENAI_CHANNELID)
     messages = [message async for message in messageable.history(limit = MAXLOG, after = datetime.datetime.now(tz=JST) - datetime.timedelta(minutes = 10),oldest_first=False)]
     toAI = [{"role": "assistant" if message.author.bot else "user", "content" : message.content} for message in messages]
-    print(toAI)
-    """
+    toAI.reverse()
     reply = chatbot.openaichat(toAI)
     if(reply):
         channel = client.get_channel(OPENAI_CHANNELID)
         await channel.send(content = reply)
-    """
 
 client.run(TOKEN)
