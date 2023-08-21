@@ -8,6 +8,7 @@ import traceback
 from riseiCalculatorProcess import *
 from recruitment.recruitment import *
 import happybirthday.happybirthday as birthday
+import openaichat.openaichat as chatbot
 
 TOKEN = os.environ["BOT_TOKEN"]
 ID = os.environ["BOT_ID"]
@@ -342,4 +343,18 @@ async def on_ready():
     checkBirtyday.start()
     print('Botでログインしました')
     
+MAXLOG = 10
+OPENAI_CHANNELID = int(os.environ["OPENAI_CHANNELID"])
+@client.event
+async def on_message(message:discord.Message):
+    if(message.channel.id != OPENAI_CHANNELID): return
+    if(message.author.bot): return
+    messageable = client.get_partial_messageable(OPENAI_CHANNELID)
+    messages = [message async for message in messageable.history(limit = MAXLOG, after = datetime.datetime.now(tz=JST) - datetime.timedelta(minute = 20))]
+    toAI = [{"role": "assistant" if message.author.bot else "user", "content" : message.content} for message in messages]
+    reply = chatbot.openaichat(toAI)
+    if(reply):
+        channel = client.get_channel(OPENAI_CHANNELID)
+        await channel.send(content = reply)
+
 client.run(TOKEN)
