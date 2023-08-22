@@ -12,7 +12,7 @@ openai.api_key = OPENAI_API_KEY
 
 def openaichat(msgList):
     response = openai.ChatCompletion.create(
-        model="gpt-4",
+        model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content" : SYSTEM_PROMPT},
         ] + msgList
