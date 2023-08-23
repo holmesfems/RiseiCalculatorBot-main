@@ -102,10 +102,9 @@ with open("minClearTimeInjection.json","r") as file:
 new_zone = [
 #    'main_11', #11章
     'main_12', #12章
-#    'permanent_sidestory_10_zone1', #NL
-#    'permanent_sidestory_11_zone1', #BI
-    'permanent_sidestory_12_zone1', #IW
-    'permanent_sidestory_12_zone1', #GA
+    'permanent_sidestory_13_zone1', #GA
+    'permanent_sidestory_14_zone1', #LE
+    'permanent_sidestory_15_zone1', #DV
     'permanent_sub_5_zone1', #CW
 ]
 
