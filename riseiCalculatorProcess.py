@@ -579,7 +579,10 @@ class RiseiCalculator(object):
 
     def Calc(self,to_print = "",target_forPrint = "",cacheTime = 30,parameters = {}):
         need_reCalculate = False
-        self.nowTime = datetime.datetime.now()
+        done_reCalculate = False
+        t_delta = datetime.timedelta(hours=9)  # 9時間
+        JST = datetime.timezone(t_delta, 'JST')  # UTCから9時間差の「JST」タイムゾーン
+        self.nowTime = datetime.datetime.now(tz=JST)
         try:
             if (self.nowTime - self.UpdatedTime > datetime.timedelta(minutes=cacheTime) and cacheTime > 0) or \
             (self.minTimes,self.Mode,self.baseMinTimes,self.Global) != (parameters["min_times"],parameters["mode"],parameters["min_basetimes"],parameters["is_global"]):
@@ -604,7 +607,6 @@ class RiseiCalculator(object):
             except Exception as e:
                 self.minTimes,self.Mode,self.baseMinTimes,self.Global = ParamBackup
                 raise e
-            self.UpdatedTime = self.nowTime
             ConvertionMatrix,ConvertionRisei,ConvertionDiv = self._GetConvertionMatrix()
             self.ConvertionMatrix,self.ConvertionRisei,self.ConvertionDiv = (ConvertionMatrix,ConvertionRisei,ConvertionDiv) #cache
             ConstStageMatrix,ConstStageRisei,ConstStageDiv = self._GetConstStageMatrix()
@@ -675,6 +677,7 @@ class RiseiCalculator(object):
             stageMatrix,stageRisei,stageDiv = self._getStageMatrix(seeds)
             self.stageMatrix,self.stageRisei,self.stageDiv = (stageMatrix,stageRisei,stageDiv) #save Cache
             self.seeds = seeds
+            done_reCalculate = True
             #計算成功後、前回の入力パラメータを保存
             #self.minTimes,self.Mode,self.baseMinTimes,self.Global = (parameters["min_times"],parameters["mode"],parameters["min_basetimes"],parameters["is_global"])
 
@@ -909,7 +912,8 @@ class RiseiCalculator(object):
             else:
                 return "未知のコマンド:" + to_print
         finally:
-            if need_reCalculate:
+            if need_reCalculate and done_reCalculate:
+                self.UpdatedTime = self.nowTime
                 #メインデータの書き出し
                 Columns_Name = [self.item_zh_to_ja[x] for x in get_ValueTarget(self.Global)] + ['理性消費']
                 Rows_Name_Convertion = ['経験値換算1','経験値換算2','経験値換算3','純金換算'] +\
