@@ -210,7 +210,7 @@ async def riseistages(inter:Interaction,stage:str,mode:Choice[str]="Sanity",is_g
 )
 async def riseievents(inter:Interaction,stage:str,mode:Choice[str]="Sanity",is_global:bool=True):
     _mode = safeCallChoiceVal(mode)
-    await riseicalculatorMaster(inter,target="events",event_code=stage,mode=_mode,is_global=is_global)
+    await riseicalculatorMaster(inter,target="events",event_code=stage,mode=_mode,is_global=is_global,max_items=20)
 
 @tree.command(
     name="riseilists",
