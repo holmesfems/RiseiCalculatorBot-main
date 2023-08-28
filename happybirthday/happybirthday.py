@@ -8,8 +8,16 @@ reflectDict = {
     "アステジーニ": "エレナちゃん",
 }
 
+chanList = [
+    "スズラン","ポプカル","シャマレ","バブル"
+]
+
 def reflectName(name:str):
-    return reflectDict.get(name,name+"さん")
+    reflect = reflectDict.get(name,None)
+    if(reflect): return reflect
+    chan = name in chanList
+    if(chan): return name + "ちゃん"
+    return name + "さん"
 
 def mentionStr(reflectList):
     l = len(reflectList)
