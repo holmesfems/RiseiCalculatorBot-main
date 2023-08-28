@@ -98,11 +98,11 @@ async def riseicalculatorMaster(inter:Interaction,target:str,target_item:str=Non
     global rc
     try:
         if(target == "items"):
-            if target_item == "":
+            if not target_item:
                 msg = "アイテム名を指定してください"
                 return
         elif(target in ["zone","events"]):
-            if event_code == "":
+            if not event_code:
                 msg = "ステージ名を指定してください"
                 return
         await inter.response.defer(thinking=True)
