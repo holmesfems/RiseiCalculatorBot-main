@@ -459,11 +459,10 @@ class StageInfo:
         return "Main:" + str(self.mainStageDict.values()) + "\n" + "Event:" + str(self.eventStageDict.values())
 
 class Calculator:
-    def __init__(self,isGlobal:bool,doInit:bool):
+    def __init__(self,isGlobal:bool):
         self.isGlobal:bool = isGlobal
         self.initialized = False
-        if(doInit):
-            self.init()
+        self.init()
     
     class ConvertionItem:
         def __init__(self,isGlobal:bool,name:str = ""):
@@ -818,8 +817,8 @@ class Calculator:
         print("基準マップデータをBaseStages.xlsxに保存しました")
 
 class CalculatorManager:
-    calculatorForGlobal = Calculator(True,True)
-    calculatorForMainland = Calculator(False,True)
+    calculatorForGlobal = Calculator(True)
+    calculatorForMainland = Calculator(False)
 
     def selectCalculator(isGlobal:bool):
         return CalculatorManager.calculatorForGlobal if isGlobal else CalculatorManager.calculatorForMainland
