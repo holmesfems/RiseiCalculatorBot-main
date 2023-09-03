@@ -10,6 +10,7 @@ import happybirthday.happybirthday as birthday
 import openaichat.openaichat as chatbot
 from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode,getStageCategoryDict
 from typing import List
+import datetime
 
 TOKEN = os.environ["BOT_TOKEN"]
 ID = os.environ["BOT_ID"]
