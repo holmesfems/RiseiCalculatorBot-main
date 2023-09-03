@@ -5,11 +5,10 @@ from discord.app_commands import Choice
 from discord.utils import MISSING
 from discord.ext import tasks
 import traceback
-from riseiCalculatorProcess import *
 from recruitment.recruitment import *
 import happybirthday.happybirthday as birthday
 import openaichat.openaichat as chatbot
-from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode
+from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode,getValueTarget
 from typing import List
 
 TOKEN = os.environ["BOT_TOKEN"]
@@ -113,7 +112,7 @@ async def riseicalculatorMaster(inter:Interaction,target:str,target_item:str=Non
         print(msg)
         #channel = inter.channel()
 
-targetItemChoice=[Choice(name=get_StageCategoryDict(False)[x]["to_ja"],value=x) for x in get_StageCategoryDict(False).keys()]
+targetItemChoice=[Choice(name=v["to_ja"],value=x) for x,v in getValueTarget(False).items()]
 modeChoice = [Choice(name="Sanity",value ="sanity"),Choice(name="Time",value ="time")]
 
 @tree.command(
