@@ -355,9 +355,8 @@ class StageItem:
         return ret
 
 class StageInfo:
-    def __init__(self,isGlobal,validBaseMinTimes:int):
+    def __init__(self,isGlobal:bool):
         self.isGlobal = isGlobal
-        self.validBaseMinTimes = validBaseMinTimes
         self.mainStageDict = {}
         self.eventStageDict = {}
         self.mainCodeToStageDict = {}
@@ -421,12 +420,12 @@ class StageInfo:
             }
         self.lastUpdated = getnow.getnow()
 
-    def validBaseStages(self) -> List[StageItem]:
-        return [x for x in self.mainStageDict.values() if x.maxTimes() >= self.validBaseMinTimes]
+    def validBaseStages(self,validBaseMinTimes:int) -> List[StageItem]:
+        return [x for x in self.mainStageDict.values() if x.maxTimes() >= validBaseMinTimes]
 
-    def categoryValidStages(self,category:str)->List[StageItem]:
+    def categoryValidStages(self,category:str,validBaseMinTimes:int)->List[StageItem]:
         allStageList:List[StageItem] = self.categoryDict[category]["Stages"]
-        validStageList:List[StageItem] = [x for x in allStageList if x.maxTimes() >= self.validBaseMinTimes]
+        validStageList:List[StageItem] = [x for x in allStageList if x.maxTimes() >= validBaseMinTimes]
         return validStageList
     
     def stageToCategory(self,stage:StageItem) -> List[str]:
@@ -439,17 +438,17 @@ class StageInfo:
             self.stage = stage
             self.categories = categories
 
-    def getCategoryMaxEfficiency(self,values:RiseiOrTimeValues)->CategoryMaxEfficiencyItem:
-        validStageList = self.validBaseStages()
+    def getCategoryMaxEfficiency(self,values:RiseiOrTimeValues,validBaseMinTimes:int)->CategoryMaxEfficiencyItem:
+        validStageList = self.validBaseStages(validBaseMinTimes)
         efficiencyAndStages:List[Tuple[float,StageItem]]  = [(x.getEfficiency(values),x) for x in validStageList]
         maxValue,maxStage = max(efficiencyAndStages,key= lambda x: x[0])
         maxCategories = self.stageToCategory(maxStage)
         return StageInfo.CategoryMaxEfficiencyItem(maxValue,maxStage,maxCategories)
 
-    def generateCategorySeed(self) -> Dict[str,StageItem]:
+    def generateCategorySeed(self,validBaseMinTimes:int) -> Dict[str,StageItem]:
         ret:Dict[str,StageItem] = {}
         for key in self.categoryDict.keys():
-            validStageList = self.categoryValidStages(key)
+            validStageList = self.categoryValidStages(key,validBaseMinTimes)
             randomChoiced = random.choice(validStageList)
             ret[key] = randomChoiced
         if hasduplicates.has_duplicates(ret.values()):
@@ -653,12 +652,13 @@ class Calculator:
             return self.name # + ":" + str(self.stageItem.toDropArray(self.isGlobal))
 
     class BaseStageMatrix:
-        def __init__(self,isGlobal:bool,stageInfo:StageInfo) -> None:
+        def __init__(self,isGlobal:bool,stageInfo:StageInfo,validBaseMinTimes:int) -> None:
             self.isGlobal = isGlobal
             self.stageInfo = stageInfo
             self.baseStageItemDict:Dict[str,Calculator.BaseStageDropItem] = {}
+            self.validBaseMinTimes = validBaseMinTimes
             #初期化　ランダムにseed生成
-            seed = self.stageInfo.generateCategorySeed()
+            seed = self.stageInfo.generateCategorySeed(self.validBaseMinTimes)
             self.initBaseStages(seed)
             self.epsilon = 0.00001
 
@@ -678,8 +678,7 @@ class Calculator:
             return str({categoryZHToJA(key,self.isGlobal):value.stageItem.name for key,value in self.baseStageItemDict.items()})
         
         def update(self,values:RiseiOrTimeValues) -> bool:
-            mode = values.mode
-            maxEfficiencyItem = self.stageInfo.getCategoryMaxEfficiency(values)
+            maxEfficiencyItem = self.stageInfo.getCategoryMaxEfficiency(values,self.validBaseMinTimes)
             if not maxEfficiencyItem.categories:
                 msg = "カテゴリから外れたマップを検出、計算を中断します\n"
                 msg += "マップ" + maxEfficiencyItem.stage.name + "は、何を稼ぐステージですか？\n"
@@ -746,42 +745,46 @@ class Calculator:
         values.setDevArray(divArray)
         return values
 
-    def init(self,validBaseMinTimes:int=3000):
-        self.stageInfo = StageInfo(self.isGlobal,validBaseMinTimes)
+    def init(self,validBaseMinTimes:int=3000,mode:CalculateMode = None):
+        self.stageInfo = StageInfo(self.isGlobal)
         self.convertionMatrix = Calculator.ConvertionMatrix(self.isGlobal)
         self.constStageMatrix = Calculator.ConstStageMatrix(self.isGlobal)
-        self.calculate()
+        self.calculate(mode,validBaseMinTimes)
         self.initialized = True
     
-    def calculate(self):
-        self.baseStageMatrixForSanity = Calculator.BaseStageMatrix(self.isGlobal,self.stageInfo)
-        self.baseStageMatrixForTime = Calculator.BaseStageMatrix(self.isGlobal,self.stageInfo)
-        self.riseiValues = self.solveOptimizedValue(CalculateMode.SANITY)
-        self.timeValues = self.solveOptimizedValue(CalculateMode.TIME)
+    def calculate(self,mode:CalculateMode = None,validBaseMinTimes:int=3000):
+        if (mode == None or mode is CalculateMode.SANITY):
+            self.baseStageMatrixForSanity = Calculator.BaseStageMatrix(self.isGlobal,self.stageInfo,validBaseMinTimes)
+            self.riseiValues = self.solveOptimizedValue(CalculateMode.SANITY)
+        if (mode == None or mode is CalculateMode.TIME):
+            self.baseStageMatrixForTime = Calculator.BaseStageMatrix(self.isGlobal,self.stageInfo,validBaseMinTimes)
+            self.timeValues = self.solveOptimizedValue(CalculateMode.TIME)
         
-    def tryRecalculate(self,validBaseMinTimes:int):
-        if validBaseMinTimes != self.stageInfo.validBaseMinTimes:
-            self.calculate()
+    def tryRecalculate(self,mode:CalculateMode = None, validBaseMinTimes:int = 3000)->bool:
+        #mode == None: いずれかのvalidBaseMinTimesと違う
+        if (mode == None and self.baseStageMatrixForSanity.validBaseMinTimes == validBaseMinTimes and self.baseStageMatrixForTime.validBaseMinTimes == validBaseMinTimes):
+            return False
+        if (self.getBaseStageMatrix(mode)).validBaseMinTimes == validBaseMinTimes:
+            return False
+        self.calculate(mode,validBaseMinTimes)
+        return True
 
     def getValues(self,mode:CalculateMode) -> RiseiOrTimeValues:
         if mode is CalculateMode.SANITY: return self.riseiValues
         return self.timeValues
 
     #ステージ情報が古ければ更新する。期限は外部からの指定、指定しない場合は強制更新
-    def tryReInit(self,timeDiff:Optional[datetime.timedelta],validBaseMinTimes:Optional[int]) -> bool:
+    def tryReInit(self,timeDiff:Optional[datetime.timedelta],validBaseMinTimes:Optional[int],mode:CalculateMode = None) -> bool:
         now = getnow.getnow()
-        if self.initialized and timeDiff and now < self.stageInfo.lastUpdated+timeDiff:
-            if validBaseMinTimes != self.stageInfo.validBaseMinTimes:
-                self.calculate()
-                return True
-            return False
+        if self.initialized and timeDiff and (timeDiff<datetime.timedelta(0) or now < self.stageInfo.lastUpdated+timeDiff):
+            return self.tryRecalculate(mode,validBaseMinTimes)
         if self.initialized:
             baseMinTimes = validBaseMinTimes if validBaseMinTimes else self.stageInfo.validBaseMinTimes
-            self.init(baseMinTimes)
+            self.init(baseMinTimes,mode)
         elif validBaseMinTimes:
-            self.init(validBaseMinTimes)
+            self.init(validBaseMinTimes,mode)
         else:
-            self.init()
+            self.init(mode=mode)
         return True
 
     def searchMainStage(self,targetCode:str) -> List[StageItem]:
@@ -846,7 +849,7 @@ class CalculatorManager:
         if (calculator == None):
             calculator = Calculator(isGlobal,False) 
             CalculatorManager.setCalculator(isGlobal,calculator)
-        calculator.tryReInit(CalculatorManager.__getTimeDelta(cache_minutes),baseMinTimes)
+        calculator.tryReInit(CalculatorManager.__getTimeDelta(cache_minutes),baseMinTimes,mode)
         return calculator.getValues(mode)
     
     def filterStagesByShowMinTimes(stageList:List[StageItem],showMinTimes):
@@ -1105,7 +1108,7 @@ class CalculatorManager:
                         Price_CC.append([name,float(value),quantity])
             except FileNotFoundError as e:
                 return "CC#{0}の交換値段が未設定です！".format(ccNumber)
-            title = "契約賞金引換効率(CC#{0})```".format(ccNumber)
+            title = "契約賞金引換効率(CC#{0})".format(ccNumber)
             ticket_efficiency_CC = [(ItemIdToName.zhToJa(x[0]),(riseiValues.getValueFromZH(x[0])/x[1],riseiValues.getStdDevFromZH(x[0])/x[1]),x[2]) for x in Price_CC if x[0] in getValueTarget(isGlobal)]
             ticket_efficiency_CC_sorted = sorted(ticket_efficiency_CC,key = lambda x:x[1][0],reverse=True)
             toPrint = []
