@@ -98,7 +98,7 @@ async def riseicalculatorMaster(inter:Interaction,target:str,target_item:str=Non
     msg = ""
     try:
         mode = CalculateMode(mode)
-        inter.response.defer(thinking=True)
+        await inter.response.defer(thinking=True)
         msg = CalculatorManager.riseicalculatorMaster(target,target_item,event_code,is_global,mode,min_basetimes,cache_time,min_times,max_items)
         await replyToDiscord(inter,msg)
         if(csv_file):

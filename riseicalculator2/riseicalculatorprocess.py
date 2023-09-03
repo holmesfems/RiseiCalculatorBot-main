@@ -890,7 +890,7 @@ class CalculatorManager:
             return CalculatorManager.riseievents(targetStage,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems)
         else:
             toPrintTarget = CalculatorManager.ToPrint(toPrint)
-            return CalculatorManager.riseilists(toPrintTarget,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems)
+            return CalculatorManager.riseilists(toPrintTarget,isGlobal,mode,baseMinTimes,cache_minutes)
 
 
     def riseimaterials(targetCategory:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = 30,showMinTimes:int = 1000,maxItems:int = 15):
@@ -1053,7 +1053,7 @@ class CalculatorManager:
             toPrint = []
             for key in getValueTarget(isGlobal):
                 value = riseiValues.getValueFromZH(key)
-                stddev = riseiValues.getValueFromZH(key)
+                stddev = riseiValues.getStdDevFromZH(key)
                 toPrint.append([
                     "{0}: {1:.3f} ± {2:.3f}".format(CalculatorManager.left(15,valueTargetZHToJA(key)),value,stddev*2)
                 ])
