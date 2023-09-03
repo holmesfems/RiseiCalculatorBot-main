@@ -4,18 +4,14 @@ import sys
 sys.path.append('../')
 from idtoname.idtoname import ItemIdToName,ZoneIdToName
 from rcutils import netutil,getnow,hasduplicates
-import re
 import pandas as pd
-import re
-import math
 import datetime
 import random
-from io import StringIO
 import unicodedata
 from collections import ChainMap
 import yaml
 from typing import Dict,List,Optional,Tuple
-from enum import Enum,StrEnum
+from enum import StrEnum
 import enum
 
 PENGUIN_URL = 'https://penguin-stats.io/PenguinStats/api/v2/'
@@ -869,6 +865,33 @@ class CalculatorManager:
 
     def sortStagesByEfficiency(stageList:List[StageItem],riseiValues:RiseiOrTimeValues):
         return sorted(stageList,key = lambda x: x.getEfficiency(riseiValues),reverse=True)
+    
+    def riseicalculatorMaster(toPrint:str,targetItem:str,targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = 30,showMinTimes:int = 1000,maxItems:int = 15):
+        if toPrint == "items":
+            if(not targetItem): 
+                return {
+                    "title":"エラー",
+                    "msgList": ["target_itemに素材カテゴリを入れてください"]
+                }
+            return CalculatorManager.riseimaterials(targetItem,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems)
+        elif toPrint == "zone":
+            if(not targetStage):
+                return {
+                    "title":"エラー",
+                    "msgList": ["event_codeにマップ名を入れてください"]
+                }
+            return CalculatorManager.riseistages(targetStage,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems)
+        elif toPrint == "events":
+            if(not targetStage):
+                return {
+                    "title":"エラー",
+                    "msgList": ["event_codeにマップ名を入れてください"]
+                }
+            return CalculatorManager.riseievents(targetStage,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems)
+        else:
+            toPrintTarget = CalculatorManager.ToPrint(toPrint)
+            return CalculatorManager.riseilists(toPrintTarget,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems)
+
 
     def riseimaterials(targetCategory:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = 30,showMinTimes:int = 1000,maxItems:int = 15):
         riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
@@ -973,7 +996,7 @@ class CalculatorManager:
             "msgList":msgChunks
         }
     
-    def riseievents(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = 30,showMinTimes:int = 1000,maxItems:int = 15):
+    def riseievents(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = 30,showMinTimes:int = 1000,maxItems:int = 20):
         riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         calculator = CalculatorManager.selectCalculator(isGlobal)
         stages = calculator.searchEventStage(targetStage)
@@ -1076,7 +1099,7 @@ class CalculatorManager:
             ccNumber = '11'
             Price_CC = list()
             try:
-                with open('price_cc{0}.txt'.format(ccNumber), 'r', encoding='utf8') as f:
+                with open('riseicalculator2/price_cc{0}.txt'.format(ccNumber), 'r', encoding='utf8') as f:
                     for line in f.readlines():
                         name, value ,quantity = line.split()
                         Price_CC.append([name,float(value),quantity])

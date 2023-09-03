@@ -94,32 +94,24 @@ def safeCallChoiceVal(choice):
 tree = app_commands.CommandTree(client)
 
 async def riseicalculatorMaster(inter:Interaction,target:str,target_item:str=None,
-                          event_code:str = None, mode:str="Sanity",min_times:int=1000,min_basetimes:int=3000,max_items:int=15,csv_file:bool = False,is_global:bool=True,cache_time:int = 30):
+                          event_code:str = None, mode:str="sanity",min_times:int=1000,min_basetimes:int=3000,max_items:int=15,csv_file:bool = False,is_global:bool=True,cache_time:int = 30):
     msg = ""
-    ls_ce = '6'
-    global rc
     try:
-        if(target == "items"):
-            if not target_item:
-                msg = "アイテム名を指定してください"
-                return
-        elif(target in ["zone","events"]):
-            if not event_code:
-                msg = "ステージ名を指定してください"
-                return
-        await inter.response.defer(thinking=True)
-        if rc == None or cache_time < 0:
-            #print(rc)
-            rc = RiseiCalculator(minTimes = min_times, baseMinTimes = min_basetimes,LS_CE=ls_ce,Mode=mode,Global=is_global)
-        msg = rc.Calc(to_print=target,target_forPrint={"items":target_item,"zone":event_code,"events":event_code}[target] if target in ["items","zone","events"] else "",\
-            cacheTime=cache_time,parameters={"mode":mode,"min_times":min_times,"min_basetimes":min_basetimes,"max_items":max_items,"ls_ce":ls_ce,"is_global":is_global})
-        return
+        mode = CalculateMode(mode)
+        inter.response.defer(thinking=True)
+        msg = CalculatorManager.riseicalculatorMaster(target,target_item,event_code,is_global,mode,min_basetimes,cache_time,min_times,max_items)
+        await replyToDiscord(inter,msg)
+        if(csv_file):
+            calculator = CalculatorManager.selectCalculator(is_global)
+            calculator.dumpToFile(mode)
+            time = calculator.stageInfo.lastUpdated
+            createdTime = "\n作成時間:\t{0}".format(time)
+            await inter.followup.send(createdTime,file = discord.File('BaseStages.xlsx'))
     except Exception as e:
         msg = showException()
     finally:
+        print(msg)
         #channel = inter.channel()
-        await replyToDiscord(inter,msg)
-        await showUpdateTime(inter,csv_file)
 
 targetItemChoice=[Choice(name=get_StageCategoryDict(False)[x]["to_ja"],value=x) for x in get_StageCategoryDict(False).keys()]
 modeChoice = [Choice(name="Sanity",value ="sanity"),Choice(name="Time",value ="time")]
@@ -143,20 +135,20 @@ modeChoice = [Choice(name="Sanity",value ="sanity"),Choice(name="Time",value ="t
 @app_commands.choices(
     target = [
         Choice(name = "基準マップ", value = "basemaps"),
-        Choice(name = "理性価値表", value = "sanValueLists"),
+        Choice(name = "理性価値表", value = "san_value_lists"),
         Choice(name = "昇進素材別検索(target_item指定)",value = "items"),
         Choice(name = "通常ステージ検索(event_code指定)",value = "zone"),
         Choice(name = "イベント検索(event_code指定)",value = "events"),
-        Choice(name = "初級資格証効率表",value = "te2List"),
-        Choice(name = "上級資格証効率表",value = "te3List"),
-        Choice(name = "特別引換証効率表",value = "specialList"),
-        Choice(name = "契約賞金引換効率表(CC#11)",value = "ccList"),
+        Choice(name = "初級資格証効率表",value = "te2list"),
+        Choice(name = "上級資格証効率表",value = "te3list"),
+        Choice(name = "特別引換証効率表",value = "special_list"),
+        Choice(name = "契約賞金引換効率表(CC#11)",value = "cclist"),
     ],
     target_item = targetItemChoice,
     mode = modeChoice
 )
 async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choice[str]=None,
-                          event_code:str = None, mode:Choice[str]="Sanity",min_times:int=1000,min_basetimes:int=3000,max_items:int=15,csv_file:bool = False,is_global:bool=True,cache_time:int = 30):
+                          event_code:str = None, mode:Choice[str]="sanity",min_times:int=1000,min_basetimes:int=3000,max_items:int=15,csv_file:bool = False,is_global:bool=True,cache_time:int = 30):
     _target = safeCallChoiceVal(target)
     _target_item = safeCallChoiceVal(target_item)
     _mode = safeCallChoiceVal(mode)
