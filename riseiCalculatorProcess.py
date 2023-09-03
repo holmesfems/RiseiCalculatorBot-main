@@ -8,7 +8,6 @@ import datetime
 from io import StringIO
 import unicodedata
 from collections import ChainMap
-from riseiCalculatorProcess import *
 import yaml
 
 def left(digit, msg):
@@ -385,7 +384,7 @@ class RiseiCalculator(object):
             arraylist.append(arr)
             riseilist.append({"Sanity":30,"Time":196.0}[self.Mode])
         elif(self.LS_CE == '6'):
-             #LS-6
+            #LS-6
             arr = np.zeros(self.TotalCount)
             arr[self.name_to_index["初级作战记录"]] = 0
             arr[self.name_to_index["中级作战记录"]] = 2
