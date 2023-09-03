@@ -452,7 +452,7 @@ class StageInfo:
             randomChoiced = random.choice(validStageList)
             ret[key] = randomChoiced
         if hasduplicates.has_duplicates(ret.values()):
-            return self.generateCategorySeed() #重複要素があればやり直し
+            return self.generateCategorySeed(validBaseMinTimes) #重複要素があればやり直し
         return ret
 
     def __repr__(self) -> str:
