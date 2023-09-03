@@ -149,7 +149,7 @@ def categoryZHToJA(zhStr:str,glob:bool) -> bool:
     categoryDict = getStageCategoryDict(glob)
     return categoryDict[zhStr]["to_ja"]
 
-class CalculateMode(Enum):
+class CalculateMode(StrEnum):
     SANITY = enum.auto()
     TIME = enum.auto()
     def __str__(self) -> str:
