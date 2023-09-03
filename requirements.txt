@@ -5,4 +5,4 @@ requests
 pyyaml
 openai
 openpyxl
-enum34
+StrEnum
