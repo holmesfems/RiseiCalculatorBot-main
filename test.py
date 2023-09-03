@@ -1,2 +1,0 @@
-from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode,getStageCategoryDict
-print(CalculatorManager.getValues(True,CalculateMode.SANITY))
