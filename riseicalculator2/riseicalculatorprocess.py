@@ -789,17 +789,13 @@ class Calculator:
         return True
 
     def searchMainStage(self,targetCode:str) -> List[StageItem]:
-        if targetCode: 
-            return [value for key,value in self.stageInfo.mainCodeToStageDict.items() if key.startswith(targetCode)]
-        return []
+        return [value for key,value in self.stageInfo.mainCodeToStageDict.items() if key.startswith(targetCode)]
     
     def autoCompleteMainStage(self,targetCode:str,limit:int=25) -> List[str]:
         return [str(x) for x in self.searchMainStage(targetCode)][:limit]
     
     def searchEventStage(self,targetCode:str) -> List[StageItem]:
-        if targetCode: 
-            return [value for key,value in self.stageInfo.eventCodeToStageDict.items() if key.startswith(targetCode)]
-        return []
+        return [value for key,value in self.stageInfo.eventCodeToStageDict.items() if key.startswith(targetCode)]
     
     def autoCompleteEventStage(self,targetCode:str,limit:int=25) -> List[str]:
         return [str(x) for x in self.searchEventStage(targetCode)][:limit]
