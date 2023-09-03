@@ -10,6 +10,7 @@ from recruitment.recruitment import *
 import happybirthday.happybirthday as birthday
 import openaichat.openaichat as chatbot
 from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode
+from typing import List
 
 TOKEN = os.environ["BOT_TOKEN"]
 ID = os.environ["BOT_ID"]
@@ -184,6 +185,7 @@ async def riseimaterials(inter:Interaction,target_item:Choice[str],mode:Choice[s
     reply = CalculatorManager.riseimaterials(_target_item,is_global,mode)
     await replyToDiscord(inter,reply)
 
+
 @tree.command(
     name="riseistages",
     description="恒常ステージの理性効率を検索します。恒常サイドストーリーも対象。"
@@ -198,10 +200,16 @@ async def riseimaterials(inter:Interaction,target_item:Choice[str],mode:Choice[s
 )
 async def riseistages(inter:Interaction,stage:str,mode:Choice[str]="Sanity",is_global:bool=True):
     _mode = safeCallChoiceVal(mode)
+    stage = safeCallChoiceVal(stage)
     mode = CalculateMode(_mode)
     await inter.response.defer(thinking=True)
     reply = CalculatorManager.riseistages(stage,is_global,mode)
     await replyToDiscord(inter,reply)
+
+@riseistages.autocomplete("stage")
+async def mainstage_autocomplete(inter:Interaction,current:str)->List[app_commands.Choice[str]]:
+    strList = CalculatorManager.calculatorForMainland.autoCompleteMainStage(current)
+    return [app_commands.Choice(name = x, value = x) for x in strList]
 
 @tree.command(
     name="riseievents",
@@ -217,10 +225,16 @@ async def riseistages(inter:Interaction,stage:str,mode:Choice[str]="Sanity",is_g
 )
 async def riseievents(inter:Interaction,stage:str,mode:Choice[str]="Sanity",is_global:bool=True):
     _mode = safeCallChoiceVal(mode)
+    stage = safeCallChoiceVal(stage)
     mode = CalculateMode(_mode)
     await inter.response.defer(thinking=True)
     reply = CalculatorManager.riseievents(stage,is_global,mode)
     await replyToDiscord(inter,reply)
+
+@riseievents.autocomplete("stage")
+async def eventstage_autocomplete(inter:Interaction,current:str)->List[app_commands.Choice[str]]:
+    strList = CalculatorManager.calculatorForMainland.autoCompleteEventStage(current)
+    return [app_commands.Choice(name = x, value = x) for x in strList]
 
 @tree.command(
     name="riseilists",
