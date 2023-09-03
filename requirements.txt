@@ -5,5 +5,4 @@ requests
 pyyaml
 openai
 openpyxl
-enum
 StrEnum
