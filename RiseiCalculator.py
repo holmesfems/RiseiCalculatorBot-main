@@ -177,7 +177,7 @@ async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choic
     target_item = targetItemChoice,
     mode = modeChoice
 )
-async def riseimaterials(inter:Interaction,target_item:Choice[str],mode:Choice[str]="Sanity",is_global:bool=True):
+async def riseimaterials(inter:Interaction,target_item:Choice[str],mode:Choice[str]="sanity",is_global:bool=True):
     _target_item = safeCallChoiceVal(target_item)
     _mode = safeCallChoiceVal(mode)
     mode = CalculateMode(_mode)
@@ -198,7 +198,7 @@ async def riseimaterials(inter:Interaction,target_item:Choice[str],mode:Choice[s
 @app_commands.choices(
     mode = modeChoice
 )
-async def riseistages(inter:Interaction,stage:str,mode:Choice[str]="Sanity",is_global:bool=True):
+async def riseistages(inter:Interaction,stage:str,mode:Choice[str]="sanity",is_global:bool=True):
     _mode = safeCallChoiceVal(mode)
     stage = safeCallChoiceVal(stage)
     mode = CalculateMode(_mode)
@@ -223,7 +223,7 @@ async def mainstage_autocomplete(inter:Interaction,current:str)->List[app_comman
 @app_commands.choices(
     mode = modeChoice
 )
-async def riseievents(inter:Interaction,stage:str,mode:Choice[str]="Sanity",is_global:bool=True):
+async def riseievents(inter:Interaction,stage:str,mode:Choice[str]="sanity",is_global:bool=True):
     _mode = safeCallChoiceVal(mode)
     stage = safeCallChoiceVal(stage)
     mode = CalculateMode(_mode)
@@ -257,7 +257,7 @@ async def eventstage_autocomplete(inter:Interaction,current:str)->List[app_comma
     ],
     mode = modeChoice
 )
-async def riseilists(inter:Interaction,target:Choice[str],mode:Choice[str]="Sanity",is_global:bool=True,csv_file:bool=False):
+async def riseilists(inter:Interaction,target:Choice[str],mode:Choice[str]="sanity",is_global:bool=True,csv_file:bool=False):
     _mode = safeCallChoiceVal(mode)
     _target = safeCallChoiceVal(target)
     mode = CalculateMode(_mode)

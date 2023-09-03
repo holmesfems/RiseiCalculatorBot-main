@@ -154,7 +154,7 @@ class RiseiCalculator(object):
                  minTimes = 1000,
                  baseMinTimes = 3000,
                  LS_CE='6',
-                 Mode = 'Sanity',
+                 Mode = 'sanity',
                  Global = True,
                  ):
         """
@@ -376,13 +376,13 @@ class RiseiCalculator(object):
             arr[self.name_to_index["高级作战记录"]] = 3
             arr[self.name_to_index["龙门币1000"]] = 0.36
             arraylist.append(arr)
-            riseilist.append({"Sanity":30,"Time":174.5}[self.Mode])
+            riseilist.append({"sanity":30,"time":174.5}[self.Mode])
 
             #CE-5
             arr = np.zeros(self.TotalCount)
             arr[self.name_to_index["龙门币1000"]] = 7.5
             arraylist.append(arr)
-            riseilist.append({"Sanity":30,"Time":196.0}[self.Mode])
+            riseilist.append({"sanity":30,"time":196.0}[self.Mode])
         elif(self.LS_CE == '6'):
             #LS-6
             arr = np.zeros(self.TotalCount)
@@ -391,13 +391,13 @@ class RiseiCalculator(object):
             arr[self.name_to_index["高级作战记录"]] = 4
             arr[self.name_to_index["龙门币1000"]] = 0.432
             arraylist.append(arr)
-            riseilist.append({"Sanity":36,"Time":183.0}[self.Mode])
+            riseilist.append({"sanity":36,"time":183.0}[self.Mode])
 
             #CE-6
             arr = np.zeros(self.TotalCount)
             arr[self.name_to_index["龙门币1000"]] = 10
             arraylist.append(arr)
-            riseilist.append({"Sanity":36,"Time":172.0}[self.Mode])
+            riseilist.append({"sanity":36,"time":172.0}[self.Mode])
 
         #CA-5
         arr = np.zeros(self.TotalCount)
@@ -406,7 +406,7 @@ class RiseiCalculator(object):
         arr[self.name_to_index["技巧概要·卷3"]] = 2
         arr[self.name_to_index["龙门币1000"]] = 0.36
         arraylist.append(arr)
-        riseilist.append({"Sanity":30,"Time":173.0}[self.Mode])
+        riseilist.append({"sanity":30,"time":173.0}[self.Mode])
         
         divlist = np.zeros(shape=(len(arraylist),self.TotalCount))
         return (np.array(arraylist),np.array(riseilist),divlist)
@@ -454,7 +454,7 @@ class RiseiCalculator(object):
                 stage_info["minTimes"] = 0
                 stage_info["maxTimes"] = 0
                 #目的の消費値がNoneの場合、計算に入れない
-                selection = {"Sanity":"apCost","Time":"timeCost"}[self.Mode]
+                selection = {"sanity":"apCost","time":"timeCost"}[self.Mode]
                 if stage_info[selection] is None:
                     continue
                 stage_dict[item["stageId"]] = stage_info
@@ -498,7 +498,7 @@ class RiseiCalculator(object):
         divlist = []
         for index in seeds:
             arraylist.append(self.stage_dict[self.valid_stages[index]]["array"])
-            selection = {"Sanity":"apCost","Time":"timeCost"}[self.Mode]
+            selection = {"sanity":"apCost","time":"timeCost"}[self.Mode]
             riseilist.append(self.stage_dict[self.valid_stages[index]][selection])
             divlist.append(self.stage_dict[self.valid_stages[index]]["divArray"])
         return (np.array(arraylist),np.array(riseilist),np.array(divlist))
@@ -528,18 +528,18 @@ class RiseiCalculator(object):
         return xDivArray**0.5*2
 
     def _getStageValues(self,valueArray):
-        selection = {"Sanity":"apCost","Time":"timeCost"}[self.Mode]
+        selection = {"sanity":"apCost","time":"timeCost"}[self.Mode]
         return {x:np.dot(valueArray,self.stage_dict[x]["array"].T)/self.stage_dict[x][selection] for x in self.valid_stages}
 
     def _getEventValues(self,valueArray):
-        selection = {"Sanity":"apCost","Time":"timeCost"}[self.Mode]
+        selection = {"sanity":"apCost","time":"timeCost"}[self.Mode]
         return {x:np.dot(valueArray,self.event_dict[x]["array"].T)/self.event_dict[x][selection] for x in self.event_stages}
 
     def _getBaseStageValues(self,valueArray):
         #解いた理性価値を使い、ステージごとの理性効率を求める
         #理性効率=Sum(理性価値×ドロ率)/理性消費
         #効率が1より上回るステージがあれば、まだ最適ではないと言える
-        selection = {"Sanity":"apCost","Time":"timeCost"}[self.Mode]
+        selection = {"sanity":"apCost","time":"timeCost"}[self.Mode]
         return {x:np.dot(valueArray,self.stage_dict[x]["array"].T)/self.stage_dict[x][selection] for x in self.valid_baseStages}
     
     def _getStageValueSD95(self,vstackTuple,divStackTuple,valueArray,seeds):
@@ -556,7 +556,7 @@ class RiseiCalculator(object):
             #stageArray = self.stage_dict[x]["array"]
                 stageDiv = self.stage_dict[x]["divArray"]
                 stageArr = self.stage_dict[x]["array"]
-                selection = {"Sanity":"apCost","Time":"timeCost"}[self.Mode]
+                selection = {"sanity":"apCost","time":"timeCost"}[self.Mode]
                 res[x] = (np.dot(stageDiv,valueArray**2)+np.dot(np.dot(np.dot(stageArr,probMatrix_inv)**2,divMatrix),valueArray**2))**0.5/self.stage_dict[x][selection]*2
         return res
         
@@ -693,8 +693,8 @@ class RiseiCalculator(object):
 
         #print("*******計算結果*********")
         try:
-            modeWord = {"Sanity":"理性","Time":"時間"}[self.Mode]
-            selection = {"Sanity":"apCost","Time":"timeCost"}[self.Mode]
+            modeWord = {"sanity":"理性","time":"時間"}[self.Mode]
+            selection = {"sanity":"apCost","time":"timeCost"}[self.Mode]
             if(to_print == "basemaps"):
                 basemaps = "基準マップ一覧:`{0}`".format({get_StageCategoryDict(self.Global)[x]["to_ja"]:self._seed2StageName(seeds)[list(get_StageCategoryDict(self.Global).keys()).index(x)] for x in get_StageCategoryDict(self.Global).keys()})
                 return basemaps
