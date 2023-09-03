@@ -1,0 +1,8 @@
+import riseicalculator2.riseicalculatorprocess
+import idtoname.idtoname
+
+#print(riseicalculator2.riseicalculatorprocess.CalculatorManager.getValues(True,riseicalculator2.riseicalculatorprocess.CalculateMode.SANITY))
+print(riseicalculator2.riseicalculatorprocess.CalculatorManager.riseievents("SV-9(Re)",True,riseicalculator2.riseicalculatorprocess.CalculateMode.SANITY))
+#riseicalculator2.riseicalculatorprocess.CalculatorManager.calculatorForGlobal.dumpToFile(riseicalculator2.riseicalculatorprocess.CalculateMode.SANITY)
+#print(idtoname.idtoname.ItemIdToName.zhToJa("赤金"))
+print(riseicalculator2.riseicalculatorprocess.CalculatorManager.riseilists(riseicalculator2.riseicalculatorprocess.CalculatorManager.ToPrint.CCLIST,True,riseicalculator2.riseicalculatorprocess.CalculateMode.SANITY))

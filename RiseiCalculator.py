@@ -9,6 +9,7 @@ from riseiCalculatorProcess import *
 from recruitment.recruitment import *
 import happybirthday.happybirthday as birthday
 import openaichat.openaichat as chatbot
+from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode
 
 TOKEN = os.environ["BOT_TOKEN"]
 ID = os.environ["BOT_ID"]
@@ -120,7 +121,7 @@ async def riseicalculatorMaster(inter:Interaction,target:str,target_item:str=Non
         await showUpdateTime(inter,csv_file)
 
 targetItemChoice=[Choice(name=get_StageCategoryDict(False)[x]["to_ja"],value=x) for x in get_StageCategoryDict(False).keys()]
-modeChoice = [Choice(name="Sanity",value ="Sanity"),Choice(name="Time",value ="Time")]
+modeChoice = [Choice(name="Sanity",value ="sanity"),Choice(name="Time",value ="time")]
 
 @tree.command(
     name = "riseicalculator",
@@ -178,7 +179,10 @@ async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choic
 async def riseimaterials(inter:Interaction,target_item:Choice[str],mode:Choice[str]="Sanity",is_global:bool=True):
     _target_item = safeCallChoiceVal(target_item)
     _mode = safeCallChoiceVal(mode)
-    await riseicalculatorMaster(inter,target="items",target_item=_target_item,mode=_mode,is_global=is_global)
+    mode = CalculateMode(_mode)
+    await inter.response.defer(thinking=True)
+    reply = CalculatorManager.riseimaterials(_target_item,is_global,mode)
+    await replyToDiscord(inter,reply)
 
 @tree.command(
     name="riseistages",
@@ -194,7 +198,10 @@ async def riseimaterials(inter:Interaction,target_item:Choice[str],mode:Choice[s
 )
 async def riseistages(inter:Interaction,stage:str,mode:Choice[str]="Sanity",is_global:bool=True):
     _mode = safeCallChoiceVal(mode)
-    await riseicalculatorMaster(inter,target="zone",event_code=stage,mode=_mode,is_global=is_global)
+    mode = CalculateMode(_mode)
+    await inter.response.defer(thinking=True)
+    reply = CalculatorManager.riseistages(stage,is_global,mode)
+    await replyToDiscord(inter,reply)
 
 @tree.command(
     name="riseievents",
@@ -210,7 +217,10 @@ async def riseistages(inter:Interaction,stage:str,mode:Choice[str]="Sanity",is_g
 )
 async def riseievents(inter:Interaction,stage:str,mode:Choice[str]="Sanity",is_global:bool=True):
     _mode = safeCallChoiceVal(mode)
-    await riseicalculatorMaster(inter,target="events",event_code=stage,mode=_mode,is_global=is_global,max_items=20)
+    mode = CalculateMode(_mode)
+    await inter.response.defer(thinking=True)
+    reply = CalculatorManager.riseievents(stage,is_global,mode)
+    await replyToDiscord(inter,reply)
 
 @tree.command(
     name="riseilists",
@@ -225,18 +235,28 @@ async def riseievents(inter:Interaction,stage:str,mode:Choice[str]="Sanity",is_g
 @app_commands.choices(
     target = [
         Choice(name = "基準マップ", value = "basemaps"),
-        Choice(name = "理性価値表", value = "sanValueLists"),
-        Choice(name = "初級資格証効率表",value = "te2List"),
-        Choice(name = "上級資格証効率表",value = "te3List"),
-        Choice(name = "特別引換証効率表",value = "specialList"),
-        Choice(name = "契約賞金引換効率表(CC#11)",value = "ccList"),
+        Choice(name = "理性価値表", value = "san_value_lists"),
+        Choice(name = "初級資格証効率表",value = "te2list"),
+        Choice(name = "上級資格証効率表",value = "te3list"),
+        Choice(name = "特別引換証効率表",value = "special_list"),
+        Choice(name = "契約賞金引換効率表(CC#11)",value = "cclist"),
     ],
     mode = modeChoice
 )
 async def riseilists(inter:Interaction,target:Choice[str],mode:Choice[str]="Sanity",is_global:bool=True,csv_file:bool=False):
     _mode = safeCallChoiceVal(mode)
     _target = safeCallChoiceVal(target)
-    await riseicalculatorMaster(inter,target=_target,mode=_mode,is_global=is_global,csv_file=csv_file)
+    mode = CalculateMode(_mode)
+    target = CalculatorManager.ToPrint(_target)
+    await inter.response.defer(thinking=True)
+    reply = CalculatorManager.riseilists(target,is_global,mode)
+    await replyToDiscord(inter,reply)
+    if(csv_file):
+        calculator = CalculatorManager.selectCalculator(is_global)
+        calculator.dumpToFile(mode)
+        time = calculator.stageInfo.lastUpdated
+        createdTime = "\n作成時間:\t{0}".format(time)
+        await inter.followup.send(createdTime,file = discord.File('BaseStages.xlsx'))
 
 class RecruitView(discord.ui.View):
     def __init__(self,timeout=180):
