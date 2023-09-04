@@ -1,3 +1,4 @@
+from __future__ import annotations
 import numpy as np
 import numpy.linalg as LA
 import sys
@@ -155,7 +156,7 @@ class CalculateMode(StrEnum):
             return "時間"
 
 class DropItem:
-    def __init__(self,dropRate,times):
+    def __init__(self,dropRate:float,times:int):
         self.dropRate = dropRate
         self.times = times
     
@@ -174,10 +175,10 @@ class DropList:
         self.__maxtimes = dropItem["times"]
         self.__mintimes = dropItem["times"]
     
-    def __iadd__(self,other):
+    def __iadd__(self,other:DropList):
         #ドロップアイテムの加算
         for key,value in other.dropDict.items():
-            #重複要素は登録しない
+            #重複要素は新しいものを適用する
             self.dropDict[key] = value
         #最大試行数
         if other.__maxtimes > self.__maxtimes:
@@ -191,7 +192,7 @@ class DropList:
         return str(self.dropDict)
     
     #龍門幣ドロップはここに含まれないので、外部で別途足す
-    def toDropArray(self, isGlobal) -> np.ndarray:
+    def toDropArray(self, isGlobal:bool) -> np.ndarray:
         dropRateList = []
         for item in getValueTarget(isGlobal):
             id = ItemIdToName.zhToId(item)
@@ -199,7 +200,7 @@ class DropList:
             dropRateList.append(dropRate)
         return np.array(dropRateList)
 
-    def toTimesArray(self,isGlobal) -> np.ndarray:
+    def toTimesArray(self,isGlobal:bool) -> np.ndarray:
         timesList = []
         for item in getValueTarget(isGlobal):
             id = ItemIdToName.zhToId(item)
@@ -207,13 +208,13 @@ class DropList:
             timesList.append(times)
         return np.array(timesList)
     
-    def toStdDevArray(self,isGlobal) -> np.ndarray:
+    def toStdDevArray(self,isGlobal:bool) -> np.ndarray:
         dropArray = self.toDropArray(isGlobal)
         extra = dropArray%1.0
         timesArray = self.toTimesArray(isGlobal)-1
         return (extra*(1.0-extra)/timesArray)**0.5
     
-    def getDropItem(self, zhStr) -> DropItem:
+    def getDropItem(self, zhStr:str) -> DropItem:
         return self.dropDict.get(zhStr,DropItem(0,0))
     
     def maxTimes(self):
@@ -293,7 +294,7 @@ class StageItem:
         lmdArray[lmdIndex] = self.apCost*0.012
         return dropRateArray + lmdArray
     
-    def getDropRate(self,zhStr,isGlobal) -> float:
+    def getDropRate(self,zhStr:str,isGlobal:bool) -> float:
         index = valueTargetIndexOf(zhStr,isGlobal)
         return self.toDropArray(isGlobal)[index]
     
@@ -400,16 +401,6 @@ class StageInfo:
             return codeToStage
         self.mainCodeToStageDict = createCodeToStageDict(self.mainStageDict)
         self.eventCodeToStageDict = createCodeToStageDict(self.eventStageDict)
-
-        #matrix代入, targetServerはCNで固定
-        additionalHeader = {"server":"CN","show_closed_zones":"true"}
-        matrix = get_json('result/matrix',additionalHeader)["matrix"] #一回目ここで死んでる
-        allStageDict = {**self.mainStageDict,**self.eventStageDict}
-        for item in matrix:
-            key = item["stageId"]
-            stageItem = allStageDict.get(key)
-            if not stageItem: continue
-            stageItem.addDropList(item,self.isGlobal)
         
         #カテゴリ辞書の作成
         categoryDict = getStageCategoryDict(self.isGlobal)
@@ -424,6 +415,18 @@ class StageInfo:
                 "SubOrder" : value.get("SubOrder",[]),
                 "to_ja" : value["to_ja"]
             }
+        self.initMatrix()
+    
+    def initMatrix(self):
+        #matrix代入, targetServerはCNで固定
+        additionalHeader = {"server":"CN","show_closed_zones":"true"}
+        matrix = get_json('result/matrix',additionalHeader)["matrix"] #一回目ここで死んでる
+        allStageDict = {**self.mainStageDict,**self.eventStageDict}
+        for item in matrix:
+            key = item["stageId"]
+            stageItem = allStageDict.get(key)
+            if not stageItem: continue
+            stageItem.addDropList(item,self.isGlobal)
         self.lastUpdated = getnow.getnow()
 
     def validBaseStages(self,validBaseMinTimes:int) -> List[StageItem]:
