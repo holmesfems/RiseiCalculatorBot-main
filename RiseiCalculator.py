@@ -201,7 +201,7 @@ async def riseistages(inter:Interaction,stage:str,mode:Choice[str]="sanity",is_g
 @riseistages.autocomplete("stage")
 async def mainstage_autocomplete(inter:Interaction,current:str)->List[app_commands.Choice[str]]:
     strList = CalculatorManager.calculatorForMainland.autoCompleteMainStage(current)
-    return [app_commands.Choice(name = x, value = x) for x in strList]
+    return [app_commands.Choice(name = name, value = value) for (name,value) in strList]
 
 @tree.command(
     name="riseievents",
@@ -226,7 +226,7 @@ async def riseievents(inter:Interaction,stage:str,mode:Choice[str]="sanity",is_g
 @riseievents.autocomplete("stage")
 async def eventstage_autocomplete(inter:Interaction,current:str)->List[app_commands.Choice[str]]:
     strList = CalculatorManager.calculatorForMainland.autoCompleteEventStage(current)
-    return [app_commands.Choice(name = x, value = x) for x in strList]
+    return [app_commands.Choice(name = name, value = value) for (name,value) in strList]
 
 @tree.command(
     name="riseilists",
