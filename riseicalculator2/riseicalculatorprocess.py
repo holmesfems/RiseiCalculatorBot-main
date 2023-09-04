@@ -276,6 +276,9 @@ class StageItem:
         self.dropList = DropList()
         self.mainDropIds = [x["itemId"] for x in dictItem.get("dropInfos",[]) if x["dropType"] == "NORMAL_DROP" and "itemId" in x.keys()]
     
+    def getMainDropJaStr(self) -> str:
+        return " ".join([ItemIdToName.getStr(x) for x in self.mainDropIds])
+
     #ドロップ配列を入手 理性消費で貰える金も追加する
     def toDropArray(self,isGlobal:bool) -> np.ndarray:
         #ドロップ率で計算したドロップ配列
@@ -797,14 +800,14 @@ class Calculator:
     def searchMainStage(self,targetCode:str) -> List[StageItem]:
         return [value for key,value in self.stageInfo.mainCodeToStageDict.items() if key.startswith(targetCode)]
     
-    def autoCompleteMainStage(self,targetCode:str,limit:int=25) -> List[str]:
-        return [str(x) for x in self.searchMainStage(targetCode)][:limit]
+    def autoCompleteMainStage(self,targetCode:str,limit:int=25) -> List[Tuple[str,str]]:
+        return [(str(x)+x.getMainDropJaStr(),str(x)) for x in self.searchMainStage(targetCode)][:limit]
     
     def searchEventStage(self,targetCode:str) -> List[StageItem]:
         return [value for key,value in self.stageInfo.eventCodeToStageDict.items() if key.startswith(targetCode)]
     
-    def autoCompleteEventStage(self,targetCode:str,limit:int=25) -> List[str]:
-        return [str(x) for x in self.searchEventStage(targetCode)][:limit]
+    def autoCompleteEventStage(self,targetCode:str,limit:int=25) -> List[Tuple[str,str]]:
+        return [(str(x)+x.getMainDropJaStr(),str(x)) for x in self.searchEventStage(targetCode)][:limit]
     
     def getStageDev(self,targetStage:StageItem,values:RiseiOrTimeValues) -> float:
         baseMatrix = self.getBaseStageMatrix(values.mode)
