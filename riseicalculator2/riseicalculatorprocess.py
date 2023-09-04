@@ -765,9 +765,10 @@ class Calculator:
         #mode == None: いずれかのvalidBaseMinTimesと違う
         if (mode == None and self.baseStageMatrixForSanity.validBaseMinTimes == validBaseMinTimes and self.baseStageMatrixForTime.validBaseMinTimes == validBaseMinTimes):
             return False
-        baseStageMatrix = self.getBaseStageMatrix(mode)
-        if mode != None and baseStageMatrix.lastUpdated > self.stageInfo.lastUpdated and baseStageMatrix.validBaseMinTimes == validBaseMinTimes:
-            return False
+        if mode != None:
+            baseStageMatrix = self.getBaseStageMatrix(mode)
+            if baseStageMatrix.lastUpdated > self.stageInfo.lastUpdated and baseStageMatrix.validBaseMinTimes == validBaseMinTimes:
+                return False
         self.calculate(mode,validBaseMinTimes)
         return True
 
