@@ -723,6 +723,9 @@ class Calculator:
             self.constStageMatrix.getStdDevMatrix(),
             self.getBaseStageMatrix(mode).getStdDevMatrix()
         ))
+    
+    def getBaseMinTimes(self,mode:CalculateMode) -> bool:
+        return self.getBaseStageMatrix(mode).validBaseMinTimes
 
     def solveValues(self,mode:CalculateMode) -> RiseiOrTimeValues:
         probMatrix = self.getProbMatrix(mode)
@@ -779,10 +782,11 @@ class Calculator:
     #ステージ情報が古ければ更新する。期限は外部からの指定、指定しない場合は強制更新
     def tryReInit(self,timeDiff:Optional[datetime.timedelta],validBaseMinTimes:Optional[int],mode:CalculateMode = None) -> bool:
         now = getnow.getnow()
+        
         if self.initialized and timeDiff and (timeDiff<datetime.timedelta(0) or now < self.stageInfo.lastUpdated+timeDiff):
             return self.tryRecalculate(mode,validBaseMinTimes)
         if self.initialized:
-            baseMinTimes = validBaseMinTimes if validBaseMinTimes else self.stageInfo.validBaseMinTimes
+            baseMinTimes = validBaseMinTimes if validBaseMinTimes else self.getBaseMinTimes(mode)
             self.init(baseMinTimes,mode)
         elif validBaseMinTimes:
             self.init(validBaseMinTimes,mode)
