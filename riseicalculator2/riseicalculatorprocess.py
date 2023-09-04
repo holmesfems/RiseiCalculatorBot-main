@@ -277,7 +277,10 @@ class StageItem:
         self.mainDropIds = [x["itemId"] for x in dictItem.get("dropInfos",[]) if x["dropType"] == "NORMAL_DROP" and "itemId" in x.keys()]
     
     def getMainDropJaStr(self) -> str:
-        return " ".join([ItemIdToName.getStr(x) for x in self.mainDropIds])
+        msg = " ".join([ItemIdToName.getStr(x) for x in self.mainDropIds])
+        if(msg):
+            return " "+msg
+        return ""
 
     #ドロップ配列を入手 理性消費で貰える金も追加する
     def toDropArray(self,isGlobal:bool) -> np.ndarray:
