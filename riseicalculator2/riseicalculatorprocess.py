@@ -16,6 +16,8 @@ from enum import StrEnum
 import enum
 
 PENGUIN_URL = 'https://penguin-stats.io/PenguinStats/api/v2/'
+EPSILON = 1e-6
+BASICSHOWMINTIMES = 1000
 headers = {'User-Agent':'ArkPlanner'}
 def get_json(s,AdditionalReq=None):
     return netutil.get_json(PENGUIN_URL+s,AdditionalReq,headers)
@@ -283,6 +285,13 @@ class StageItem:
             return " "+msg
         return ""
 
+    def isValidForShow(self,showMinTimes:int,isGlobal:bool):
+        if self.maxTimes() < showMinTimes:
+            return False
+        if self.dropList.toDropArray(isGlobal).sum() < EPSILON:
+            return False
+        return True
+
     #ドロップ配列を入手 理性消費で貰える金も追加する
     def toDropArray(self,isGlobal:bool) -> np.ndarray:
         #ドロップ率で計算したドロップ配列
@@ -364,10 +373,10 @@ class StageItem:
 class StageInfo:
     def __init__(self,isGlobal:bool):
         self.isGlobal = isGlobal
-        self.mainStageDict = {}
-        self.eventStageDict = {}
-        self.mainCodeToStageDict = {}
-        self.eventCodeToStageDict = {}
+        self.mainStageDict:Dict[str,StageItem] = {}
+        self.eventStageDict:Dict[str,StageItem] = {}
+        self.mainCodeToStageDict:Dict[str,StageItem] = {}
+        self.eventCodeToStageDict:Dict[str,StageItem] = {}
         self.lastUpdated = None
         self.init()
     #ステージ情報更新できるように外から呼び出せるようにする
@@ -387,14 +396,14 @@ class StageInfo:
             #ウルサスの子供を除外
             and "act10d5" not in x["zoneId"] 
         ]
-        def createStageDict(stageList):
+        def createStageDict(stageList) -> Dict[str,StageItem]:
             return {x["stageId"]:StageItem(x) for x in stageList}
         
         self.mainStageDict = createStageDict(mainStageList)
         self.eventStageDict = createStageDict(eventStageList)
 
         #作戦コードから逆引きする辞書を作成
-        def createCodeToStageDict(stageDict):
+        def createCodeToStageDict(stageDict:Dict[str,StageItem]) -> Dict[str,StageItem]:
             codeToStage = {}
             for value in stageDict.values():
                 codeToStage[str(value)] = value
@@ -670,7 +679,6 @@ class Calculator:
             #初期化　ランダムにseed生成
             seed = self.stageInfo.generateCategorySeed(self.validBaseMinTimes)
             self.initBaseStages(seed)
-            self.epsilon = 0.00001
             self.lastUpdated:datetime.datetime = None
 
         def initBaseStages(self,seed:Dict[str,StageItem]):
@@ -694,7 +702,7 @@ class Calculator:
                 msg = "カテゴリから外れたマップを検出、計算を中断します\n"
                 msg += "マップ" + maxEfficiencyItem.stage.name + "は、何を稼ぐステージですか？\n"
                 raise Exception(msg)
-            if maxEfficiencyItem.maxValue <= 1.0 + self.epsilon:
+            if maxEfficiencyItem.maxValue <= 1.0 + EPSILON:
                 return False #続けて更新しなくてよい
             targetCategory = random.choice(maxEfficiencyItem.categories)
             print(targetCategory,":",maxEfficiencyItem.stage.name,"=",maxEfficiencyItem.maxValue,"基準マップ差し替え実行")
@@ -815,17 +823,17 @@ class Calculator:
             self.init(mode=mode)
         return True
 
-    def searchMainStage(self,targetCode:str) -> List[StageItem]:
-        return [value for key,value in self.stageInfo.mainCodeToStageDict.items() if key.startswith(targetCode)]
+    def searchMainStage(self,targetCode:str,showMinTimes:int) -> List[StageItem]:
+        return [value for key,value in self.stageInfo.mainCodeToStageDict.items() if key.startswith(targetCode) and value.isValidForShow(showMinTimes,self.isGlobal)]
     
     def autoCompleteMainStage(self,targetCode:str,limit:int=25) -> List[Tuple[str,str]]:
-        return [(str(x)+x.getMainDropJaStr(),str(x)) for x in self.searchMainStage(targetCode)][:limit]
+        return [(str(x)+x.getMainDropJaStr(),str(x)) for x in self.searchMainStage(targetCode,BASICSHOWMINTIMES)][:limit]
     
-    def searchEventStage(self,targetCode:str) -> List[StageItem]:
-        return [value for key,value in self.stageInfo.eventCodeToStageDict.items() if key.startswith(targetCode)]
+    def searchEventStage(self,targetCode:str,showMinTimes:int) -> List[StageItem]:
+        return [value for key,value in self.stageInfo.eventCodeToStageDict.items() if key.startswith(targetCode) and value.isValidForShow(showMinTimes,self.isGlobal)]
     
     def autoCompleteEventStage(self,targetCode:str,limit:int=25) -> List[Tuple[str,str]]:
-        return [(str(x)+x.getMainDropJaStr(),str(x)) for x in self.searchEventStage(targetCode)][:limit]
+        return [(str(x)+x.getMainDropJaStr(),str(x)) for x in self.searchEventStage(targetCode,BASICSHOWMINTIMES)][:limit]
     
     def getStageDev(self,targetStage:StageItem,values:RiseiOrTimeValues) -> float:
         baseMatrix = self.getBaseStageMatrix(values.mode)
@@ -878,8 +886,8 @@ class CalculatorManager:
         calculator.tryReInit(CalculatorManager.__getTimeDelta(cache_minutes),baseMinTimes,mode)
         return calculator.getValues(mode)
     
-    def filterStagesByShowMinTimes(stageList:List[StageItem],showMinTimes):
-        return [x for x in stageList if x.maxTimes() >= showMinTimes]
+    def filterStagesByShowMinTimes(stageList:List[StageItem],showMinTimes:int,isGlobal:bool):
+        return [x for x in stageList if x.isValidForShow(showMinTimes,isGlobal)]
 
     def dumpToPrint(toPrint):
         return "```" + "\n".join(["".join(x) for x in toPrint]) + "```"
@@ -933,7 +941,7 @@ class CalculatorManager:
                 "msgList":["無効なカテゴリ:" + targetCategory]
             }
         stages = categoryValue["Stages"]
-        stagesToShow = CalculatorManager.filterStagesByShowMinTimes(stages,showMinTimes)
+        stagesToShow = CalculatorManager.filterStagesByShowMinTimes(stages,showMinTimes,isGlobal)
         msgHeader = categoryValue["to_ja"]+ ": 理性価値(中級)={0:.3f}±{1:.3f}\n".format(riseiValues.getValueFromZH(categoryValue["MainItem"]),riseiValues.getStdDevFromZH(categoryValue["MainItem"]))
         msgChunks = [msgHeader]
         #並び変え
@@ -974,8 +982,7 @@ class CalculatorManager:
     def riseistages(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = 30,showMinTimes:int = 1000,maxItems:int = 15):
         riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         calculator = CalculatorManager.selectCalculator(isGlobal)
-        stages = calculator.searchMainStage(targetStage)
-        stagesToShow = CalculatorManager.filterStagesByShowMinTimes(stages,showMinTimes)
+        stagesToShow = calculator.searchMainStage(targetStage,showMinTimes)
         title = "通常ステージ検索"
         if(not stagesToShow):
             return {
@@ -1028,9 +1035,8 @@ class CalculatorManager:
     def riseievents(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = 30,showMinTimes:int = 1000,maxItems:int = 20):
         riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         calculator = CalculatorManager.selectCalculator(isGlobal)
-        stages = calculator.searchEventStage(targetStage)
+        stagesToShow = calculator.searchEventStage(targetStage,showMinTimes)
         #print(stages)
-        stagesToShow = CalculatorManager.filterStagesByShowMinTimes(stages,showMinTimes)
         title = "イベントステージ検索"
         if(not stagesToShow):
             return {
