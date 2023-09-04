@@ -18,8 +18,8 @@ GUILD_ID = int(os.environ["GUILD_ID"])
 url_botCommands = "https://discord.com/api/v8/applications/{0}/commands".format(ID)
 intents=discord.Intents.default()
 client = discord.Client(intents=intents,command_prefix = '/')
-
-rc = None
+t_delta = datetime.timedelta(hours=9)  # 9時間
+JST = datetime.timezone(t_delta, 'JST')  # UTCから9時間差の「JST」タイムゾーン
 
 def arrangementChunks(msgList, maxLength:int):
     chunks = []
@@ -60,11 +60,6 @@ async def replyToDiscord(inter:Interaction,msg):
     embeds = createEmbedList(msg)
     await inter.followup.send(embeds = embeds)
         #await inter.followup
-
-async def showUpdateTime(inter:Interaction,csv_file):
-    if rc != None:
-        createdTime = "\n作成時間:\t{0}".format(rc.UpdatedTime)
-        await inter.followup.send(createdTime,file = discord.File('BaseStages.csv') if csv_file else MISSING)
 
 def showException():
     ex_type, ex_value, ex_traceback = sys.exc_info()
@@ -354,9 +349,6 @@ async def recruitlist(inter:Interaction, star:Choice[int]):
     await replyToDiscord(inter,msg)
 
 CHANNEL_ID_HAPPYBIRTHDAY = int(os.environ["CHANNEL_ID_HAPPYBIRTHDAY"])
-
-t_delta = datetime.timedelta(hours=9)  # 9時間
-JST = datetime.timezone(t_delta, 'JST')  # UTCから9時間差の「JST」タイムゾーン
 
 @tasks.loop(time=datetime.time(hour=0, minute=0, tzinfo=JST))
 async def checkBirtyday():
