@@ -264,6 +264,11 @@ async def riseilists(inter:Interaction,target:Choice[str],mode:Choice[str]="sani
         createdTime = "\n作成時間:\t{0}".format(time)
         await inter.followup.send(createdTime,file = discord.File('BaseStages.xlsx'))
 
+#毎日3時に情報自動更新
+@tasks.loop(time=datetime.time(hour=3, minute = 0, tzinfo=JST))
+async def updateRiseiCalculatorInstances():
+    CalculatorManager.updateAllCalculators()
+
 class RecruitView(discord.ui.View):
     def __init__(self,timeout=180):
         super().__init__(timeout=timeout)
@@ -363,12 +368,7 @@ async def checkBirtyday():
         embeds = createEmbedList(msg)
         await channel.send(embeds=embeds)
 
-@client.event
-async def on_ready():
-    await tree.sync()
-    checkBirtyday.start()
-    print('Botでログインしました')
-    
+
 MAXLOG = 10
 MAXMSGLEN = 200
 OPENAI_CHANNELID = int(os.environ["OPENAI_CHANNELID"])
@@ -400,5 +400,11 @@ async def on_message(message:discord.Message):
         print(msg)
     finally:
         ISINPROCESS_AICHAT = False
+
+@client.event
+async def on_ready():
+    await tree.sync()
+    checkBirtyday.start()
+    print('Botでログインしました')
 
 client.run(TOKEN)

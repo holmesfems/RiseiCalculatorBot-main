@@ -471,6 +471,8 @@ class Calculator:
     def __init__(self,isGlobal:bool):
         self.isGlobal:bool = isGlobal
         self.initialized = False
+        self.stageInfo:StageInfo = None
+        self.convertionMatrix:Calculator.ConstStageMatrix = None
         self.init()
     
     class ConvertionItem:
@@ -758,9 +760,19 @@ class Calculator:
         values.setDevArray(divArray)
         return values
 
-    def init(self,validBaseMinTimes:int=3000,mode:CalculateMode = None):
-        self.stageInfo = StageInfo(self.isGlobal)
-        self.convertionMatrix = Calculator.ConvertionMatrix(self.isGlobal)
+    def init(self,validBaseMinTimes:int=3000,mode:CalculateMode = None, forceRecreateStageInfo:bool = False):
+
+        #ステージ情報クラスを更新
+        if(self.stageInfo and not forceRecreateStageInfo):
+            self.stageInfo.initMatrix() #ステージの構成情報までは更新しない（ドロップ情報のみ更新）
+        else:
+            self.stageInfo = StageInfo(self.isGlobal) #ステージ全更新
+        
+        #一回目、もしくは強制更新の場合、convertionMatrix(アイテム合成情報)を更新
+        if(not self.convertionMatrix or forceRecreateStageInfo): 
+            self.convertionMatrix = Calculator.ConvertionMatrix(self.isGlobal)
+
+        #LS CE CAクラスは作成コスト低いのでとりあえず更新
         self.constStageMatrix = Calculator.ConstStageMatrix(self.isGlobal)
         self.calculate(mode,validBaseMinTimes)
         self.initialized = True
@@ -840,11 +852,9 @@ class CalculatorManager:
     def selectCalculator(isGlobal:bool):
         return CalculatorManager.calculatorForGlobal if isGlobal else CalculatorManager.calculatorForMainland
     
-    def setCalculator(isGlobal:bool,newCalculator:Calculator):
-        if isGlobal:
-            CalculatorManager.calculatorForGlobal = newCalculator
-        else:
-            CalculatorManager.calculatorForMainland = newCalculator
+    def updateAllCalculators():
+        CalculatorManager.calculatorForGlobal.init(forceRecreateStageInfo=True)
+        CalculatorManager.calculatorForMainland.init(forceRecreateStageInfo=True)
 
     def __getTimeDelta(minutes:float):
         return datetime.timedelta(minutes = minutes)
