@@ -579,7 +579,7 @@ class Calculator:
             return [x.name for x in self.convertionItemList]
 
         
-    #作戦記録、龍門幣、本のステージドロップ
+    #作戦記録、龍門幣、本のステージドロップを司るクラス
     class StageDropItem(ConvertionItem):
         def __init__(self, isGlobal: bool, name: str = ""):
             super().__init__(isGlobal, name)
@@ -660,6 +660,7 @@ class Calculator:
             seed = self.stageInfo.generateCategorySeed(self.validBaseMinTimes)
             self.initBaseStages(seed)
             self.epsilon = 0.00001
+            self.lastUpdated:datetime.datetime = None
 
         def initBaseStages(self,seed:Dict[str,StageItem]):
             self.baseStageItemDict = {key:Calculator.BaseStageDropItem(self.isGlobal,key,value) for key,value in seed.items()}
@@ -687,6 +688,7 @@ class Calculator:
             targetCategory = random.choice(maxEfficiencyItem.categories)
             print(targetCategory,":",maxEfficiencyItem.stage.name,"=",maxEfficiencyItem.maxValue,"基準マップ差し替え実行")
             self.baseStageItemDict[targetCategory] = Calculator.BaseStageDropItem(self.isGlobal,targetCategory,maxEfficiencyItem.stage)
+            self.lastUpdated = getnow.getnow()
             return True
 
         def getBaseStages(self) -> Dict[str,str]:
@@ -763,7 +765,8 @@ class Calculator:
         #mode == None: いずれかのvalidBaseMinTimesと違う
         if (mode == None and self.baseStageMatrixForSanity.validBaseMinTimes == validBaseMinTimes and self.baseStageMatrixForTime.validBaseMinTimes == validBaseMinTimes):
             return False
-        if (mode != None and self.getBaseStageMatrix(mode)).validBaseMinTimes == validBaseMinTimes:
+        baseStageMatrix = self.getBaseStageMatrix(mode)
+        if mode != None and baseStageMatrix.lastUpdated > self.stageInfo.lastUpdated and baseStageMatrix.validBaseMinTimes == validBaseMinTimes:
             return False
         self.calculate(mode,validBaseMinTimes)
         return True
