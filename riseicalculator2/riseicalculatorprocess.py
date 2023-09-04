@@ -1072,7 +1072,7 @@ class CalculatorManager:
         calculator = CalculatorManager.selectCalculator(isGlobal)
         if toPrintTarget is CalculatorManager.ToPrint.BASEMAPS:
             baseMapStr = str(calculator.getBaseStageMatrix(mode))
-            msg = "基準ステージ一覧:`{0}`".format(baseMapStr)
+            msg = "`{0}`".format(baseMapStr)
             return {
                 "title" : "基準ステージ表示",
                 "msgList": [msg]
