@@ -17,7 +17,9 @@ import enum
 
 PENGUIN_URL = 'https://penguin-stats.io/PenguinStats/api/v2/'
 EPSILON = 1e-6
-BASICSHOWMINTIMES = 1000
+DEFAULT_SHOW_MIN_TIMES = 1000
+DEFAULT_CACHE_TIME = 120 #minutes
+
 headers = {'User-Agent':'ArkPlanner'}
 def get_json(s,AdditionalReq=None):
     return netutil.get_json(PENGUIN_URL+s,AdditionalReq,headers)
@@ -827,13 +829,13 @@ class Calculator:
         return [value for key,value in self.stageInfo.mainCodeToStageDict.items() if key.startswith(targetCode) and value.isValidForShow(showMinTimes,self.isGlobal)]
     
     def autoCompleteMainStage(self,targetCode:str,limit:int=25) -> List[Tuple[str,str]]:
-        return [(str(x)+x.getMainDropJaStr(),str(x)) for x in self.searchMainStage(targetCode,BASICSHOWMINTIMES)][:limit]
+        return [(str(x)+x.getMainDropJaStr(),str(x)) for x in self.searchMainStage(targetCode,DEFAULT_SHOW_MIN_TIMES)][:limit]
     
     def searchEventStage(self,targetCode:str,showMinTimes:int) -> List[StageItem]:
         return [value for key,value in self.stageInfo.eventCodeToStageDict.items() if key.startswith(targetCode) and value.isValidForShow(showMinTimes,self.isGlobal)]
     
     def autoCompleteEventStage(self,targetCode:str,limit:int=25) -> List[Tuple[str,str]]:
-        return [(str(x)+x.getMainDropJaStr(),str(x)) for x in self.searchEventStage(targetCode,BASICSHOWMINTIMES)][:limit]
+        return [(str(x)+x.getMainDropJaStr(),str(x)) for x in self.searchEventStage(targetCode,DEFAULT_SHOW_MIN_TIMES)][:limit]
     
     def getStageDev(self,targetStage:StageItem,values:RiseiOrTimeValues) -> float:
         baseMatrix = self.getBaseStageMatrix(values.mode)
@@ -878,7 +880,7 @@ class CalculatorManager:
         SPECIAL_LIST = enum.auto()
         CCLIST = enum.auto()
 
-    def getValues(isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = 30) -> RiseiOrTimeValues:
+    def getValues(isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME) -> RiseiOrTimeValues:
         calculator = CalculatorManager.selectCalculator(isGlobal)
         if (calculator == None):
             calculator = Calculator(isGlobal,False) 
@@ -903,7 +905,7 @@ class CalculatorManager:
     def sortStagesByEfficiency(stageList:List[StageItem],riseiValues:RiseiOrTimeValues):
         return sorted(stageList,key = lambda x: x.getEfficiency(riseiValues),reverse=True)
     
-    def riseicalculatorMaster(toPrint:str,targetItem:str,targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = 30,showMinTimes:int = 1000,maxItems:int = 15):
+    def riseicalculatorMaster(toPrint:str,targetItem:str,targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15):
         if toPrint == "items":
             if(not targetItem): 
                 return {
@@ -930,7 +932,7 @@ class CalculatorManager:
             return CalculatorManager.riseilists(toPrintTarget,isGlobal,mode,baseMinTimes,cache_minutes)
 
 
-    def riseimaterials(targetCategory:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = 30,showMinTimes:int = 1000,maxItems:int = 15):
+    def riseimaterials(targetCategory:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15):
         riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         #print(riseiValue)
         calculator = CalculatorManager.selectCalculator(isGlobal)
@@ -979,7 +981,7 @@ class CalculatorManager:
             "msgList":msgChunks
         }
 
-    def riseistages(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = 30,showMinTimes:int = 1000,maxItems:int = 15):
+    def riseistages(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15):
         riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         calculator = CalculatorManager.selectCalculator(isGlobal)
         stagesToShow = calculator.searchMainStage(targetStage,showMinTimes)
@@ -1032,7 +1034,7 @@ class CalculatorManager:
             "msgList":msgChunks
         }
     
-    def riseievents(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = 30,showMinTimes:int = 1000,maxItems:int = 20):
+    def riseievents(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 20):
         riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         calculator = CalculatorManager.selectCalculator(isGlobal)
         stagesToShow = calculator.searchEventStage(targetStage,showMinTimes)
@@ -1073,7 +1075,7 @@ class CalculatorManager:
             "msgList":msgChunks
         }
     
-    def riseilists(toPrintTarget:ToPrint,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = 30):
+    def riseilists(toPrintTarget:ToPrint,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME):
         riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         calculator = CalculatorManager.selectCalculator(isGlobal)
         if toPrintTarget is CalculatorManager.ToPrint.BASEMAPS:

@@ -69,20 +69,6 @@ class SkillIdToName:
         if(not SkillIdToName.__idToStr):
             SkillIdToName.init()
         return SkillIdToName.__idToStr.get(id,"Missing")
-    
-def initall():
-    initList = [ItemIdToName,SkillIdToName]
-    for item in initList:
-        try:
-            item.init()
-        except Exception as e:
-            print(e)
-
-def __debug():
-    print(ItemIdToName.zhToJa("凝胶"))
-
-if __name__ == "__main__":
-    __debug()
 
 STAGE_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/stage_table.json"
 STAGE_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/ja_JP/gamedata/excel/stage_table.json"

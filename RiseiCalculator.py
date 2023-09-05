@@ -8,7 +8,7 @@ import traceback
 from recruitment.recruitment import *
 import happybirthday.happybirthday as birthday
 import openaichat.openaichat as chatbot
-from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode,getStageCategoryDict
+from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode,getStageCategoryDict,DEFAULT_CACHE_TIME,DEFAULT_SHOW_MIN_TIMES
 from typing import List
 import datetime
 
@@ -88,7 +88,7 @@ def safeCallChoiceVal(choice):
 tree = app_commands.CommandTree(client)
 
 async def riseicalculatorMaster(inter:Interaction,target:str,target_item:str=None,
-                          event_code:str = None, mode:str="sanity",min_times:int=1000,min_basetimes:int=3000,max_items:int=15,csv_file:bool = False,is_global:bool=True,cache_time:int = 30):
+                          event_code:str = None, mode:str="sanity",min_times:int=DEFAULT_SHOW_MIN_TIMES,min_basetimes:int=3000,max_items:int=15,csv_file:bool = False,is_global:bool=True,cache_time:int = DEFAULT_CACHE_TIME):
     msg = ""
     try:
         mode = CalculateMode(mode)
@@ -142,7 +142,7 @@ modeChoice = [Choice(name="Sanity",value ="sanity"),Choice(name="Time",value ="t
     mode = modeChoice
 )
 async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choice[str]=None,
-                          event_code:str = None, mode:Choice[str]="sanity",min_times:int=1000,min_basetimes:int=3000,max_items:int=15,csv_file:bool = False,is_global:bool=True,cache_time:int = 30):
+                          event_code:str = None, mode:Choice[str]="sanity",min_times:int=DEFAULT_SHOW_MIN_TIMES,min_basetimes:int=3000,max_items:int=15,csv_file:bool = False,is_global:bool=True,cache_time:int = DEFAULT_CACHE_TIME):
     _target = safeCallChoiceVal(target)
     _target_item = safeCallChoiceVal(target_item)
     _mode = safeCallChoiceVal(mode)
