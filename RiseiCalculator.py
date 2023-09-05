@@ -14,7 +14,6 @@ import datetime
 
 TOKEN = os.environ["BOT_TOKEN"]
 ID = os.environ["BOT_ID"]
-GUILD_ID = int(os.environ["GUILD_ID"])
 url_botCommands = "https://discord.com/api/v8/applications/{0}/commands".format(ID)
 intents=discord.Intents.default()
 client = discord.Client(intents=intents,command_prefix = '/')
