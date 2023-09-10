@@ -3,10 +3,10 @@ sys.path.append('../')
 from rcutils import netutil
 import re
 from idtoname.idtoname import SkillIdToName,ItemIdToName
+from typing import Dict
 
 CHAR_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/character_table.json"
 CHAR_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/ja_JP/gamedata/excel/character_table.json"
-
 UNI_EQ_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/uniequip_table.json"
 
 
@@ -77,7 +77,7 @@ class ItemCost:
             ret = ret + item
         return ret
 
-class OperatorInfomation:
+class Operator:
     def __init__(self,key,value):
         self.name = value["name"]
         self.id = key
@@ -85,7 +85,7 @@ class OperatorInfomation:
         self.skills = value["skills"] #スキル特化
         self.allSkills = value["allSkillLvlup"] #スキルLv1~7 
         self.idValue = value["idValue"] #実装順？
-        self.cnOnly = value["cnOnly"]
+        self.cnOnly = value["cnOnly"] #大陸版限定オペレーターか
         self.uniqeEq = []
 
     def addEq(self,uniEq):
@@ -118,15 +118,21 @@ class OperatorInfomation:
             costs = [ItemCost(costValue) for costKey,costValue in costDicts.items()]
             ret[key] = ItemCost.sum(costs)
         return ret
+    
+    def isCNOnly(self):
+        return self.cnOnly
 
     def __repr__(self):
         return self.name
 
-class OperatorInfomationList:
+class AllOperatorsInfo:
     def __init__(self):
+        self.operatorDict:Dict[str,Operator] = {}
+        self.init()
+
+    def init(self):
         allInfoCN = get_json(CHAR_TABLE_URL_CN)
         allInfoJP = get_json(CHAR_TABLE_URL_JP)
-        self.operatorDict = {}
         for key,value in allInfoCN.items():
             keyRegex = r"([^_]+)_(\d+)_([^_]+)"
             #print(key)
@@ -142,7 +148,7 @@ class OperatorInfomationList:
             else:
                 value["cnOnly"] = True
             value["idValue"] = int(match.group(2))
-            self.operatorDict[key] = OperatorInfomation(key,value)
+            self.operatorDict[key] = Operator(key,value)
         
         allUEQ = get_json(UNI_EQ_URL_CN)["equipDict"]
         for key,value in allUEQ.items():
@@ -161,7 +167,7 @@ class OperatorInfomationList:
         print(allCosts)
     
 def main():
-    a = OperatorInfomationList()
+    a = AllOperatorsInfo()
     
 if (__name__ == "__main__"):
     main()

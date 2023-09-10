@@ -32,6 +32,7 @@ def arrangementChunks(msgList, maxLength:int):
                 chunks.append(item)
     return chunks
 
+#ディスコード返信用のEmbedを作る関数
 def createEmbedList(msg):
     maxLength = 1900
     title = "reply"
@@ -41,24 +42,34 @@ def createEmbedList(msg):
     elif type(msg) == type(list()):
         chunks = arrangementChunks(msg,maxLength)
     elif type(msg) == type(dict()):
+        #タイトル設定
         title = msg.get("title",title)
+        #メッセージ本文、改ページされたくないブロックをまとめる
         msgList = msg.get("msgList",[])
-        color = msg.get("color",0x8be02b)
         chunks = arrangementChunks(msgList,maxLength)
-    embeds = []
-    for item in chunks:
-        embed = discord.Embed(
+        #左のバーの色を指定
+        color = msg.get("color",color)
+    embeds = [discord.Embed(
             title = title,
             description = item,
             color = color
-        )
-        embeds.append(embed)
+        ) for item in chunks]
     return embeds
+
+def extractFileFromMsg(msg):
+    #ファイルの受け取り
+    file = MISSING
+    if type(msg) is dict:
+        openFile = msg.get("file",None)
+        if(openFile):
+            file = discord.File(openFile)
+    return file
 
 async def replyToDiscord(inter:Interaction,msg):
     embeds = createEmbedList(msg)
-    await inter.followup.send(embeds = embeds)
-        #await inter.followup
+    file = extractFileFromMsg(msg)
+    await inter.followup.send(embeds = embeds,file=file)
+    #await inter.followup
 
 def showException():
     ex_type, ex_value, ex_traceback = sys.exc_info()
@@ -93,14 +104,13 @@ async def riseicalculatorMaster(inter:Interaction,target:str,target_item:str=Non
     try:
         mode = CalculateMode(mode)
         await inter.response.defer(thinking=True)
-        msg = CalculatorManager.riseicalculatorMaster(target,target_item,event_code,is_global,mode,min_basetimes,cache_time,min_times,max_items)
+        msg = CalculatorManager.riseicalculatorMaster(target,target_item,event_code,is_global,mode,min_basetimes,cache_time,min_times,max_items,csv_file)
         await replyToDiscord(inter,msg)
         if(csv_file):
             calculator = CalculatorManager.selectCalculator(is_global)
-            calculator.dumpToFile(mode)
             time = calculator.stageInfo.lastUpdated
             createdTime = "\n作成時間:\t{0}".format(time)
-            await inter.followup.send(createdTime,file = discord.File('BaseStages.xlsx'))
+            await inter.followup.send(createdTime)
     except Exception as e:
         msg = showException()
     finally:
@@ -157,18 +167,19 @@ async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choic
 @app_commands.describe(
     target_item = "昇進素材を選択",
     mode = "計算モード選択",
-    is_global = "True:グローバル版基準の計算(デフォルト)、False:大陸版の新ステージと新素材を入れた計算"
+    is_global = "True:グローバル版基準の計算(デフォルト)、False:大陸版の新ステージと新素材を入れた計算",
+    csv_file = "ステージドロップ率をExcelとして出力する"
 )
 @app_commands.choices(
     target_item = targetItemChoice,
     mode = modeChoice
 )
-async def riseimaterials(inter:Interaction,target_item:Choice[str],mode:Choice[str]="sanity",is_global:bool=True):
+async def riseimaterials(inter:Interaction,target_item:Choice[str],mode:Choice[str]="sanity",is_global:bool=True,csv_file:bool=False):
     _target_item = safeCallChoiceVal(target_item)
     _mode = safeCallChoiceVal(mode)
     mode = CalculateMode(_mode)
     await inter.response.defer(thinking=True)
-    reply = CalculatorManager.riseimaterials(_target_item,is_global,mode)
+    reply = CalculatorManager.riseimaterials(_target_item,is_global,mode,toCsv=csv_file)
     await replyToDiscord(inter,reply)
 
 
@@ -179,17 +190,18 @@ async def riseimaterials(inter:Interaction,target_item:Choice[str],mode:Choice[s
 @app_commands.describe(
     stage = "ステージ名を入力(例:1-7 SV-8 など)",
     mode = "計算モード選択",
-    is_global = "True:グローバル版基準の計算(デフォルト)、False:大陸版の新ステージと新素材を入れた計算"
+    is_global = "True:グローバル版基準の計算(デフォルト)、False:大陸版の新ステージと新素材を入れた計算",
+    csv_file = "ステージドロップ率をExcelとして出力する"
 )
 @app_commands.choices(
     mode = modeChoice
 )
-async def riseistages(inter:Interaction,stage:str,mode:Choice[str]="sanity",is_global:bool=True):
+async def riseistages(inter:Interaction,stage:str,mode:Choice[str]="sanity",is_global:bool=True,csv_file:bool=False):
     _mode = safeCallChoiceVal(mode)
     stage = safeCallChoiceVal(stage)
     mode = CalculateMode(_mode)
     await inter.response.defer(thinking=True)
-    reply = CalculatorManager.riseistages(stage,is_global,mode)
+    reply = CalculatorManager.riseistages(stage,is_global,mode,toCsv=csv_file)
     await replyToDiscord(inter,reply)
 
 @riseistages.autocomplete("stage")
@@ -204,17 +216,18 @@ async def mainstage_autocomplete(inter:Interaction,current:str)->List[app_comman
 @app_commands.describe(
     stage = "ステージ名を入力(例:SV-8 IW-8など)",
     mode = "計算モード選択",
-    is_global = "True:グローバル版基準の計算(デフォルト)、False:大陸版の新ステージと新素材を入れた計算"
+    is_global = "True:グローバル版基準の計算(デフォルト)、False:大陸版の新ステージと新素材を入れた計算",
+    csv_file = "ステージドロップ率をExcelとして出力する"
 )
 @app_commands.choices(
     mode = modeChoice
 )
-async def riseievents(inter:Interaction,stage:str,mode:Choice[str]="sanity",is_global:bool=True):
+async def riseievents(inter:Interaction,stage:str,mode:Choice[str]="sanity",is_global:bool=True,csv_file:bool=False):
     _mode = safeCallChoiceVal(mode)
     stage = safeCallChoiceVal(stage)
     mode = CalculateMode(_mode)
     await inter.response.defer(thinking=True)
-    reply = CalculatorManager.riseievents(stage,is_global,mode)
+    reply = CalculatorManager.riseievents(stage,is_global,mode,toCsv=csv_file)
     await replyToDiscord(inter,reply)
 
 @riseievents.autocomplete("stage")
@@ -249,14 +262,13 @@ async def riseilists(inter:Interaction,target:Choice[str],mode:Choice[str]="sani
     mode = CalculateMode(_mode)
     target = CalculatorManager.ToPrint(_target)
     await inter.response.defer(thinking=True)
-    reply = CalculatorManager.riseilists(target,is_global,mode)
+    reply = CalculatorManager.riseilists(target,is_global,mode,toCsv=csv_file)
     await replyToDiscord(inter,reply)
     if(csv_file):
         calculator = CalculatorManager.selectCalculator(is_global)
-        calculator.dumpToFile(mode)
         time = calculator.stageInfo.lastUpdated
         createdTime = "\n作成時間:\t{0}".format(time)
-        await inter.followup.send(createdTime,file = discord.File('BaseStages.xlsx'))
+        await inter.followup.send(createdTime)
 
 #毎日3時に情報自動更新
 @tasks.loop(time=datetime.time(hour=3, minute = 0, tzinfo=JST))

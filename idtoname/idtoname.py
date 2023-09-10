@@ -1,6 +1,6 @@
 import sys
-if __name__ != "__main__":
-    sys.path.append('../')
+import yaml
+sys.path.append('../')
 from rcutils import netutil
 
 get_json = netutil.get_json
@@ -14,8 +14,8 @@ class ItemIdToName:
     __ZHToid = {}
     __idToZH = {}
     def init():
-        allInfoCN = get_json(ITEM_TABLE_URL_CN)["items"]
-        allInfoJP = get_json(ITEM_TABLE_URL_JP)["items"]
+        allInfoCN:dict = get_json(ITEM_TABLE_URL_CN)["items"]
+        allInfoJP:dict = get_json(ITEM_TABLE_URL_JP)["items"]
         ItemIdToName.__idToStr = {}
         ItemIdToName.__ZHToJA = {}
         ItemIdToName.__ZHToid = {}
@@ -29,6 +29,15 @@ class ItemIdToName:
                 ItemIdToName.__ZHToJA[value["name"]] = jpValue["name"]
                 value = jpValue
             ItemIdToName.__idToStr[key] = value["name"]
+        
+        #理性価値計算で使う特殊なアイテムのIDを入れる
+        with open("./idtoname/costomItemId.json","rb") as file:
+            costomItems = yaml.safe_load(file)
+        for item in costomItems:
+            ItemIdToName.__idToStr[item["id"]] = item["ja"]
+            ItemIdToName.__ZHToJA[item["zh"]] = item["ja"]
+            ItemIdToName.__ZHToid[item["zh"]] = item["id"]
+            ItemIdToName.__idToZH[item["id"]] = item["zh"]
     
     def getStr(id:str)->str:
         if(not ItemIdToName.__idToStr):

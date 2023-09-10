@@ -19,6 +19,7 @@ PENGUIN_URL = 'https://penguin-stats.io/PenguinStats/api/v2/'
 EPSILON = 1e-6
 DEFAULT_SHOW_MIN_TIMES = 1000
 DEFAULT_CACHE_TIME = 120 #minutes
+EXCEL_FILENAME = 'BaseStages.xlsx'
 
 headers = {'User-Agent':'ArkPlanner'}
 def get_json(s,AdditionalReq=None):
@@ -132,8 +133,10 @@ def getStageCategoryDict(glob:bool):
         return ChainMap(StageCategoryDict["main"],StageCategoryDict["new"])
 
 def valueTargetZHToJA(zhStr:str) -> str:
-    specialDict = {'龙门币1000':"龍門幣1000"}
-    return specialDict.get(zhStr,ItemIdToName.zhToJa(zhStr))
+    return ItemIdToName.zhToJa(zhStr)
+
+def getDataFrameColumnsName(glob:bool) -> List[str]:
+    return [valueTargetZHToJA(x) for x in getValueTarget(glob)] + ['理性消費']
 
 def valueTargetIndexOf(zhStr:str,glob:bool) -> int:
     try:
@@ -234,21 +237,20 @@ class RiseiOrTimeValues:
         self.devArray = np.zeros(len(valueArray))
 
     def __repr__(self) -> str:
-        nameDict = self.toNameDict()
-        devDict = self.toNameDictStdDev()
+        nameDict = self.toNameValueDict()
+        devDict = self.toNameStdDevDict()
         valueTarget = getValueTarget(self.isGlobal)
         jaValueTarget = [valueTargetZHToJA(x) for x in valueTarget]
         return "\n".join([x+" : "+"{0:.3f} ± {1:.4f}".format(nameDict[x],devDict[x]*2) for x in jaValueTarget])
 
-    def toNameDict(self) -> Dict[str,float]:
+    def toNameValueDict(self) -> Dict[str,float]:
         valueTarget = getValueTarget(self.isGlobal)
         return {valueTargetZHToJA(valueTarget[i]):self.valueArray[i] for i in range(len(valueTarget))}
     
-    def toNameDictStdDev(self) -> Dict[str,float]:
+    def toNameStdDevDict(self) -> Dict[str,float]:
         valueTarget = getValueTarget(self.isGlobal)
         return {valueTargetZHToJA(valueTarget[i]):self.devArray[i] for i in range(len(valueTarget))}
     
-
     def getValueFromZH(self,zhstr:str) -> float:
         index = valueTargetIndexOf(zhstr,self.isGlobal)
         return self.valueArray[index]
@@ -263,6 +265,10 @@ class RiseiOrTimeValues:
 
     def setDevArray(self,stdDevArray:np.ndarray):
         self.devArray = stdDevArray
+
+    def toIdValueDict(self) -> Dict[str,float]:
+        valueTarget = getValueTarget(self.isGlobal)
+        return {ItemIdToName.zhToId(valueTarget[i]):self.valueArray[i] for i in range(len(valueTarget))} 
 
 
 class StageItem:
@@ -308,6 +314,13 @@ class StageItem:
     def getDropRate(self,zhStr:str,isGlobal:bool) -> float:
         index = valueTargetIndexOf(zhStr,isGlobal)
         return self.toDropArray(isGlobal)[index]
+    
+    #データフレームにする
+    def toDataFrame(self,isGlobal:bool) -> pd.DataFrame:
+        columns = getDataFrameColumnsName(isGlobal)
+        mainData = [np.append(self.toDropArray(isGlobal),self.apCost)]
+        index = [str(self)]
+        return pd.DataFrame(mainData,index = index, columns=columns)
     
     #計算モードに応じてコストを取得
     def getCost(self,mode:CalculateMode):
@@ -842,8 +855,8 @@ class Calculator:
         if(baseMatrix.contains(targetStage)): return 0
         return targetStage.getStdDev(values)
     
-    def dumpToFile(self,mode:CalculateMode):
-        columnsName = [valueTargetZHToJA(x) for x in getValueTarget(self.isGlobal)] + ['理性消費']
+    def toDataFrame(self,mode:CalculateMode) -> pd.DataFrame:
+        columnsName = getDataFrameColumnsName(self.isGlobal)
         baseMatrix = self.getBaseStageMatrix(mode)
         rowsName = self.convertionMatrix.getRowsName() + self.constStageMatrix.getRowsName() + baseMatrix.getRowsName() + ["理性価値"]
         probMatrix = self.getProbMatrix(mode)
@@ -851,9 +864,12 @@ class Calculator:
         costs = self.getCostArray(mode)
         mainData = np.vstack((probMatrix,values))
         mainData = np.hstack((mainData,np.concatenate([costs,[0]]).reshape(-1,1)))
-        df = pd.DataFrame(mainData,columns=columnsName,index=rowsName)
-        df.to_excel('BaseStages.xlsx')
-        print("基準マップデータをBaseStages.xlsxに保存しました")
+        return pd.DataFrame(mainData,columns=columnsName,index=rowsName)
+    
+    def dumpToFile(self,mode:CalculateMode):
+        df = self.toDataFrame(mode)
+        df.to_excel(EXCEL_FILENAME)
+        print("基準マップデータを"+EXCEL_FILENAME+"に保存しました")
 
 class CalculatorManager:
     calculatorForGlobal = Calculator(True)
@@ -901,53 +917,70 @@ class CalculatorManager:
             else:
                 digit -= 1
         return msg + ' '*digit
+    def stagesToExcelFile(mode:CalculateMode,isGlobal:bool,stageList:List[StageItem],filename:str):
+        calculator = CalculatorManager.selectCalculator(isGlobal)
+        valuesDF = calculator.toDataFrame(mode)
+        allDFs = [stage.toDataFrame(isGlobal) for stage in stageList]
+        allDFs.insert(0,valuesDF)
+        df:pd.DataFrame = pd.concat(objs=allDFs)
+        df.to_excel(filename)
+    
+    def execStagesToExcelFile(mode:CalculateMode,isGlobal:bool,stageList:List[StageItem],filename:str,exec:bool)->str:
+        if(exec):
+            CalculatorManager.stagesToExcelFile(mode,isGlobal,stageList,filename)
+            return filename
+        else:
+            return None
 
     def sortStagesByEfficiency(stageList:List[StageItem],riseiValues:RiseiOrTimeValues):
         return sorted(stageList,key = lambda x: x.getEfficiency(riseiValues),reverse=True)
     
-    def riseicalculatorMaster(toPrint:str,targetItem:str,targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15):
+    def riseicalculatorMaster(toPrint:str,targetItem:str,targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15, toCsv = False):
         if toPrint == "items":
             if(not targetItem): 
                 return {
                     "title":"エラー",
                     "msgList": ["target_itemに素材カテゴリを入れてください"]
                 }
-            return CalculatorManager.riseimaterials(targetItem,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems)
+            return CalculatorManager.riseimaterials(targetItem,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems,toCsv)
         elif toPrint == "zone":
             if(not targetStage):
                 return {
                     "title":"エラー",
                     "msgList": ["event_codeにマップ名を入れてください"]
                 }
-            return CalculatorManager.riseistages(targetStage,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems)
+            return CalculatorManager.riseistages(targetStage,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems,toCsv)
         elif toPrint == "events":
             if(not targetStage):
                 return {
                     "title":"エラー",
                     "msgList": ["event_codeにマップ名を入れてください"]
                 }
-            return CalculatorManager.riseievents(targetStage,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems)
+            return CalculatorManager.riseievents(targetStage,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems,toCsv)
         else:
             toPrintTarget = CalculatorManager.ToPrint(toPrint)
-            return CalculatorManager.riseilists(toPrintTarget,isGlobal,mode,baseMinTimes,cache_minutes)
+            return CalculatorManager.riseilists(toPrintTarget,isGlobal,mode,baseMinTimes,cache_minutes,toCsv)
 
 
-    def riseimaterials(targetCategory:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15):
+    def riseimaterials(targetCategory:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15, toCsv = False):
         riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         #print(riseiValue)
         calculator = CalculatorManager.selectCalculator(isGlobal)
         categoryValue = calculator.stageInfo.categoryDict.get(targetCategory)
-        if not categoryValue:
+        title = "昇進素材検索"
+        stages = categoryValue.get("Stages",[])
+        stagesToShow = CalculatorManager.filterStagesByShowMinTimes(stages,showMinTimes,isGlobal)
+        if not stagesToShow:
             return {
-                "title":"昇進素材検索",
+                "title":title,
                 "msgList":["無効なカテゴリ:" + targetCategory]
             }
-        stages = categoryValue["Stages"]
-        stagesToShow = CalculatorManager.filterStagesByShowMinTimes(stages,showMinTimes,isGlobal)
         msgHeader = categoryValue["to_ja"]+ ": 理性価値(中級)={0:.3f}±{1:.3f}\n".format(riseiValues.getValueFromZH(categoryValue["MainItem"]),riseiValues.getStdDevFromZH(categoryValue["MainItem"]))
         msgChunks = [msgHeader]
+        
         #並び変え
         stagesToShow = CalculatorManager.sortStagesByEfficiency(stagesToShow,riseiValues)
+        
         cnt = 0
         for stage in stagesToShow:
             cnt += 1
@@ -976,12 +1009,16 @@ class CalculatorManager:
             msgChunks.append(CalculatorManager.dumpToPrint(toPrint))
             if maxItems > 0 and cnt >= maxItems:
                 break
+        #ステージドロップをExcelに整理
+        MATERIAL_CSV_NAME = "MaterialsDrop.xlsx"
+        file = CalculatorManager.execStagesToExcelFile(mode,isGlobal,stagesToShow,MATERIAL_CSV_NAME,toCsv)
         return {
-            "title":"昇進素材検索",
-            "msgList":msgChunks
+            "title":title,
+            "msgList":msgChunks,
+            "file":file
         }
 
-    def riseistages(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15):
+    def riseistages(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15,toCsv = False):
         riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         calculator = CalculatorManager.selectCalculator(isGlobal)
         stagesToShow = calculator.searchMainStage(targetStage,showMinTimes)
@@ -1029,12 +1066,16 @@ class CalculatorManager:
             msgChunks.append(CalculatorManager.dumpToPrint(toPrint))
             if maxItems > 0 and cnt >= maxItems:
                 break
+        #ステージドロップをExcelに整理
+        STAGE_CSV_NAME = "StageDrop.xlsx"
+        file = CalculatorManager.execStagesToExcelFile(mode,isGlobal,stagesToShow,STAGE_CSV_NAME,toCsv)
         return {
             "title":title,
-            "msgList":msgChunks
+            "msgList":msgChunks,
+            "file":file
         }
     
-    def riseievents(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 20):
+    def riseievents(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 20,toCsv = False):
         riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         calculator = CalculatorManager.selectCalculator(isGlobal)
         stagesToShow = calculator.searchEventStage(targetStage,showMinTimes)
@@ -1070,18 +1111,23 @@ class CalculatorManager:
             msgChunks.append(CalculatorManager.dumpToPrint(toPrint))
             if maxItems > 0 and cnt >= maxItems:
                 break
+        #ステージドロップをExcelに整理
+        EVENT_CSV_NAME = "EventDrop.xlsx"
+        file = CalculatorManager.execStagesToExcelFile(mode,isGlobal,stagesToShow,EVENT_CSV_NAME,toCsv)
         return {
             "title":title,
-            "msgList":msgChunks
+            "msgList":msgChunks,
+            "file":file
         }
     
-    def riseilists(toPrintTarget:ToPrint,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME):
+    def riseilists(toPrintTarget:ToPrint,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,toCsv = False):
         riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         calculator = CalculatorManager.selectCalculator(isGlobal)
+        msgDict:dict = {}
         if toPrintTarget is CalculatorManager.ToPrint.BASEMAPS:
             baseMapStr = str(calculator.getBaseStageMatrix(mode))
             msg = "`{0}`".format(baseMapStr)
-            return {
+            msgDict = {
                 "title" : "基準ステージ表示",
                 "msgList": [msg]
             }
@@ -1094,7 +1140,7 @@ class CalculatorManager:
                 toPrint.append([
                     "{0}: {1:.3f} ± {2:.3f}".format(CalculatorManager.left(15,valueTargetZHToJA(key)),value,stddev*2)
                 ])
-            return {
+            msgDict = {
                 "title":title,
                 "msgList" : [CalculatorManager.dumpToPrint(toPrint)]
             }
@@ -1105,7 +1151,7 @@ class CalculatorManager:
             ticket_efficiency2_sorted = sorted(ticket_efficiency2.items(),key = lambda x:x[1][0],reverse=True)
             for key,value in ticket_efficiency2_sorted:
                 toPrint.append(["{0}:\t{1:.3f} ± {2:.3f}".format(CalculatorManager.left(15,key),value[0],value[1]*2)])
-            return {
+            msgDict = {
                 "title":title,
                 "msgList" : [CalculatorManager.dumpToPrint(toPrint)]
             }
@@ -1116,7 +1162,7 @@ class CalculatorManager:
             ticket_efficiency3_sorted = sorted(ticket_efficiency3.items(),key = lambda x:x[1][0],reverse=True)
             for key,value in ticket_efficiency3_sorted:
                 toPrint.append(["{0}:\t{1:.3f} ± {2:.3f}".format(CalculatorManager.left(15,key),value[0],value[1]*2)])
-            return {
+            msgDict = {
                 "title":title,
                 "msgList" : [CalculatorManager.dumpToPrint(toPrint)]
             }
@@ -1127,7 +1173,7 @@ class CalculatorManager:
             ticket_efficiency_special_sorted = sorted(ticket_efficiency_special.items(),key = lambda x:x[1][0],reverse=True)
             for key,value in ticket_efficiency_special_sorted:
                 toPrint.append(["{0}:\t{1:.3f} ± {2:.3f}".format(CalculatorManager.left(15,key),value[0],value[1]*2)])
-            return {
+            msgDict = {
                 "title":title,
                 "msgList" : [CalculatorManager.dumpToPrint(toPrint)]
             }
@@ -1148,12 +1194,20 @@ class CalculatorManager:
             toPrint = []
             for key,value,quantity in ticket_efficiency_CC_sorted:
                 toPrint.append(["{0}: {1:.3f} ± {2:.3f}".format(CalculatorManager.left(20,key+'({0})'.format(quantity)),value[0],value[1]*2)])
-            return {
+            msgDict = {
                 "title":title,
                 "msgList" : [CalculatorManager.dumpToPrint(toPrint)]
             }
+        file = None
+        if toCsv:
+            calculator.dumpToFile(mode)
+            file = EXCEL_FILENAME
+        if(msgDict):
+            msgDict["file"] = file
+            return msgDict
         return {
             "title":"エラー",
-            "msgList" : ["未知のコマンド："+str(toPrintTarget)]
+            "msgList" : ["未知のコマンド："+str(toPrintTarget)],
+            "file" : file
         }
         
