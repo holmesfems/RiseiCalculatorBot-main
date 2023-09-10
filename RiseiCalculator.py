@@ -67,7 +67,7 @@ def extractFileAndMsg(msg):
         sendMsg = msg.get("fileMsg",None)
         if(sendMsg):
             msg = sendMsg
-    return (sendMsg,file)
+    return (msg,file)
 
 async def replyToDiscord(inter:Interaction,msg):
     embeds = createEmbedList(msg)
