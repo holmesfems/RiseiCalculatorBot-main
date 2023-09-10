@@ -54,6 +54,9 @@ python RiseiCalculator.py
 Herokuなどのサービス(有料)を使えば、リモートサーバーに本botを実行させることができるので、いつでも使えるようになります。
 詳しくは[こちら](https://devcenter.heroku.com/ja/articles/github-integration)の公式記事を参照し、本リポジトリと連携して自動Deploy環境を構築してください
 
+## ChangedLog
+2023/09/10 riseimaterials,riseievents,riseistagesのコマンドに、excel出力機能を追加。表示したステージのドロップ率を出力します。
+
 ## Licence
 Copyright (c) 2023 holmesfems
 
