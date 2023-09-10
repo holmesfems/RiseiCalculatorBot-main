@@ -59,22 +59,21 @@ def createEmbedList(msg):
 def extractFileAndMsg(msg):
     #ファイルの受け取り
     file = MISSING
-    msg = ""
+    msgStr = ""
     if type(msg) is dict:
         openFile = msg.get("file",None)
         if(openFile):
             file = discord.File(openFile)
         sendMsg = msg.get("fileMsg",None)
         if(sendMsg):
-            msg = sendMsg
-    return (msg,file)
+            msgStr = sendMsg
+    return (msgStr,file)
 
 async def replyToDiscord(inter:Interaction,msg):
     embeds = createEmbedList(msg)
     await inter.followup.send(embeds = embeds)
     msg,file = extractFileAndMsg(msg)
-    print(msg,file)
-    if(msg):
+    if(file!=MISSING):
         await inter.followup.send(content=msg,file=file)
     #await inter.followup
 
