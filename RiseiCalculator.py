@@ -74,7 +74,7 @@ async def replyToDiscord(inter:Interaction,msg):
     await inter.followup.send(embeds = embeds)
     msgStr,file = extractFileAndMsg(msg)
     if(msgStr):
-        await inter.followup.send(content=msg,file=file)
+        await inter.followup.send(content=msgStr,file=file)
     #await inter.followup
 
 def showException():
