@@ -56,21 +56,25 @@ def createEmbedList(msg):
         ) for item in chunks]
     return embeds
 
-def extractFileFromMsg(msg):
+def extractFileAndMsg(msg):
     #ファイルの受け取り
     file = MISSING
+    msg = ""
     if type(msg) is dict:
         openFile = msg.get("file",None)
         if(openFile):
             file = discord.File(openFile)
-    return file
+        sendMsg = msg.get("fileMsg",None)
+        if(sendMsg):
+            msg = sendMsg
+    return (sendMsg,file)
 
 async def replyToDiscord(inter:Interaction,msg):
     embeds = createEmbedList(msg)
-    file = extractFileFromMsg(msg)
     await inter.followup.send(embeds = embeds)
-    if(file != MISSING):
-        await inter.followup.send(file=file)
+    (msg,file) = extractFileAndMsg(msg)
+    if(msg):
+        await inter.followup.send(content=msg,file=file)
     #await inter.followup
 
 def showException():
@@ -108,11 +112,7 @@ async def riseicalculatorMaster(inter:Interaction,target:str,target_item:str=Non
         await inter.response.defer(thinking=True)
         msg = CalculatorManager.riseicalculatorMaster(target,target_item,event_code,is_global,mode,min_basetimes,cache_time,min_times,max_items,csv_file)
         await replyToDiscord(inter,msg)
-        if(csv_file):
-            calculator = CalculatorManager.selectCalculator(is_global)
-            time = calculator.stageInfo.lastUpdated
-            createdTime = "\n作成時間:\t{0}".format(time)
-            await inter.followup.send(createdTime)
+
     except Exception as e:
         msg = showException()
     finally:
@@ -266,11 +266,6 @@ async def riseilists(inter:Interaction,target:Choice[str],mode:Choice[str]="sani
     await inter.response.defer(thinking=True)
     reply = CalculatorManager.riseilists(target,is_global,mode,toCsv=csv_file)
     await replyToDiscord(inter,reply)
-    if(csv_file):
-        calculator = CalculatorManager.selectCalculator(is_global)
-        time = calculator.stageInfo.lastUpdated
-        createdTime = "\n作成時間:\t{0}".format(time)
-        await inter.followup.send(createdTime)
 
 #毎日3時に情報自動更新
 @tasks.loop(time=datetime.time(hour=3, minute = 0, tzinfo=JST))
