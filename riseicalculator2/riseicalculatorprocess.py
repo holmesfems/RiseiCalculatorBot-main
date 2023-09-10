@@ -871,6 +871,10 @@ class Calculator:
         df.to_excel(EXCEL_FILENAME)
         print("基準マップデータを"+EXCEL_FILENAME+"に保存しました")
 
+    def getUpdatedTimeStr(self) -> str:
+        time = self.stageInfo.lastUpdated
+        return "\n作成時間:\t{0}".format(time)
+
 class CalculatorManager:
     calculatorForGlobal = Calculator(True)
     calculatorForMainland = Calculator(False)
@@ -1015,7 +1019,8 @@ class CalculatorManager:
         return {
             "title":title,
             "msgList":msgChunks,
-            "file":file
+            "file":file,
+            "fileMsg":calculator.getUpdatedTimeStr()
         }
 
     def riseistages(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15,toCsv = False):
@@ -1072,7 +1077,8 @@ class CalculatorManager:
         return {
             "title":title,
             "msgList":msgChunks,
-            "file":file
+            "file":file,
+            "fileMsg":calculator.getUpdatedTimeStr()
         }
     
     def riseievents(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 20,toCsv = False):
@@ -1117,7 +1123,8 @@ class CalculatorManager:
         return {
             "title":title,
             "msgList":msgChunks,
-            "file":file
+            "file":file,
+            "fileMsg":calculator.getUpdatedTimeStr()
         }
     
     def riseilists(toPrintTarget:ToPrint,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,toCsv = False):
@@ -1204,10 +1211,10 @@ class CalculatorManager:
             file = EXCEL_FILENAME
         if(msgDict):
             msgDict["file"] = file
+            msgDict["fileMsg"] = calculator.getUpdatedTimeStr()
             return msgDict
         return {
             "title":"エラー",
             "msgList" : ["未知のコマンド："+str(toPrintTarget)],
-            "file" : file
         }
         
