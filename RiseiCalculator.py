@@ -68,7 +68,9 @@ def extractFileFromMsg(msg):
 async def replyToDiscord(inter:Interaction,msg):
     embeds = createEmbedList(msg)
     file = extractFileFromMsg(msg)
-    await inter.followup.send(embeds = embeds,file=file)
+    await inter.followup.send(embeds = embeds)
+    if(file != MISSING):
+        await inter.followup.send(file=file)
     #await inter.followup
 
 def showException():
