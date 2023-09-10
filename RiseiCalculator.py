@@ -73,6 +73,7 @@ async def replyToDiscord(inter:Interaction,msg):
     embeds = createEmbedList(msg)
     await inter.followup.send(embeds = embeds)
     msg,file = extractFileAndMsg(msg)
+    print(msg,file)
     if(msg):
         await inter.followup.send(content=msg,file=file)
     #await inter.followup

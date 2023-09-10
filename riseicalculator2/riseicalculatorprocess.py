@@ -873,7 +873,7 @@ class Calculator:
 
     def getUpdatedTimeStr(self) -> str:
         time = self.stageInfo.lastUpdated
-        return "\n作成時間:\t{0}".format(time)
+        return "作成時間:\t{0}".format(time)
 
 class CalculatorManager:
     calculatorForGlobal = Calculator(True)
