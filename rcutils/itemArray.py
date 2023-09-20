@@ -4,13 +4,14 @@ import yaml
 sys.path.append('../')
 from infoFromOuterSource.idtoname import ItemIdToName
 from typing import Dict
+EPSILON = 0.0001
 
 class ItemArray:
     def __init__(self,itemIdToCountDict:Dict[str,float]={}):
         if(not itemIdToCountDict):
             self.__dict:Dict[str,float] = {}
         else:
-            self.__dict = itemIdToCountDict
+            self.__dict = itemIdToCountDict.copy()
     
     def copy(self)->ItemArray:
         copy = ItemArray()
@@ -50,16 +51,12 @@ class ItemArray:
         return copy
     
     def toNameCountDict(self)->Dict[str,float]:
-        ret = {}
-        for key,value in self.__dict.items():
-            ret[ItemIdToName.getStr(key)] = value
-        return ret
+        return {ItemIdToName.getStr(key):value for key,value in self.__dict.items()}
+
     
     def toZHStrCountDict(self)->Dict[str,float]:
-        ret = {}
-        for key,value in self.__dict.items():
-            ret[ItemIdToName.getZH(key)] = value
-        return ret
+        return {ItemIdToName.getZH(key) : value for key,value in self.__dict.items()}
+
     
     def isEmpty(self) -> bool:
         if(not self.__dict): return True
@@ -80,16 +77,29 @@ class ItemArray:
         
         #龍門幣1倍を削除
         del self.__dict[goldId]
+        return self
 
     #龍門幣を龍門幣1000に変換したうえで、0項目を削除
     def normalize(self):
         self.normalizeGold()
-        self.__dict = {key:value for key,value in self.__dict.items() if value!=0}
+        self.__dict = {key:value for key,value in self.__dict.items() if abs(value)>EPSILON}
         return self
+
+    def getById(self,idStr:str) -> float:
+        return self.__dict.get(idStr,0)
 
     def getByZH(self,zhStr:str) -> float:
         id = ItemIdToName.zhToId(zhStr)
-        return self.__dict.get(id,0)
+        return self.getById(id)
     
     def toIdCountDict(self) -> Dict[str,float]:
         return self.__dict.copy()
+    
+    def filterById(self,idList:Dict[str]) -> ItemArray:
+        ret = ItemArray()
+        ret.__dict = {key:value for key,value in self.__dict.items() if key in idList}
+        return ret
+    
+    def filterByZH(self,zhList:Dict[str]) -> ItemArray:
+        return self.filterById([ItemIdToName.zhToId(zh) for zh in zhList])
+    

@@ -17,65 +17,25 @@ UNI_EQ_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/m
 get_json = netutil.get_json
 
 class ItemCost:
-    class ItemInfo:
-        def __init__(self,jsonValue):
-            if(jsonValue):
-                self.id = jsonValue["id"]
-                self.count = jsonValue["count"]
-                self.name = ItemIdToName.getStr(self.id)
-            else:
-                self.id = ""
-                self.count = 0
-                self.name = ""
-
-        def copy(self):
-            copy = ItemCost.ItemInfo(None)
-            copy.id = self.id
-            copy.count = self.count
-            copy.name = self.name
-            return self
-        
-        def __add__(self,otherItem:ItemCost.ItemInfo):
-            copy = self.copy()
-            copy += otherItem
-            return copy
-
-        def __iadd__(self, otherItem:ItemCost.ItemInfo):
-            if(self.id == otherItem.id):
-                self.count += otherItem.count
-            return self
-        
-        def __imul__(self,other:int):
-            if not type(other) is int:
-                return
-            self.count *= other
-        
-        def __repr__(self):
-            return self.name + "×" + str(self.count)
-
-
     def __init__(self,valueList:List[Dict]=[]):
-        self.itemDict:Dict[str,ItemCost.ItemInfo] = {}
-        if not valueList: return
+        itemDict = {}
+        if valueList is None: valueList = []
         for item in valueList:
             key = item["id"]
-            self.itemDict[key] = ItemCost.ItemInfo(item)
+            itemDict[key] = item["count"]
+        self.itemArray = itemArray.ItemArray(itemDict)
     
     def copy(self):
-        copy = ItemCost(None)
-        copy.itemDict = {key:value.copy() for key,value in self.itemDict.items()}
+        copy = ItemCost()
+        copy.itemArray = self.itemArray.copy()
         return copy
     
     def __repr__(self):
-        return ",".join([str(x) for x in sorted(self.itemDict.values(),key = lambda y:y.id)])
+        content =  ",".join(["{0} × {1:d}".format(key,value) for key,value in self.itemArray.toNameCountDict().items()])
+        return "[{0}]".format(content)
     
     def __iadd__(self,other:ItemCost):
-        for key,value in other.itemDict.items():
-            before = self.itemDict.get(key)
-            if(not before): #copy側にkeyが無い
-                self.itemDict[key] = value
-            else:
-                self.itemDict[key] += value
+        self.itemArray += other.itemArray
         return self
 
     def __add__(self,other:ItemCost)->ItemCost:
@@ -86,7 +46,7 @@ class ItemCost:
     def filterRare2(self)->ItemCost:
         R2List = getItemRarity2(True)
         copy = self.copy()
-        copy.itemDict = {key:value for key,value in copy.itemDict.items() if ItemIdToName.getZH(key) in R2List}
+        copy.itemArray = copy.itemArray.filterByZH(R2List)
         return copy
     
     #上級素材→中級換算、副産物無し
@@ -96,9 +56,9 @@ class ItemCost:
         R3List = getItemRarity3(True)
         for item in R4List + R3List:
             id = ItemIdToName.zhToId(item)
-            if not copy.itemDict.get(id):continue
+            count = copy.itemArray.getById(id)
+            if not count:continue
             formulaArray = Formula.getFormulaArray(id)
-            count = copy.itemDict[id].count
             formulaArray *= count
             formulaArray.normalize()
             formulaCost = ItemCost.fromItemArray(formulaArray)
@@ -113,28 +73,16 @@ class ItemCost:
         return ret
     
     def fromItemArray(array:itemArray.ItemArray):
-        dictList = [{"id":key,"count":value} for key,value in array.toIdCountDict().items()]
-        ret = ItemCost(dictList)
+        ret = ItemCost()
+        ret.itemArray = array.copy()
         return ret
     
     def normalizeGold(self):
-        goldId = ItemIdToName.jaToId("龍門幣")
-        if(not self.itemDict.get(goldId)): return
-
-        goldId1000 = ItemIdToName.jaToId("龍門幣1000")
-        value = self.itemDict[goldId].count/1000
-        if(self.itemDict.get(goldId1000)):
-            self.itemDict[goldId1000].count += value
-        else:
-            self.itemDict[goldId1000] = ItemCost.ItemInfo({"id":goldId1000,"count":value})
-        
-        #龍門幣1倍を削除
-        del self.itemDict[goldId]
+        self.itemArray.normalizeGold()
         return self
 
     def normalize(self):
-        self.normalizeGold()
-        self.itemDict = {key:value for key,value in self.itemDict.items() if value.count!=0}
+        self.itemArray.normalize()
         return self
     
     def toRiseiValue(self):
@@ -143,13 +91,13 @@ class ItemCost:
         ret = 0
         copy = self.copy()
         copy.normalize()
-        for key,value in copy.itemDict.items():
+        for key,value in copy.itemArray.toIdCountDict().items():
             if(not riseiDict.get(key)):continue
-            ret += value.count * riseiDict[key]
+            ret += value * riseiDict[key]
         return ret
     
     def toStrBlock(self):
-        return "```"+"\n".join("{0}:{1:d}".format(CalculatorManager.left(15,ItemIdToName.getStr(key)),value.count)for key,value in self.itemDict.items())+"```"
+        return "```"+"\n".join("{0} × {1:d}".format(key,value)for key,value in self.itemArray.toNameCountDict().items())+"```"
 
 
 class OperatorCosts:
