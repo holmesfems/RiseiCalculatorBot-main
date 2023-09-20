@@ -214,7 +214,7 @@ class OperatorCostsCalculator:
         OperatorCostsCalculator.operatorInfo.init()
 
     def autoComplete(name:str,limit:int = 25) -> List[str]:
-        return [key for key in OperatorCostsCalculator.operatorInfo.getOperatorNames() if key.startswith(name)][:limit]
+        return [key for key in OperatorCostsCalculator.operatorInfo.getOperatorNames() if name in key][:limit]
     
     def skillMasterCosts(operatorName:str,skillNum:int,masterNum:int) -> Dict:
         costItem = OperatorCostsCalculator.operatorInfo.getOperatorCostFromName(operatorName)
