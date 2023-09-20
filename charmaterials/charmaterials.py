@@ -149,7 +149,7 @@ class ItemCost:
         return ret
     
     def toStrBlock(self):
-        return "```"+"\n".join("{0}×{1:d}".format(CalculatorManager.left(15,ItemIdToName.getStr(key)),value.count)for key,value in self.itemDict.items())+"```"
+        return "```"+"\n".join("{0}:{1:d}".format(CalculatorManager.left(15,ItemIdToName.getStr(key)),value.count)for key,value in self.itemDict.items())+"```"
 
 
 class OperatorCosts:
@@ -297,7 +297,7 @@ class OperatorCostsCalculator:
         if(toR2List): masterCost = masterCost.rare3and4ToRare2()
         return{
             "title" : title,
-            "msgList":[skillName + "特化" + str(masterNum) +"必要素材：理性価値=" + str(riseiValue),
+            "msgList":[skillName + "特化" + str(masterNum) +"必要素材：理性価値={0:.2f}".format(riseiValue),
                        masterCost.toStrBlock()
                        ]
         }

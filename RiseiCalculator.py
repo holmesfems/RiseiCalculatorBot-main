@@ -362,9 +362,9 @@ async def recruitlist(inter:Interaction, star:Choice[int]):
     description= "オペレーターのスキル特化消費素材を調べる"
 )
 @app_commands.describe(
-    operator_name = "オペレーターの名前",
+    operator_name = "オペレーターの名前、大陸先行オペレーターは中国語名を入れてください",
     skill_num = "何番目のスキル",
-    master_num = "特化段階",
+    master_num = "特化段階(デフォルトは1~3合計)",
     to_r2list = "上級、最上級素材を中級換算する(デフォルトはFalse)"
 )
 @app_commands.choices(
