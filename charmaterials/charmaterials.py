@@ -240,7 +240,7 @@ class OperatorCostsCalculator:
         for i in range(1,4):
             masterCost = skillCost[i-1]
             riseiValue = masterCost.toRiseiValue()
-            headerMsg = "特化{0} 理性価値:{1}".format(i,riseiValue)
+            headerMsg = "特化{0} 理性価値:{1:.2f}".format(i,riseiValue)
             blockMsg = masterCost.toStrBlock()
             msgList.append(headerMsg + blockMsg + "\n")
         
