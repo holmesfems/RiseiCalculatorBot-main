@@ -216,7 +216,7 @@ class OperatorCostsCalculator:
     def autoComplete(name:str,limit:int = 25) -> List[str]:
         return [key for key in OperatorCostsCalculator.operatorInfo.getOperatorNames() if name in key][:limit]
     
-    def skillMasterCosts(operatorName:str,skillNum:int,masterNum:int) -> Dict:
+    def skillMasterCosts(operatorName:str,skillNum:int) -> Dict:
         costItem = OperatorCostsCalculator.operatorInfo.getOperatorCostFromName(operatorName)
         title = "スキル特化素材検索"
         if(not costItem): return {
@@ -234,22 +234,30 @@ class OperatorCostsCalculator:
             "msgList":["オペレーター【"+operatorName+"】のスキル"+str(skillNum)+"の特化は存在しません"]
         }
 
-        masterCost = None
-        if(masterNum <= 3):
-            #特化段階数を選択
-            masterCost = skillCost[masterNum-1].copy()
-        else:
-            #特化3に必要な合計素材
-            masterCost = ItemCost.sum(skillCost)
-        riseiValue = masterCost.toRiseiValue()
-        r2Cost = masterCost.rare3and4ToRare2()
-        masterStr = "特化" + str(masterNum) if masterNum<=3 else "全特化"
+        allCost = ItemCost.sum(skillCost)
+        msgList = []
+        title = "スキル特化検索:" + skillName
+        for i in range(1,4):
+            masterCost = skillCost[i-1]
+            riseiValue = masterCost.toRiseiValue()
+            headerMsg = "特化{0} 理性価値:{1}".format(i,riseiValue)
+            blockMsg = masterCost.toStrBlock()
+            msgList.append(headerMsg + blockMsg + "\n")
+        
+        #合計素材
+        riseiValue = allCost.toRiseiValue()
+        headerMsg = "合計  理性価値:{0}".format(riseiValue)
+        blockMsg = allCost.toStrBlock()
+        msgList.append(headerMsg + blockMsg + "\n")
+
+        #中級換算
+        r2Cost = allCost.rare3and4ToRare2()
+        headerMsg = "中級換算"
+        blockMsg = r2Cost.toStrBlock()
+        msgList.append(headerMsg + blockMsg)
+
         return{
             "title" : title,
-            "msgList":[skillName + masterStr +"必要素材：理性価値={0:.2f}".format(riseiValue) +
-                       masterCost.toStrBlock() +
-                       "\n中級素材換算:" +
-                       r2Cost.toStrBlock()
-            ]
+            "msgList":msgList
         }
     
