@@ -216,7 +216,7 @@ class OperatorCostsCalculator:
     def autoComplete(name:str,limit:int = 25) -> List[str]:
         return [key for key in OperatorCostsCalculator.operatorInfo.getOperatorNames() if key.startswith(name)][:limit]
     
-    def skillMasterCosts(operatorName:str,skillNum:int,masterNum:int,toR2List:bool) -> Dict:
+    def skillMasterCosts(operatorName:str,skillNum:int,masterNum:int) -> Dict:
         costItem = OperatorCostsCalculator.operatorInfo.getOperatorCostFromName(operatorName)
         title = "スキル特化素材検索"
         if(not costItem): return {
@@ -242,12 +242,14 @@ class OperatorCostsCalculator:
             #特化3に必要な合計素材
             masterCost = ItemCost.sum(skillCost)
         riseiValue = masterCost.toRiseiValue()
-        if(toR2List): masterCost = masterCost.rare3and4ToRare2()
+        r2Cost = masterCost.rare3and4ToRare2()
         masterStr = "特化" + str(masterNum) if masterNum<=3 else "全特化"
         return{
             "title" : title,
-            "msgList":[skillName + masterStr +"必要素材：理性価値={0:.2f}".format(riseiValue),
-                       masterCost.toStrBlock()
-                       ]
+            "msgList":[skillName + masterStr +"必要素材：理性価値={0:.2f}".format(riseiValue) +
+                       masterCost.toStrBlock() +
+                       "\n中級素材換算:" +
+                       r2Cost.toStrBlock
+            ]
         }
     

@@ -365,18 +365,17 @@ async def recruitlist(inter:Interaction, star:Choice[int]):
     operator_name = "オペレーターの名前、大陸先行オペレーターは中国語名を入れてください",
     skill_num = "何番目のスキル",
     master_num = "特化段階(デフォルトは1~3合計)",
-    to_r2list = "上級、最上級素材を中級換算する(デフォルトはFalse)"
 )
 @app_commands.choices(
     skill_num = [Choice(name=str(i),value=i) for i in range(1,4)],
     master_num = [Choice(name=str(i),value=i) for i in range(1,4)] + [Choice(name="1~3合計",value=4)]
 )
-async def operatormastercost(inter:Interaction,operator_name:str,skill_num:Choice[int],master_num:Choice[int]=4,to_r2list:bool=False):
+async def operatormastercost(inter:Interaction,operator_name:str,skill_num:Choice[int],master_num:Choice[int]=4):
     operator_name = safeCallChoiceVal(operator_name)
     skill_num = safeCallChoiceVal(skill_num)
     master_num = safeCallChoiceVal(master_num)
     await inter.response.defer(thinking=True)
-    msg = OperatorCostsCalculator.skillMasterCosts(operator_name,skill_num,master_num,to_r2list)
+    msg = OperatorCostsCalculator.skillMasterCosts(operator_name,skill_num,master_num)
     await replyToDiscord(inter,msg)
 
 @operatormastercost.autocomplete("operator_name")
