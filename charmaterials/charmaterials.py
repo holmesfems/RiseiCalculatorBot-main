@@ -249,7 +249,7 @@ class OperatorCostsCalculator:
             "msgList":[skillName + masterStr +"必要素材：理性価値={0:.2f}".format(riseiValue) +
                        masterCost.toStrBlock() +
                        "\n中級素材換算:" +
-                       r2Cost.toStrBlock
+                       r2Cost.toStrBlock()
             ]
         }
     
