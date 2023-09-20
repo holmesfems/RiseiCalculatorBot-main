@@ -63,7 +63,7 @@ class ItemCost:
     
     def copy(self):
         copy = ItemCost(None)
-        copy.itemDict = self.itemDict.copy()
+        copy.itemDict = {key:value.copy() for key,value in self.itemDict.items()}
         return copy
     
     def __repr__(self):
@@ -289,7 +289,7 @@ class OperatorCostsCalculator:
         masterCost = None
         if(masterNum <= 3):
             #特化段階数を選択
-            masterCost = skillCost[masterNum-1]
+            masterCost = skillCost[masterNum-1].copy()
         else:
             #特化3に必要な合計素材
             masterCost = ItemCost.sum(skillCost)
