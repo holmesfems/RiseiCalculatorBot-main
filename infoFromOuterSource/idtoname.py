@@ -13,6 +13,7 @@ class ItemIdToName:
     __ZHToJA = {}
     __ZHToid = {}
     __idToZH = {}
+    __JAToid = {}
     def init():
         allInfoCN:dict = get_json(ITEM_TABLE_URL_CN)["items"]
         allInfoJP:dict = get_json(ITEM_TABLE_URL_JP)["items"]
@@ -20,6 +21,7 @@ class ItemIdToName:
         ItemIdToName.__ZHToJA = {}
         ItemIdToName.__ZHToid = {}
         ItemIdToName.__idToZH = {}
+        ItemIdToName.__JAToid = {}
         for key,value in allInfoCN.items():
             jpValue = allInfoJP.get(key)
             cnName = value["name"] 
@@ -29,15 +31,17 @@ class ItemIdToName:
                 ItemIdToName.__ZHToJA[value["name"]] = jpValue["name"]
                 value = jpValue
             ItemIdToName.__idToStr[key] = value["name"]
+            ItemIdToName.__JAToid[value["name"]] = key
         
         #理性価値計算で使う特殊なアイテムのIDを入れる
-        with open("./idtoname/costomItemId.json","rb") as file:
+        with open("./infoFromOuterSource/costomItemId.json","rb") as file:
             costomItems = yaml.safe_load(file)
         for item in costomItems:
             ItemIdToName.__idToStr[item["id"]] = item["ja"]
             ItemIdToName.__ZHToJA[item["zh"]] = item["ja"]
             ItemIdToName.__ZHToid[item["zh"]] = item["id"]
             ItemIdToName.__idToZH[item["id"]] = item["zh"]
+            ItemIdToName.__JAToid[item["ja"]] = item["id"]
     
     def getStr(id:str)->str:
         if(not ItemIdToName.__idToStr):
@@ -53,6 +57,11 @@ class ItemIdToName:
         if(not ItemIdToName.__ZHToid):
             ItemIdToName.init()
         return ItemIdToName.__ZHToid.get(zhStr,None)
+    
+    def jaToId(zhStr:str)->str:
+        if(not ItemIdToName.__JAToid):
+            ItemIdToName.init()
+        return ItemIdToName.__JAToid.get(zhStr,None)
     
     def getZH(id:str)->str:
         if(not ItemIdToName.__idToZH):

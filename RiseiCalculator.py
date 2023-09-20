@@ -11,6 +11,7 @@ import openaichat.openaichat as chatbot
 from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode,getStageCategoryDict,DEFAULT_CACHE_TIME,DEFAULT_SHOW_MIN_TIMES
 from typing import List
 import datetime
+from charmaterials.charmaterials import OperatorCostsCalculator
 
 TOKEN = os.environ["BOT_TOKEN"]
 ID = os.environ["BOT_ID"]
@@ -355,6 +356,34 @@ async def recruitlist(inter:Interaction, star:Choice[int]):
     await inter.response.defer(thinking=True)
     msg = showHighStars(_star)
     await replyToDiscord(inter,msg)
+
+@tree.command(
+    name = "operatormastercost",
+    description= "オペレーターのスキル特化消費素材を調べる"
+)
+@app_commands.describe(
+    operator_name = "オペレーターの名前",
+    skill_num = "何番目のスキル",
+    master_num = "特化段階",
+    to_r2list = "上級、最上級素材を中級換算する(デフォルトはFalse)"
+)
+@app_commands.choices(
+    skill_num = [Choice(name=str(i),value=i) for i in range(1,4)],
+    master_num = [Choice(name=str(i),value=i) for i in range(1,4)] + [Choice(name="1~3合計",value=4)]
+)
+async def operatormastercost(inter:Interaction,operator_name:str,skill_num:Choice[int],master_num:Choice[int]=4,to_r2list:bool=False):
+    operator_name = safeCallChoiceVal(operator_name)
+    skill_num = safeCallChoiceVal(skill_num)
+    master_num = safeCallChoiceVal(master_num)
+    await inter.response.defer(thinking=True)
+    msg = OperatorCostsCalculator.skillMasterCosts(operator_name,skill_num,master_num,to_r2list)
+    await replyToDiscord(inter,msg)
+
+@operatormastercost.autocomplete("operator_name")
+async def operator_name_autocomplete(inter:Interaction,current:str)->List[app_commands.Choice[str]]:
+    strList = OperatorCostsCalculator.autoComplete(current)
+    return [app_commands.Choice(name = name, value = name) for name in strList]
+
 
 CHANNEL_ID_HAPPYBIRTHDAY = int(os.environ["CHANNEL_ID_HAPPYBIRTHDAY"])
 
