@@ -252,7 +252,7 @@ class OperatorCostsCalculator:
 
         #中級換算
         r2Cost = allCost.rare3and4ToRare2()
-        headerMsg = "中級換算"
+        headerMsg = "合計  中級換算"
         blockMsg = r2Cost.toStrBlock()
         msgList.append(headerMsg + blockMsg)
 
