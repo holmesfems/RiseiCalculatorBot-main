@@ -236,7 +236,7 @@ class OperatorCostsCalculator:
 
         allCost = ItemCost.sum(skillCost)
         msgList = []
-        title = "スキル特化検索:" + skillName
+        title = "スキル特化検索: " + skillName
         for i in range(1,4):
             masterCost = skillCost[i-1]
             riseiValue = masterCost.toRiseiValue()
@@ -246,7 +246,7 @@ class OperatorCostsCalculator:
         
         #合計素材
         riseiValue = allCost.toRiseiValue()
-        headerMsg = "合計  理性価値:{0}".format(riseiValue)
+        headerMsg = "合計  理性価値:{0:.2f}".format(riseiValue)
         blockMsg = allCost.toStrBlock()
         msgList.append(headerMsg + blockMsg + "\n")
 
