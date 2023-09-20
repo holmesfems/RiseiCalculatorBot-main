@@ -295,9 +295,10 @@ class OperatorCostsCalculator:
             masterCost = ItemCost.sum(skillCost)
         riseiValue = masterCost.toRiseiValue()
         if(toR2List): masterCost = masterCost.rare3and4ToRare2()
+        masterStr = "特化" + str(masterNum) if masterNum<=3 else "全特化"
         return{
             "title" : title,
-            "msgList":[skillName + "特化" + str(masterNum) +"必要素材：理性価値={0:.2f}".format(riseiValue),
+            "msgList":[skillName + masterStr +"必要素材：理性価値={0:.2f}".format(riseiValue),
                        masterCost.toStrBlock()
                        ]
         }
