@@ -12,9 +12,20 @@ from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateM
 CHAR_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/character_table.json"
 CHAR_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/ja_JP/gamedata/excel/character_table.json"
 UNI_EQ_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/uniequip_table.json"
-
+PATCH_CHAR_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/ja_JP/gamedata/excel/char_patch_table.json"
 
 get_json = netutil.get_json
+
+jobIdToName:Dict[str,str] = {
+    "WARRIOR":"前衛",
+    "SNIPER" :"狙撃",
+    "SPECIAL":"特殊",
+    "SUPPORT":"補助",
+    "TANK"   :"重装",
+    "PIONEER":"先鋒",
+    "CASTER" :"術師",
+    "MEDIC"  :"医療"
+}
 
 class ItemCost:
     def __init__(self,valueList:List[Dict]=[]):
@@ -72,11 +83,6 @@ class ItemCost:
             ret += item
         return ret
     
-    def fromItemArray(array:itemArray.ItemArray):
-        ret = ItemCost()
-        ret.itemArray = array.copy()
-        return ret
-    
     def normalizeGold(self):
         self.itemArray.normalizeGold()
         return self
@@ -85,7 +91,7 @@ class ItemCost:
         self.itemArray.normalize()
         return self
     
-    def toRiseiValue(self):
+    def toRiseiValue(self)->float:
         riseiValue = CalculatorManager.getValues(True,CalculateMode.SANITY)
         riseiDict = riseiValue.toIdValueDict()
         ret = 0
@@ -98,7 +104,11 @@ class ItemCost:
     
     def toStrBlock(self):
         return "```"+"\n".join("{0} × {1:d}".format(key,value)for key,value in self.itemArray.toNameCountDict().items())+"```"
-
+    
+    def fromItemArray(array:itemArray.ItemArray) -> ItemCost:
+        ret = ItemCost()
+        ret.itemArray = array.copy()
+        return ret
 
 class OperatorCosts:
     def __init__(self,key,value):
@@ -116,12 +126,22 @@ class OperatorCosts:
         self.skills:List[Tuple[str,List[ItemCost]]] = ret
         #スキルLv1~7に必要な素材
         self.allSkills:List[ItemCost] = [ItemCost(x["lvlUpCost"]) for x in value["allSkillLvlup"]]
-        #謎のid番号
-        self.idValue:int = value["idValue"] 
+
         #大陸版限定オペレーターか
         self.cnOnly:bool = value["cnOnly"] 
         #モジュール initInfoだけでは足りないので、別途追加
         self.uniqeEq:Dict[str,ItemCost] = {}
+        #星の数
+        #大陸版では "TIER_n"のstr、日本版ではnのintになる
+        rarity = value["rarity"]
+        if(type(rarity) is str):
+            #大陸版表記
+            keyRegex = r"TIER_(\d+)"
+            match = re.match(keyRegex,rarity)
+            self.stars:int = int(match.group(1))
+        else:
+            #JP版表記
+            self.stars:int = rarity+1
 
     def addEq(self,uniEq):
         eqType = uniEq["typeName2"]
@@ -179,7 +199,16 @@ class AllOperatorsInfo:
                 value["cnOnly"] = False
             else:
                 value["cnOnly"] = True
-            value["idValue"] = int(match.group(2))
+
+            self.operatorDict[key] = OperatorCosts(key,value)
+            self.nameToId[value["name"]] = key
+        
+        #昇格(前衛アーミヤ)
+        patchInfoJP:dict = get_json(PATCH_CHAR_TABLE_URL_JP)["patchChars"]
+        for key,value in patchInfoJP.items():
+            #今は前衛アーミヤ一人だけ、今後追加されたらまた調整する必要があるかも
+            value["cnOnly"] = False
+            value["name"] = value["name"] + "({0})".format(jobIdToName[value["profession"]])
             self.operatorDict[key] = OperatorCosts(key,value)
             self.nameToId[value["name"]] = key
         
@@ -207,14 +236,17 @@ class AllOperatorsInfo:
         #print(self.operatorDict)
         return allCosts
     
+    def getAllCostItems(self)->Dict[str,OperatorCosts]:
+        return self.operatorDict.copy()
+    
 class OperatorCostsCalculator:
     operatorInfo = AllOperatorsInfo()
 
     def init():
         OperatorCostsCalculator.operatorInfo.init()
 
-    def autoComplete(name:str,limit:int = 25) -> List[str]:
-        return [key for key in OperatorCostsCalculator.operatorInfo.getOperatorNames() if name in key][:limit]
+    def autoCompleteForMasterCosts(name:str,limit:int = 25) -> List[Tuple[str,str]]:
+        return [(value.name,value.name) for value in OperatorCostsCalculator.operatorInfo.operatorDict.values() if name in value.name and value.stars>=4][:limit]
     
     def skillMasterCosts(operatorName:str,skillNum:int) -> Dict:
         costItem = OperatorCostsCalculator.operatorInfo.getOperatorCostFromName(operatorName)

@@ -377,8 +377,8 @@ async def operatormastercost(inter:Interaction,operator_name:str,skill_num:Choic
 
 @operatormastercost.autocomplete("operator_name")
 async def operator_name_autocomplete(inter:Interaction,current:str)->List[app_commands.Choice[str]]:
-    strList = OperatorCostsCalculator.autoComplete(current)
-    return [app_commands.Choice(name = name, value = name) for name in strList]
+    strList = OperatorCostsCalculator.autoCompleteForMasterCosts(current)
+    return [app_commands.Choice(name = name, value = value) for name,value in strList]
 
 
 CHANNEL_ID_HAPPYBIRTHDAY = int(os.environ["CHANNEL_ID_HAPPYBIRTHDAY"])
