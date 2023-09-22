@@ -44,7 +44,7 @@ class ItemCost:
         return copy
     
     def __repr__(self):
-        content =  ",".join(["{0} × {1:d}".format(key,value) for key,value in self.itemArray.toNameCountDict().items()])
+        content =  ", ".join(["{0} × {1:d}".format(key,value) for key,value in self.itemArray.toNameCountDict().items()])
         return "[{0}]".format(content)
     
     def __iadd__(self,other:ItemCost):
@@ -312,8 +312,8 @@ class OperatorCostsCalculator:
                 #print(name,star5Operators[key].totalPhaseCost())
                 riseiValue = value
                 toPrint.append(f"{index+1}. {CalculatorManager.left(18,name)}: {riseiValue:.3f}")
-                if(index+1 % 50 == 0):
-                    msgList.append(CalculatorManager.dumpToPrint(toPrint)+"\n")
+                if((index + 1)% 50 == 0):
+                    msgList.append(CalculatorManager.dumpToPrint(toPrint))
                     toPrint = []
             if(toPrint):
                 msgList.append(CalculatorManager.dumpToPrint(toPrint))
@@ -328,11 +328,11 @@ class OperatorCostsCalculator:
             toPrint = []
             for key,value in cnOnlyOperators.items():
                 toPrint.append(value.name)
-            msgList.append("未実装オペレーター一覧：" + CalculatorManager.dumpToPrint(toPrint))
+            msgList.append("未実装オペレーター一覧：" + CalculatorManager.dumpToPrint(toPrint) + "\n")
 
             totalCost = ItemCost.sum([value.allCost() for value in cnOnlyOperators.values()])
-            msgList.append("全昇進、全特化、全モジュールの合計消費:" + totalCost.toStrBlock())
-            msgList.append("中級素材換算:"+totalCost.rare3and4ToRare2().toStrBlock(sortByCount=True))
+            msgList.append("全昇進、全特化、全モジュールの合計消費:" + totalCost.toStrBlock() + "\n")
+            msgList.append("中級素材換算:"+totalCost.rare3and4ToRare2().toStrBlock(sortByCount=True) + "\n")
             msgList.append("合計理性価値(SoC、モジュール素材抜き):" + "{0:.3f}".format(totalCost.toRiseiValue()))
             return {"title":title,
                     "msgList":msgList
