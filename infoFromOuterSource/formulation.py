@@ -5,6 +5,9 @@ from infoFromOuterSource.idtoname import ItemIdToName
 from rcutils import netutil,itemArray
 from typing import Dict,List
 
+#素材合成の情報を保持するクラス
+#FormulaItemは素材合成のレシピ一つ
+#Formulaは全部のレシピをまとめたもの
 class FormulaItem:
     def __init__(self,formulaJson:Dict):
         self.key = formulaJson["id"]
