@@ -5,7 +5,7 @@ from rcutils import netutil,itemArray
 import re
 from infoFromOuterSource.idtoname import SkillIdToName,ItemIdToName
 from typing import Dict,List,Tuple
-from riseicalculator2.listInfo import getItemRarity4,getItemRarity3,getItemRarity2
+from riseicalculator2.listInfo import getItemRarity4,getItemRarity3,getItemRarity2,getValueTarget
 from infoFromOuterSource.formulation import Formula
 from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode
 from enum import StrEnum
@@ -114,6 +114,11 @@ class ItemCost:
     def fromItemArray(array:itemArray.ItemArray) -> ItemCost:
         ret = ItemCost()
         ret.itemArray = array.copy()
+        return ret
+    
+    def toMaterialCost(self):
+        ret = ItemCost()
+        ret.itemArray = self.itemArray.filterByZH(getValueTarget(False))
         return ret
     
 
@@ -303,7 +308,7 @@ class OperatorCostsCalculator:
             riseiValueDict = {key:value.totalPhaseCost().toRiseiValue() for key,value in star5Operators.items()}
             sortedValueDict = {key:value for key,value in sorted(riseiValueDict.items(),key=lambda x:x[1],reverse=True)}
             title = "★5昇進素材価値表"
-            headerMsg = "初級SoC×3、上級SoC×4は以下の理性価値計算に含まれません:"
+            headerMsg = "SoCは以下の計算に含まれません:"
             msgList = [headerMsg]
             toPrint = []
             for index,(key,value) in enumerate(sortedValueDict.items()):
@@ -311,7 +316,8 @@ class OperatorCostsCalculator:
                 name = star5Operators[key].name
                 #print(name,star5Operators[key].totalPhaseCost())
                 riseiValue = value
-                toPrint.append(f"{index+1}. {CalculatorManager.left(18,name)}: {riseiValue:.3f}")
+                phaseCost = star5Operators[key].totalPhaseCost()
+                toPrint.append(f"{index+1}. {name} {str(phaseCost.toMaterialCost())}: {riseiValue:.3f}")
                 if((index + 1)% 50 == 0):
                     msgList.append(CalculatorManager.dumpToPrint(toPrint))
                     toPrint = []
