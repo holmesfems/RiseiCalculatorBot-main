@@ -317,8 +317,8 @@ class OperatorCostsCalculator:
                 #print(name,star5Operators[key].totalPhaseCost())
                 riseiValue = value
                 phaseCost = star5Operators[key].totalPhaseCost()
-                toPrint.append(f"{index+1}. {name} {str(phaseCost.toMaterialCost())}: {riseiValue:.3f}")
-                if((index + 1)% 30 == 0):
+                toPrint.append(f"{index+1}. {name} : {riseiValue:.3f}")
+                if((index + 1)% 50 == 0):
                     msgList.append(CalculatorManager.dumpToPrint(toPrint))
                     toPrint = []
             if(toPrint):
