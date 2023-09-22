@@ -303,16 +303,22 @@ class OperatorCostsCalculator:
             riseiValueDict = {key:value.totalPhaseCost().toRiseiValue() for key,value in star5Operators.items()}
             sortedValueDict = {key:value for key,value in sorted(riseiValueDict.items(),key=lambda x:x[1],reverse=True)}
             title = "★5昇進素材価値表"
-            headerMsg = "初級SoC×3、上級SoC×4は以下の理性価値に含まれません:"
+            headerMsg = "初級SoC×3、上級SoC×4は以下の理性価値計算に含まれません:"
+            msgList = [headerMsg]
             toPrint = []
-            for key,value in sortedValueDict.items():
+            for index,(key,value) in enumerate(sortedValueDict.items()):
+
                 name = star5Operators[key].name
                 #print(name,star5Operators[key].totalPhaseCost())
                 riseiValue = value
-                toPrint.append(f"{CalculatorManager.left(18,name)}: {riseiValue:.3f}")
-            msg = CalculatorManager.dumpToPrint(toPrint)
+                toPrint.append(f"{index+1}. {CalculatorManager.left(18,name)}: {riseiValue:.3f}")
+                if(index+1 % 50 == 0):
+                    msgList.append(CalculatorManager.dumpToPrint(toPrint))
+                    toPrint = []
+            if(toPrint):
+                msgList.append(CalculatorManager.dumpToPrint(toPrint))
             return {"title":title,
-                    "msgList":[headerMsg,msg]
+                    "msgList":msgList
                     }
         
         elif(selection is OperatorCostsCalculator.CostListSelection.COSTOFCNONLY):
