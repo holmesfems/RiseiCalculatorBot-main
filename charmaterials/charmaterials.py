@@ -313,7 +313,7 @@ class OperatorCostsCalculator:
                 riseiValue = value
                 toPrint.append(f"{index+1}. {CalculatorManager.left(18,name)}: {riseiValue:.3f}")
                 if(index+1 % 50 == 0):
-                    msgList.append(CalculatorManager.dumpToPrint(toPrint))
+                    msgList.append(CalculatorManager.dumpToPrint(toPrint)+"\n")
                     toPrint = []
             if(toPrint):
                 msgList.append(CalculatorManager.dumpToPrint(toPrint))
