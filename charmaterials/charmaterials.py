@@ -8,12 +8,14 @@ from typing import Dict,List,Tuple
 from riseicalculator2.listInfo import getItemRarity4,getItemRarity3,getItemRarity2
 from infoFromOuterSource.formulation import Formula
 from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode
+from enum import StrEnum
+import enum
 
 CHAR_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/character_table.json"
 CHAR_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/ja_JP/gamedata/excel/character_table.json"
 UNI_EQ_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/uniequip_table.json"
 PATCH_CHAR_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/ja_JP/gamedata/excel/char_patch_table.json"
-
+EPSILON = 1e-4
 get_json = netutil.get_json
 
 jobIdToName:Dict[str,str] = {
@@ -102,14 +104,18 @@ class ItemCost:
             ret += value * riseiDict[key]
         return ret
     
-    def toStrBlock(self):
+    def toStrBlock(self,sortByCount = False):
         sortedArray = self.itemArray.copy()
-        return "```"+"\n".join("{0} × {1:d}".format(key,value)for key,value in sortedArray.toNameCountDict().items())+"```"
+        items = sortedArray.toNameCountDict().items()
+        if(sortByCount):
+            items = sorted(items,key=lambda x: x[1],reverse=True)
+        return "```"+"\n".join(["{0} × {1:d}".format(key,round(value)) if abs(value - round(value)) < EPSILON else "{0} × {1:.3f}".format(key,value) for key,value in items])+"```"
     
     def fromItemArray(array:itemArray.ItemArray) -> ItemCost:
         ret = ItemCost()
         ret.itemArray = array.copy()
         return ret
+    
 
 class OperatorCosts:
     def __init__(self,key,value):
@@ -143,6 +149,9 @@ class OperatorCosts:
         else:
             #JP版表記
             self.stars:int = rarity+1
+        
+        #昇格オペレーター(前衛アーミヤ)かの判定
+        self.isPatch = value["isPatch"]
 
     def addEq(self,uniEq):
         eqType = uniEq["typeName2"]
@@ -200,7 +209,7 @@ class AllOperatorsInfo:
                 value["cnOnly"] = False
             else:
                 value["cnOnly"] = True
-
+            value["isPatch"] = False
             self.operatorDict[key] = OperatorCosts(key,value)
             self.nameToId[value["name"]] = key
         
@@ -210,6 +219,7 @@ class AllOperatorsInfo:
             #今は前衛アーミヤ一人だけ、今後追加されたらまた調整する必要があるかも
             value["cnOnly"] = False
             value["name"] = value["name"] + "({0})".format(jobIdToName[value["profession"]])
+            value["isPatch"] = True
             self.operatorDict[key] = OperatorCosts(key,value)
             self.nameToId[value["name"]] = key
         
@@ -225,22 +235,14 @@ class AllOperatorsInfo:
         id = self.nameToId[nameStr]
         return self.operatorDict.get(id,None)
     
-    def getAllCostOfCNOnly(self):
-        operatorCNOnly = [x for x in self.operatorDict.values() if x.cnOnly]
-        allCosts = ItemCost(None)
-        for item in operatorCNOnly:
-            print(item.name)
-            allCosts += item.totalPhaseCost()
-            allCosts += item.totalSkillLv7Cost()
-            allCosts += item.totalSkillMasterCost()
-            #print(item.totalUniqueEQCost())
-        #print(self.operatorDict)
-        return allCosts
-    
     def getAllCostItems(self)->Dict[str,OperatorCosts]:
         return self.operatorDict.copy()
     
 class OperatorCostsCalculator:
+    class CostListSelection(StrEnum):
+        STAR5ELITE = enum.auto()
+        COSTOFCNONLY = enum.auto()
+
     operatorInfo = AllOperatorsInfo()
 
     def init():
@@ -294,3 +296,44 @@ class OperatorCostsCalculator:
             "msgList":msgList
         }
     
+
+    def operatorCostList(selection:CostListSelection) -> Dict:
+        if(selection is OperatorCostsCalculator.CostListSelection.STAR5ELITE):
+            star5Operators = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if value.stars == 5 and not value.isPatch}
+            riseiValueDict = {key:value.totalPhaseCost().toRiseiValue() for key,value in star5Operators.items()}
+            sortedValueDict = {key:value for key,value in sorted(riseiValueDict.items(),key=lambda x:x[1],reverse=True)}
+            title = "★5昇進素材価値表"
+            headerMsg = "初級SoC×3、上級SoC×4は以下の理性価値に含まれません:"
+            toPrint = []
+            for key,value in sortedValueDict.items():
+                name = star5Operators[key].name
+                print(name,star5Operators[key].totalPhaseCost())
+                riseiValue = value
+                toPrint.append(f"{CalculatorManager.left(18,name)}: {riseiValue:.3f}")
+            msg = CalculatorManager.dumpToPrint(toPrint)
+            return {"title":title,
+                    "msgList":[headerMsg,msg]
+                    }
+        
+        elif(selection is OperatorCostsCalculator.CostListSelection.COSTOFCNONLY):
+            cnOnlyOperators = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if value.isCNOnly()}
+            title = "未実装オペレーターの消費素材合計"
+            msgList = []
+            toPrint = []
+            for key,value in cnOnlyOperators.items():
+                toPrint.append(value.name)
+            msgList.append("未実装オペレーター一覧：" + CalculatorManager.dumpToPrint(toPrint))
+
+            totalCost = ItemCost.sum([value.allCost() for value in cnOnlyOperators.values()])
+            msgList.append("全昇進、全特化、全モジュールの合計消費:" + totalCost.toStrBlock())
+            msgList.append("中級素材換算:"+totalCost.rare3and4ToRare2().toStrBlock(sortByCount=True))
+            msgList.append("合計理性価値(SoC、モジュール素材抜き):" + "{0:.3f}".format(totalCost.toRiseiValue()))
+            return {"title":title,
+                    "msgList":msgList
+                    }
+            
+        else:
+            return{
+                "title":"エラー",
+                "msgList":"未知のコマンド:" + str(selection)
+            }

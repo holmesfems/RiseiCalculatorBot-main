@@ -380,6 +380,26 @@ async def operator_name_autocomplete(inter:Interaction,current:str)->List[app_co
     strList = OperatorCostsCalculator.autoCompleteForMasterCosts(current)
     return [app_commands.Choice(name = name, value = value) for name,value in strList]
 
+@tree.command(
+    name="operatorcostlist",
+    description="オペレーター消費素材の、いくつか役立つリストを出力します。"
+)
+@app_commands.describe(
+    selection = "表示するリスト選択"
+)
+@app_commands.choices(
+    selection = [
+        Choice(name="星5昇進素材価値表",value="star5elite"),
+        Choice(name="未実装オペレーターの消費素材合計",value = "costofcnonly")
+    ]
+)
+async def operatorcostlist(inter:Interaction,selection:Choice[str]):
+    selection = safeCallChoiceVal(selection)
+    selection = OperatorCostsCalculator.CostListSelection(selection)
+    await inter.response.defer(thinking=True)
+    msg = OperatorCostsCalculator.operatorCostList(selection)
+    await replyToDiscord(msg)
+
 
 CHANNEL_ID_HAPPYBIRTHDAY = int(os.environ["CHANNEL_ID_HAPPYBIRTHDAY"])
 
