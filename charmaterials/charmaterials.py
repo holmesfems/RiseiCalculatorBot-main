@@ -307,7 +307,7 @@ class OperatorCostsCalculator:
             toPrint = []
             for key,value in sortedValueDict.items():
                 name = star5Operators[key].name
-                print(name,star5Operators[key].totalPhaseCost())
+                #print(name,star5Operators[key].totalPhaseCost())
                 riseiValue = value
                 toPrint.append(f"{CalculatorManager.left(18,name)}: {riseiValue:.3f}")
             msg = CalculatorManager.dumpToPrint(toPrint)

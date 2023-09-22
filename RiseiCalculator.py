@@ -398,7 +398,7 @@ async def operatorcostlist(inter:Interaction,selection:Choice[str]):
     selection = OperatorCostsCalculator.CostListSelection(selection)
     await inter.response.defer(thinking=True)
     msg = OperatorCostsCalculator.operatorCostList(selection)
-    await replyToDiscord(msg)
+    await replyToDiscord(inter,msg)
 
 
 CHANNEL_ID_HAPPYBIRTHDAY = int(os.environ["CHANNEL_ID_HAPPYBIRTHDAY"])
