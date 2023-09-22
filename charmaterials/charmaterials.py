@@ -74,7 +74,7 @@ class ItemCost:
             formulaArray.normalize()
             formulaCost = ItemCost.fromItemArray(formulaArray)
             copy += formulaCost
-        return copy.normalize().filterRare2()
+        return copy.filterRare2()
     
     def sum(list:List[ItemCost]):
         if(not list): return ItemCost()
@@ -103,7 +103,8 @@ class ItemCost:
         return ret
     
     def toStrBlock(self):
-        return "```"+"\n".join("{0} × {1:d}".format(key,value)for key,value in self.itemArray.toNameCountDict().items())+"```"
+        sortedArray = self.itemArray.copy()
+        return "```"+"\n".join("{0} × {1:d}".format(key,value)for key,value in sortedArray.toNameCountDict().items())+"```"
     
     def fromItemArray(array:itemArray.ItemArray) -> ItemCost:
         ret = ItemCost()

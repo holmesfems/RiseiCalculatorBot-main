@@ -4,7 +4,10 @@ import yaml
 sys.path.append('../')
 from infoFromOuterSource.idtoname import ItemIdToName
 from typing import Dict
+from riseicalculator2 import listInfo
 EPSILON = 0.0001
+_ORDERCRITERIA = listInfo.getValueTarget(False)
+_INDEX_INFINITY = 10000
 
 class ItemArray:
     def __init__(self,itemIdToCountDict:Dict[str,float]={}):
@@ -12,10 +15,12 @@ class ItemArray:
             self.__dict:Dict[str,float] = {}
         else:
             self.__dict = itemIdToCountDict.copy()
+        self.__normalized = False
     
     def copy(self)->ItemArray:
         copy = ItemArray()
         copy.__dict = self.__dict.copy()
+        copy.__normalized = self.__normalized
         return copy
     
     def __iadd__(self,other:ItemArray):
@@ -24,6 +29,7 @@ class ItemArray:
                 self.__dict[key] += value
             else:
                 self.__dict[key] = value
+            self.__normalized = False
         return self
 
     def __add__(self,other:ItemArray)->ItemArray:
@@ -50,14 +56,6 @@ class ItemArray:
         copy *= factor
         return copy
     
-    def toNameCountDict(self)->Dict[str,float]:
-        return {ItemIdToName.getStr(key):value for key,value in self.__dict.items()}
-
-    
-    def toZHStrCountDict(self)->Dict[str,float]:
-        return {ItemIdToName.getZH(key) : value for key,value in self.__dict.items()}
-
-    
     def isEmpty(self) -> bool:
         if(not self.__dict): return True
         for value in self.__dict.values():
@@ -79,10 +77,19 @@ class ItemArray:
         del self.__dict[goldId]
         return self
 
-    #龍門幣を龍門幣1000に変換したうえで、0項目を削除
+    #龍門幣を龍門幣1000に変換したうえで、0項目を削除、順番も変える
     def normalize(self):
-        self.normalizeGold()
-        self.__dict = {key:value for key,value in self.__dict.items() if abs(value)>EPSILON}
+        if not self.__normalized:
+            self.normalizeGold()
+            def sortKey(x):
+                zhstr = ItemIdToName.getZH(x[0])
+                if zhstr in _ORDERCRITERIA:
+                    return _ORDERCRITERIA.index(zhstr)
+                else:
+                    return _INDEX_INFINITY
+            sortedDictItems = sorted(self.__dict.items(),key=sortKey)
+            self.__dict = {key:value for key,value in sortedDictItems if abs(value)>EPSILON}
+            self.__normalized = True
         return self
 
     def getById(self,idStr:str) -> float:
@@ -93,11 +100,22 @@ class ItemArray:
         return self.getById(id)
     
     def toIdCountDict(self) -> Dict[str,float]:
+        self.normalize()
         return self.__dict.copy()
+    
+    def toNameCountDict(self)->Dict[str,float]:
+        self.normalize()
+        return {ItemIdToName.getStr(key):value for key,value in self.__dict.items()}
+
+    
+    def toZHStrCountDict(self)->Dict[str,float]:
+        self.normalize()
+        return {ItemIdToName.getZH(key) : value for key,value in self.__dict.items()}
     
     def filterById(self,idList:Dict[str]) -> ItemArray:
         ret = ItemArray()
         ret.__dict = {key:value for key,value in self.__dict.items() if key in idList}
+        ret.__normalized = self.__normalized
         return ret
     
     def filterByZH(self,zhList:Dict[str]) -> ItemArray:
