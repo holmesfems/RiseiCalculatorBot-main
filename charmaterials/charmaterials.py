@@ -144,6 +144,7 @@ class OperatorCosts:
         self.cnOnly:bool = value["cnOnly"] 
         #モジュール initInfoだけでは足りないので、別途追加
         self.uniqeEq:Dict[str,ItemCost] = {}
+        self.uniqeEqIsCNOnly:Dict[str,bool] = {}
         #星の数
         #大陸版では "TIER_n"のstr、日本版ではnのintになる
         rarity = value["rarity"]
@@ -166,7 +167,7 @@ class OperatorCosts:
         key = eqType
         costs = [ItemCost(costValue) for costKey,costValue in costDicts.items()]
         self.uniqeEq[key] = costs
-        self.uniqeEqIsCNOnly = uniEq["cnOnly"]
+        self.uniqeEqIsCNOnly[key] = uniEq["cnOnly"]
 
     def totalPhaseCost(self)->ItemCost:
         return ItemCost.sum(self.phases)
@@ -179,6 +180,12 @@ class OperatorCosts:
     
     def totalUniqueEQCost(self)->ItemCost:
         return ItemCost.sum([ItemCost.sum(value) for value in self.uniqeEq.values()])
+    
+    def totalUniqueEQCostCNOnly(self) -> ItemCost:
+        return ItemCost.sum([ItemCost.sum(value) for key,value in self.uniqeEq.items() if self.uniqeEqIsCNOnly[key]])
+    
+    def hasCNOnlyUEQ(self) -> bool:
+        return any(self.uniqeEqIsCNOnly.values())
     
     def allCost(self)->ItemCost:
         ret = self.totalPhaseCost()
@@ -354,9 +361,9 @@ class OperatorCostsCalculator:
             msgList.append("全昇進、全特化の合計消費:" + totalCost.toStrBlock() + "\n")
             msgList.append("中級素材換算:"+totalCost.rare3and4ToRare2().toStrBlock(sortByCount=True) + "\n")
             msgList.append("合計理性価値(SoC抜き):" + "{0:.3f}".format(totalCost.toRiseiValue()) + "\n")
-            eqCNOnlyOperators = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if value.uniqeEqIsCNOnly()}
-            eqCost = ItemCost.sum([value.totalUniqueEQCost() for value in eqCNOnlyOperators.values()])
-            msgList.append("全昇進、全特化の合計消費:" + eqCost.toStrBlock())
+            eqCNOnlyOperators = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if value.hasCNOnlyUEQ()}
+            eqCost = ItemCost.sum([value.totalUniqueEQCostCNOnly() for value in eqCNOnlyOperators.values()])
+            msgList.append("未実装モジュールの合計消費:" + eqCost.toStrBlock())
             return {"title":title,
                     "msgList":msgList
                     }
