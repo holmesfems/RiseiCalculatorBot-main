@@ -14,6 +14,7 @@ import enum
 CHAR_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/character_table.json"
 CHAR_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/ja_JP/gamedata/excel/character_table.json"
 UNI_EQ_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/uniequip_table.json"
+UNI_EQ_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/ja_JP/gamedata/excel/uniequip_table.json"
 PATCH_CHAR_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/ja_JP/gamedata/excel/char_patch_table.json"
 EPSILON = 1e-4
 get_json = netutil.get_json
@@ -165,6 +166,7 @@ class OperatorCosts:
         key = eqType
         costs = [ItemCost(costValue) for costKey,costValue in costDicts.items()]
         self.uniqeEq[key] = costs
+        self.uniqeEqIsCNOnly = uniEq["cnOnly"]
 
     def totalPhaseCost(self)->ItemCost:
         return ItemCost.sum(self.phases)
@@ -183,6 +185,12 @@ class OperatorCosts:
         ret += self.totalSkillMasterCost()
         ret += self.totalSkillLv7Cost()
         ret += self.totalUniqueEQCost()
+        return ret
+    
+    def allCostExceptEq(self)->ItemCost:
+        ret = self.totalPhaseCost()
+        ret += self.totalSkillMasterCost()
+        ret += self.totalSkillLv7Cost()
         return ret
     
     def isCNOnly(self):
@@ -228,9 +236,15 @@ class AllOperatorsInfo:
             self.operatorDict[key] = OperatorCosts(key,value)
             self.nameToId[value["name"]] = key
         
-        allUEQ = get_json(UNI_EQ_URL_CN)["equipDict"]
+        allUEQ:dict = get_json(UNI_EQ_URL_CN)["equipDict"]
+        allUEQ_JP:dict = get_json(UNI_EQ_URL_JP)["equipDict"]
         for key,value in allUEQ.items():
             charId = value["charId"]
+            jpValue = allUEQ_JP.get(key)
+            if(jpValue):
+                value["cnOnly"] = False
+            else:
+                value["cnOnly"] = True
             self.operatorDict[charId].addEq(value)
     
     def getOperatorNames(self):
@@ -316,7 +330,7 @@ class OperatorCostsCalculator:
                 name = star5Operators[key].name
                 #print(name,star5Operators[key].totalPhaseCost())
                 riseiValue = value
-                phaseCost = star5Operators[key].totalPhaseCost()
+                #phaseCost = star5Operators[key].totalPhaseCost()
                 toPrint.append(f"{index+1}. {name} : {riseiValue:.3f}")
                 if((index + 1)% 50 == 0):
                     msgList.append(CalculatorManager.dumpToPrint(toPrint))
@@ -336,10 +350,13 @@ class OperatorCostsCalculator:
                 toPrint.append(value.name)
             msgList.append("未実装オペレーター一覧：" + CalculatorManager.dumpToPrint(toPrint) + "\n")
 
-            totalCost = ItemCost.sum([value.allCost() for value in cnOnlyOperators.values()])
-            msgList.append("全昇進、全特化、全モジュールの合計消費:" + totalCost.toStrBlock() + "\n")
+            totalCost = ItemCost.sum([value.allCostExceptEq() for value in cnOnlyOperators.values()])
+            msgList.append("全昇進、全特化の合計消費:" + totalCost.toStrBlock() + "\n")
             msgList.append("中級素材換算:"+totalCost.rare3and4ToRare2().toStrBlock(sortByCount=True) + "\n")
-            msgList.append("合計理性価値(SoC、モジュール素材抜き):" + "{0:.3f}".format(totalCost.toRiseiValue()))
+            msgList.append("合計理性価値(SoC抜き):" + "{0:.3f}".format(totalCost.toRiseiValue()) + "\n")
+            eqCNOnlyOperators = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if value.uniqeEqIsCNOnly()}
+            eqCost = ItemCost.sum([value.totalUniqueEQCost() for value in eqCNOnlyOperators.values()])
+            msgList.append("全昇進、全特化の合計消費:" + eqCost.toStrBlock())
             return {"title":title,
                     "msgList":msgList
                     }
