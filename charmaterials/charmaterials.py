@@ -45,7 +45,7 @@ class ItemCost:
         return copy
     
     def __repr__(self):
-        content =  ", ".join(["{0} × {1:d}".format(key,value) for key,value in self.itemArray.toNameCountDict().items()])
+        content =  ", ".join(["{0} × {1:d}".format(key,round(value)) if abs(value - round(value)) < EPSILON else "{0} × {1:.3f}".format(key,value) for key,value in self.itemArray.toNameCountDict().items()])
         return "[{0}]".format(content)
     
     def __iadd__(self,other:ItemCost):
@@ -110,7 +110,8 @@ class ItemCost:
         items = sortedArray.toNameCountDict().items()
         if(sortByCount):
             items = sorted(items,key=lambda x: x[1],reverse=True)
-        return "```"+"\n".join(["{0} × {1:d}".format(key,round(value)) if abs(value - round(value)) < EPSILON else "{0} × {1:.3f}".format(key,value) for key,value in items])+"```"
+        body = ["{0} × {1:d}".format(key,round(value)) if abs(value - round(value)) < EPSILON else "{0} × {1:.3f}".format(key,value) for key,value in items]
+        return CalculatorManager.dumpToPrint(body)
     
     def fromItemArray(array:itemArray.ItemArray) -> ItemCost:
         ret = ItemCost()

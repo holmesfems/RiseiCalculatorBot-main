@@ -819,8 +819,9 @@ class CalculatorManager:
     def filterStagesByShowMinTimes(stageList:List[StageItem],showMinTimes:int,isGlobal:bool):
         return [x for x in stageList if x.isValidForShow(showMinTimes,isGlobal)]
 
-    def dumpToPrint(toPrint):
-        return "```" + "\n".join(["".join(x) for x in toPrint]) + "```"
+    def dumpToPrint(toPrint,header = ""):
+        body = "\n".join(["".join(x) for x in toPrint])
+        return f"```{header}\n{body}```"
     
     def left(digit, msg):
         for c in msg:
