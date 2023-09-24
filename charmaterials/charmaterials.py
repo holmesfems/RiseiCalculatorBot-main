@@ -359,11 +359,12 @@ class OperatorCostsCalculator:
 
             totalCost = ItemCost.sum([value.allCostExceptEq() for value in cnOnlyOperators.values()])
             msgList.append("全昇進、全特化の合計消費:" + totalCost.toStrBlock() + "\n")
-            msgList.append("中級素材換算:"+totalCost.rare3and4ToRare2().toStrBlock(sortByCount=True) + "\n")
-            msgList.append("合計理性価値(SoC抜き):" + "{0:.3f}".format(totalCost.toRiseiValue()) + "\n")
             eqCNOnlyOperators = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if value.hasCNOnlyUEQ()}
             eqCost = ItemCost.sum([value.totalUniqueEQCostCNOnly() for value in eqCNOnlyOperators.values()])
-            msgList.append("未実装モジュールの合計消費:" + eqCost.toStrBlock())
+            msgList.append("未実装モジュールの合計消費:" + eqCost.toStrBlock() + "\n")
+            msgList.append("全合計の中級素材換算:"+(totalCost+eqCost).rare3and4ToRare2().toStrBlock(sortByCount=True) + "\n")
+            msgList.append("合計理性価値(SoC/チップ抜き):" + "{0:.3f}".format(totalCost.toRiseiValue() + eqCost.toRiseiValue()))
+            
             return {"title":title,
                     "msgList":msgList
                     }
