@@ -94,8 +94,8 @@ class ItemCost:
         self.itemArray.normalize()
         return self
     
-    def toRiseiValue(self)->float:
-        riseiValue = CalculatorManager.getValues(True,CalculateMode.SANITY)
+    def toRiseiValue(self,glob:bool = True)->float:
+        riseiValue = CalculatorManager.getValues(glob,CalculateMode.SANITY)
         # riseiDict = riseiValue.toIdValueDict()
         # ret = 0
         # copy = self.copy()
@@ -106,8 +106,8 @@ class ItemCost:
         # return ret
         return riseiValue.getValueFromItemArray(self.itemArray)
     
-    def toRiseiValue_OnlyValueTarget(self)->float:
-        riseiValue = CalculatorManager.getValues(True,CalculateMode.SANITY)
+    def toRiseiValue_OnlyValueTarget(self,glob:bool = True)->float:
+        riseiValue = CalculatorManager.getValues(glob,CalculateMode.SANITY)
         # riseiDict = riseiValue.toIdValueDict()
         # ret = 0
         # copy = self.copy()
@@ -377,7 +377,7 @@ class OperatorCostsCalculator:
             eqCost = ItemCost.sum([value.totalUniqueEQCostCNOnly() for value in eqCNOnlyOperators.values()])
             msgList.append("未実装モジュールの合計消費:" + eqCost.toStrBlock() + "\n")
             msgList.append("全合計の中級素材換算:"+(totalCost+eqCost).rare3and4ToRare2().toStrBlock(sortByCount=True) + "\n")
-            totalCostValue = totalCost.toRiseiValue() + eqCost.toRiseiValue()
+            totalCostValue = totalCost.toRiseiValue(False) + eqCost.toRiseiValue(False)
             msgList.append(f"合計理性価値(補完チップ系抜き):{totalCostValue:.3f}\n")
             msgList.append(f"源石換算 : {totalCostValue/135:.3f}\n")
             msgList.append(f"日本円換算 : {totalCostValue/135/175*10000:.0f} 円")
