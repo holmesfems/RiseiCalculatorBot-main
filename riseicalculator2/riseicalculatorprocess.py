@@ -711,9 +711,9 @@ class Calculator:
         #誤差を設定する
         probMatrix = self.getProbMatrix(mode)
         probMatrixInv = np.linalg.inv(probMatrix)
-        divMatrix = self.getDevMatrix(mode)
-        divArray = np.dot(np.dot(probMatrixInv**2,divMatrix**2),values.valueArray**2)**0.5
-        values.setDevArray(divArray)
+        devMatrix = self.getDevMatrix(mode)
+        devArray = np.dot(np.dot(probMatrixInv**2,devMatrix**2),values.valueArray**2)**0.5
+        values.setDevArray(devArray)
         return values
 
     def init(self,validBaseMinTimes:int=3000,mode:CalculateMode = None, forceRecreateStageInfo:bool = False):
