@@ -149,7 +149,7 @@ modeChoice = [Choice(name="Sanity",value ="sanity"),Choice(name="Time",value ="t
         Choice(name = "初級資格証効率表",value = "te2list"),
         Choice(name = "上級資格証効率表",value = "te3list"),
         Choice(name = "特別引換証効率表",value = "special_list"),
-        Choice(name = "契約賞金引換効率表(CC#11)",value = "cclist"),
+        Choice(name = f"契約賞金引換効率表(CC#{CalculatorManager.CC_NUMBER})",value = "cclist"),
     ],
     target_item = targetItemChoice,
     mode = modeChoice

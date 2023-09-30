@@ -95,7 +95,7 @@ class CCExchangeItem:
 with open(f"riseicalculator2/price_cc{__ccNumber}.yaml","rb") as f:
     __price_CC = yaml.safe_load(f)
     __price_CC:List[CCExchangeItem] = [CCExchangeItem(item) for item in __price_CC]
-    print(__price_CC)
+    #print(__price_CC)
 
 def getCCList() -> List[CCExchangeItem]:
     return __price_CC
