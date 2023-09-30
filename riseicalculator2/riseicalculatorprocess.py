@@ -811,6 +811,7 @@ class Calculator:
 class CalculatorManager:
     calculatorForGlobal = Calculator(True)
     calculatorForMainland = Calculator(False)
+    CC_NUMBER = "12"
 
     def selectCalculator(isGlobal:bool):
         return CalculatorManager.calculatorForGlobal if isGlobal else CalculatorManager.calculatorForMainland
@@ -1115,7 +1116,7 @@ class CalculatorManager:
         elif toPrintTarget is CalculatorManager.ToPrint.CCLIST:
             #契約賞金引換証
             Price_CC = getCCList()
-            title = "契約賞金引換効率(CC#12)"
+            title = f"契約賞金引換効率(CC#{CalculatorManager.CC_NUMBER})"
             ticket_efficiency_CC = [(x.fullname(),(riseiValues.getValueFromZH(x.name)/x.value,riseiValues.getStdDevFromZH(x.name)/x.value)) for x in Price_CC]
             ticket_efficiency_CC_sorted = sorted(ticket_efficiency_CC,key = lambda x:x[1][0],reverse=True)
             toPrint = [["{0}: {1:.3f} ± {2:.3f}".format(CalculatorManager.left(18,name),value[0],value[1]*2)] for name,value in ticket_efficiency_CC_sorted]

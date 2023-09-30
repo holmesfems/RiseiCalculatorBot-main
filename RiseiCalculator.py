@@ -255,7 +255,7 @@ async def eventstage_autocomplete(inter:Interaction,current:str)->List[app_comma
         Choice(name = "初級資格証効率表",value = "te2list"),
         Choice(name = "上級資格証効率表",value = "te3list"),
         Choice(name = "特別引換証効率表",value = "special_list"),
-        Choice(name = "契約賞金引換効率表(CC#11)",value = "cclist"),
+        Choice(name = f"契約賞金引換効率表(CC#{CalculatorManager.CC_NUMBER})",value = "cclist"),
     ],
     mode = modeChoice
 )
