@@ -96,26 +96,10 @@ class ItemCost:
     
     def toRiseiValue(self,glob:bool = True)->float:
         riseiValue = CalculatorManager.getValues(glob,CalculateMode.SANITY)
-        # riseiDict = riseiValue.toIdValueDict()
-        # ret = 0
-        # copy = self.copy()
-        # copy.normalize()
-        # for key,value in copy.itemArray.toIdCountDict().items():
-        #     if(not riseiDict.get(key)):continue
-        #     ret += value * riseiDict[key]
-        # return ret
         return riseiValue.getValueFromItemArray(self.itemArray)
     
     def toRiseiValue_OnlyValueTarget(self,glob:bool = True)->float:
         riseiValue = CalculatorManager.getValues(glob,CalculateMode.SANITY)
-        # riseiDict = riseiValue.toIdValueDict()
-        # ret = 0
-        # copy = self.copy()
-        # copy.normalize()
-        # for key,value in copy.itemArray.toIdCountDict().items():
-        #     if(not riseiDict.get(key)):continue
-        #     ret += value * riseiDict[key]
-        # return ret
         return riseiValue.getValueFromItemArray_OnlyValueTarget(self.itemArray)
     
     def toStrBlock(self,sortByCount = False):

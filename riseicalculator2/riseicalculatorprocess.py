@@ -313,8 +313,8 @@ class StageItem:
     #誤差項を計算
     def getStdDev(self,riseiValue:RiseiOrTimeValues) -> float:
         stdev = self.toStdDevArray(riseiValue.isGlobal)
-        dev1 = np.dot(stdev**2,riseiValue.valueArray**2)
-        dev2 = np.dot(self.toDropArray(riseiValue.isGlobal)**2,riseiValue.devArray**2)
+        dev1 = np.dot(stdev**2,riseiValue.valueArray)
+        dev2 = np.dot(self.toDropArray(riseiValue.isGlobal),riseiValue.devArray**2)
         dev = dev1 + dev2
         return dev ** 0.5
 
