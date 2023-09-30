@@ -205,6 +205,15 @@ class RiseiOrTimeValues:
             value = self.getValueFromZH(key)
             ret += count * value
         return ret
+    
+    def getValueFromItemArray_OnlyValueTarget(self,array:itemArray.ItemArray) -> float:
+        zhDict = array.toZHStrCountDict()
+        ret = 0
+        for key,count in zhDict.items():
+            if(key not in getValueTarget(self.isGlobal)): continue
+            value = self.getValueFromZH(key)
+            ret += count * value
+        return ret
 
 class StageItem:
     def __init__(self,dictItem):

@@ -106,6 +106,18 @@ class ItemCost:
         # return ret
         return riseiValue.getValueFromItemArray(self.itemArray)
     
+    def toRiseiValue_OnlyValueTarget(self)->float:
+        riseiValue = CalculatorManager.getValues(True,CalculateMode.SANITY)
+        # riseiDict = riseiValue.toIdValueDict()
+        # ret = 0
+        # copy = self.copy()
+        # copy.normalize()
+        # for key,value in copy.itemArray.toIdCountDict().items():
+        #     if(not riseiDict.get(key)):continue
+        #     ret += value * riseiDict[key]
+        # return ret
+        return riseiValue.getValueFromItemArray_OnlyValueTarget(self.itemArray)
+    
     def toStrBlock(self,sortByCount = False):
         sortedArray = self.itemArray.copy()
         items = sortedArray.toNameCountDict().items()
@@ -328,7 +340,7 @@ class OperatorCostsCalculator:
     def operatorCostList(selection:CostListSelection) -> Dict:
         if(selection is OperatorCostsCalculator.CostListSelection.STAR5ELITE):
             star5Operators = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if value.stars == 5 and not value.isPatch}
-            riseiValueDict = {key:value.totalPhaseCost().toRiseiValue() for key,value in star5Operators.items()}
+            riseiValueDict = {key:value.totalPhaseCost().toRiseiValue_OnlyValueTarget() for key,value in star5Operators.items()}
             sortedValueDict = {key:value for key,value in sorted(riseiValueDict.items(),key=lambda x:x[1],reverse=True)}
             title = "★5昇進素材価値表"
             headerMsg = "SoCは以下の計算に含まれません:"
@@ -365,8 +377,10 @@ class OperatorCostsCalculator:
             eqCost = ItemCost.sum([value.totalUniqueEQCostCNOnly() for value in eqCNOnlyOperators.values()])
             msgList.append("未実装モジュールの合計消費:" + eqCost.toStrBlock() + "\n")
             msgList.append("全合計の中級素材換算:"+(totalCost+eqCost).rare3and4ToRare2().toStrBlock(sortByCount=True) + "\n")
-            msgList.append("合計理性価値(SoC/チップ抜き):" + "{0:.3f}".format(totalCost.toRiseiValue() + eqCost.toRiseiValue()))
-            
+            totalCostValue = totalCost.toRiseiValue() + eqCost.toRiseiValue()
+            msgList.append(f"合計理性価値(チップ強化抜き):{totalCostValue:.3f}\n")
+            msgList.append(f"源石換算:{totalCostValue/135:.3f}\n")
+            msgList.append(f"日本円換算:{totalCostValue/135/175*10000:.3f}")
             return {"title":title,
                     "msgList":msgList
                     }
