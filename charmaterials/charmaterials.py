@@ -378,9 +378,9 @@ class OperatorCostsCalculator:
             msgList.append("未実装モジュールの合計消費:" + eqCost.toStrBlock() + "\n")
             msgList.append("全合計の中級素材換算:"+(totalCost+eqCost).rare3and4ToRare2().toStrBlock(sortByCount=True) + "\n")
             totalCostValue = totalCost.toRiseiValue() + eqCost.toRiseiValue()
-            msgList.append(f"合計理性価値(チップ強化抜き):{totalCostValue:.3f}\n")
-            msgList.append(f"源石換算:{totalCostValue/135:.3f}\n")
-            msgList.append(f"日本円換算:{totalCostValue/135/175*10000:.3f}")
+            msgList.append(f"合計理性価値(補完チップ系抜き):{totalCostValue:.3f}\n")
+            msgList.append(f"源石換算 : {totalCostValue/135:.3f}\n")
+            msgList.append(f"日本円換算 : {totalCostValue/135/175*10000:.3f} 円")
             return {"title":title,
                     "msgList":msgList
                     }

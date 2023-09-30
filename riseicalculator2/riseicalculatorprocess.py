@@ -1118,7 +1118,7 @@ class CalculatorManager:
             title = "契約賞金引換効率(CC#12)"
             ticket_efficiency_CC = [(x.fullname(),(riseiValues.getValueFromZH(x.name)/x.value,riseiValues.getStdDevFromZH(x.name)/x.value)) for x in Price_CC]
             ticket_efficiency_CC_sorted = sorted(ticket_efficiency_CC,key = lambda x:x[1][0],reverse=True)
-            toPrint = [["{0}: {1:.3f} ± {2:.3f}".format(CalculatorManager.left(20,name),value[0],value[1]*2)] for name,value in ticket_efficiency_CC_sorted]
+            toPrint = [["{0}: {1:.3f} ± {2:.3f}".format(CalculatorManager.left(18,name),value[0],value[1]*2)] for name,value in ticket_efficiency_CC_sorted]
             msgDict = {
                 "title":title,
                 "msgList" : [CalculatorManager.dumpToPrint(toPrint)]
