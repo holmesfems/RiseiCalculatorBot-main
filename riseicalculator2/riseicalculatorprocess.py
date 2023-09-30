@@ -783,10 +783,14 @@ class Calculator:
     def autoCompleteEventStage(self,targetCode:str,limit:int=25) -> List[Tuple[str,str]]:
         return [(str(x)+x.getMainDropJaStr(),str(x)) for x in self.searchEventStage(targetCode,DEFAULT_SHOW_MIN_TIMES)][:limit]
     
+    #理性効率の誤差項を計算する
     def getStageDev(self,targetStage:StageItem,values:RiseiOrTimeValues) -> float:
         baseMatrix = self.getBaseStageMatrix(values.mode)
         if(baseMatrix.contains(targetStage)): return 0
-        return targetStage.getStdDev(values) / targetStage.getCost(values.mode)
+        cost = targetStage.getCost(values.mode)
+        cost = cost if cost > 0 else 1
+        #効率の誤差 = ステージ価値の誤差 / ステージコスト
+        return targetStage.getStdDev(values) / cost
     
     def toDataFrame(self,mode:CalculateMode) -> pd.DataFrame:
         columnsName = getDataFrameColumnsName(self.isGlobal)
