@@ -944,7 +944,7 @@ class CalculatorManager:
                 ]
             toPrint += [
                 ["主素材効率     : {0:.1f}%".format(100*stage.getPartialEfficiency(riseiValues,categoryValue["Items"]))],
-                ["95%信頼区間(2σ): {0:.1f}%".format(100*calculator.getStageDev(stage,riseiValues))],
+                ["99%信頼区間(3σ): {0:.1f}%".format(100*calculator.getStageDev(stage,riseiValues)*3)],
                 ["昇進効率       : {0:.1f}%".format(100*stage.getPartialEfficiency(riseiValues,getValueTarget(isGlobal)[4:]))],
                 ["試行数         : ",str(stage.maxTimes())],
             ]
@@ -983,7 +983,7 @@ class CalculatorManager:
             toPrint = [
                 ["マップ名       : ",stage.name],
                 ["総合{1}効率    : {0:.1f}%".format(100*stage.getEfficiency(riseiValues),str(mode))],
-                ["95%信頼区間(2σ): {0:.1f}%".format(100*calculator.getStageDev(stage,riseiValues))],
+                ["99%信頼区間(3σ): {0:.1f}%".format(100*calculator.getStageDev(stage,riseiValues)*3)],
             ]
             dropCategoryList = calculator.stageInfo.stageToCategory(stage)
             if len(dropCategoryList) == 0:
