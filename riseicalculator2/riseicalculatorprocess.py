@@ -791,12 +791,13 @@ class Calculator:
     def toDataFrame(self,mode:CalculateMode) -> pd.DataFrame:
         columnsName = getDataFrameColumnsName(self.isGlobal)
         baseMatrix = self.getBaseStageMatrix(mode)
-        rowsName = self.convertionMatrix.getRowsName() + self.constStageMatrix.getRowsName() + baseMatrix.getRowsName() + ["理性価値"]
+        rowsName = self.convertionMatrix.getRowsName() + self.constStageMatrix.getRowsName() + baseMatrix.getRowsName() + ["理性価値","標準偏差"]
         probMatrix = self.getProbMatrix(mode)
         values = self.getValues(mode).valueArray
+        stdev = self.getValues(mode).devArray
         costs = self.getCostArray(mode)
-        mainData = np.vstack((probMatrix,values))
-        mainData = np.hstack((mainData,np.concatenate([costs,[0]]).reshape(-1,1)))
+        mainData = np.vstack((probMatrix,values,stdev))
+        mainData = np.hstack((mainData,np.concatenate([costs,[0,0]]).reshape(-1,1)))
         return pd.DataFrame(mainData,columns=columnsName,index=rowsName)
     
     def dumpToFile(self,mode:CalculateMode):
