@@ -119,20 +119,20 @@ class DropList:
     
     #龍門幣ドロップはここに含まれないので、外部で別途足す
     def toDropArray(self, isGlobal:bool) -> np.ndarray:
-        dropRateList = []
-        for item in getValueTarget(isGlobal):
+        dropRateArray = np.zeros(len(getValueTarget(isGlobal)))
+        for index,item in enumerate(getValueTarget(isGlobal)):
             id = ItemIdToName.zhToId(item)
             dropRate = self.dropDict.get(id,DropItem(0,0)).dropRate
-            dropRateList.append(dropRate)
-        return np.array(dropRateList)
+            dropRateArray[index] = dropRate
+        return dropRateArray
 
     def toTimesArray(self,isGlobal:bool) -> np.ndarray:
-        timesList = []
-        for item in getValueTarget(isGlobal):
+        timesArray = np.zeros(len(getValueTarget(isGlobal)))
+        for index,item in enumerate(getValueTarget(isGlobal)):
             id = ItemIdToName.zhToId(item)
             times = self.dropDict.get(id,DropItem(0,2)).times
-            timesList.append(times)
-        return np.array(timesList)
+            timesArray[index] = times
+        return timesArray
     
     def toStdDevArray(self,isGlobal:bool) -> np.ndarray:
         dropArray = self.toDropArray(isGlobal)
