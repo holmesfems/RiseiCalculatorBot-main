@@ -91,6 +91,36 @@ class ItemArray:
             self.__dict = {key:value for key,value in sortedDictItems if abs(value)>EPSILON}
             self.__normalized = True
         return self
+    
+    #職SoCを汎用SoCに変換する 理性価値計算用
+    def normalizeSoC(self)->ItemArray:
+        newDict = {}
+        reflectSoC = {
+            #初級SoC
+            ("3211","3221","3231","3241","3251","3261","3271","3281") : "3201_CUSTOM",
+            #中級SoC
+            ("3212","3222","3232","3242","3252","3262","3272","3282") : "3202_CUSTOM",
+            #上級SoC
+            ("3213","3223","3233","3243","3253","3263","3273","3283") : "3203_CUSTOM",
+        }
+        def reflectSocId(socId):
+            key = list(filter(lambda x: socId in x,reflectSoC.keys()))
+            if(key):
+                return reflectSoC[key[0]]
+            else:
+                return None
+        def addDict(id,value):
+            if(newDict.get(id,None)!=None):
+                newDict[id] += value
+            else:
+                newDict[id] = value
+        for key,value in self.__dict.items():
+            socId = reflectSocId(key)
+            if(socId):
+                addDict(socId,value)
+            else:
+                addDict(key,value)
+        return ItemArray(newDict)
 
     def getById(self,idStr:str) -> float:
         return self.__dict.get(idStr,0)
@@ -107,7 +137,6 @@ class ItemArray:
         self.normalize()
         return {ItemIdToName.getStr(key):value for key,value in self.__dict.items()}
 
-    
     def toZHStrCountDict(self)->Dict[str,float]:
         self.normalize()
         return {ItemIdToName.getZH(key) : value for key,value in self.__dict.items()}

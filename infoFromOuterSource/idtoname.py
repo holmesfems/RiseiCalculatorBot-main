@@ -34,7 +34,7 @@ class ItemIdToName:
             ItemIdToName.__JAToid[value["name"]] = key
         
         #理性価値計算で使う特殊なアイテムのIDを入れる
-        with open("./infoFromOuterSource/costomItemId.json","rb") as file:
+        with open("./infoFromOuterSource/customItemId.json","rb") as file:
             costomItems = yaml.safe_load(file)
         for item in costomItems:
             ItemIdToName.__idToStr[item["id"]] = item["ja"]

@@ -1,6 +1,9 @@
 from typing import List
 import yaml
 from collections import ChainMap
+import sys
+sys.path.append('../')
+from infoFromOuterSource.idtoname import ItemIdToName
 
 #ドロップアイテム&ステージのカテゴリ情報を入手
 with open("riseicalculator2/StageCategoryDict.json","rb") as file:
@@ -71,6 +74,33 @@ ValueTarget_new:List[str] = [
     
 ]
 
+#契約賞金引換証
+__ccNumber = '12'
+class CCExchangeItem:
+    def __init__(self,dictItem:dict):
+        self.name = dictItem["name"]
+        self.quantity = dictItem["quantity"]
+        self.value = dictItem["value"]
+
+    def __repr__(self)->str:
+        return f"{self.fullname()}:{self.value}"
+    
+    def fullname(self)->str:
+        jaName = ItemIdToName.zhToJa(self.name)
+        if(self.quantity == "∞"):
+            return f"{jaName}({self.quantity})"
+        else:
+            return f"{jaName}"
+
+with open(f"riseicalculator2/price_cc{__ccNumber}.yaml","rb") as f:
+    __price_CC = yaml.safe_load(f)
+    __price_CC:List[CCExchangeItem] = [CCExchangeItem(item) for item in __price_CC]
+    print(__price_CC)
+
+def getCCList() -> List[CCExchangeItem]:
+    return __price_CC
+
+
 #大陸版基準、グロ版基準調整用
 def getGlobalOrMainland(ParamName,glob:bool):
     if glob:
@@ -95,3 +125,4 @@ def getStageCategoryDict(glob:bool):
         return StageCategoryDict["main"]
     else:
         return ChainMap(StageCategoryDict["main"],StageCategoryDict["new"])
+    

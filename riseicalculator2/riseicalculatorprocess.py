@@ -5,7 +5,7 @@ import sys
 sys.path.append('../')
 from infoFromOuterSource.idtoname import ItemIdToName,ZoneIdToName
 from infoFromOuterSource.formulation import Formula
-from rcutils import netutil,getnow,hasduplicates
+from rcutils import netutil,getnow,hasduplicates,itemArray
 import pandas as pd
 import datetime
 import random
@@ -149,6 +149,9 @@ class DropList:
         return self.__mintimes
     
 class RiseiOrTimeValues:
+    with open("riseicalculator2/constValues.yaml","rb") as f:
+        __constValueDict = yaml.safe_load(f)
+
     def __init__(self,valueArray:np.ndarray,isGlobal:bool,mode:CalculateMode):
         self.isGlobal = isGlobal
         self.valueArray = valueArray
@@ -172,7 +175,10 @@ class RiseiOrTimeValues:
     
     def getValueFromZH(self,zhstr:str) -> float:
         index = valueTargetIndexOf(zhstr,self.isGlobal)
-        return self.valueArray[index]
+        if(index >= 0):
+            return self.valueArray[index]
+        else:
+            return RiseiOrTimeValues.__constValueDict.get(zhstr,0.0)
     
     def getValueFromCode(self,codeStr:str) -> float:
         zhstr = ItemIdToName.getZH(codeStr)
@@ -180,15 +186,25 @@ class RiseiOrTimeValues:
     
     def getStdDevFromZH(self,zhstr:str) -> float:
         index = valueTargetIndexOf(zhstr,self.isGlobal)
-        return self.devArray[index]
+        if(index >= 0):
+            return self.devArray[index]
+        else:
+            return 0.0
 
     def setDevArray(self,stdDevArray:np.ndarray):
         self.devArray = stdDevArray
 
     def toIdValueDict(self) -> Dict[str,float]:
         valueTarget = getValueTarget(self.isGlobal)
-        return {ItemIdToName.zhToId(valueTarget[i]):self.valueArray[i] for i in range(len(valueTarget))} 
-
+        return {ItemIdToName.zhToId(valueTarget[i]):self.valueArray[i] for i in range(len(valueTarget))}
+    
+    def getValueFromItemArray(self,array:itemArray.ItemArray) -> float:
+        zhDict = array.normalizeSoC().toZHStrCountDict()
+        ret = 0
+        for key,count in zhDict.items():
+            value = self.getValueFromZH(key)
+            ret += count * value
+        return ret
 
 class StageItem:
     def __init__(self,dictItem):
@@ -1063,10 +1079,8 @@ class CalculatorManager:
         elif toPrintTarget is CalculatorManager.ToPrint.TE2LIST:
             title = "初級資格証効率"
             ticket_efficiency2 = {ItemIdToName.zhToJa(x):(riseiValues.getValueFromZH(x)/Price[x],riseiValues.getStdDevFromZH(x)/Price[x]) for x in getItemRarity2(isGlobal)}
-            toPrint = []
             ticket_efficiency2_sorted = sorted(ticket_efficiency2.items(),key = lambda x:x[1][0],reverse=True)
-            for key,value in ticket_efficiency2_sorted:
-                toPrint.append(["{0}:\t{1:.3f} ± {2:.3f}".format(CalculatorManager.left(15,key),value[0],value[1]*2)])
+            toPrint = [["{0}:\t{1:.3f} ± {2:.3f}".format(CalculatorManager.left(15,key),value[0],value[1]*2)] for key,value in ticket_efficiency2_sorted]
             msgDict = {
                 "title":title,
                 "msgList" : [CalculatorManager.dumpToPrint(toPrint)]
@@ -1074,10 +1088,8 @@ class CalculatorManager:
         elif toPrintTarget is CalculatorManager.ToPrint.TE3LIST:
             title = "上級資格証効率"
             ticket_efficiency3 = {ItemIdToName.zhToJa(x):(riseiValues.getValueFromZH(x)/Price[x],riseiValues.getStdDevFromZH(x)/Price[x]) for x in getItemRarity3(isGlobal)}
-            toPrint = []
             ticket_efficiency3_sorted = sorted(ticket_efficiency3.items(),key = lambda x:x[1][0],reverse=True)
-            for key,value in ticket_efficiency3_sorted:
-                toPrint.append(["{0}:\t{1:.3f} ± {2:.3f}".format(CalculatorManager.left(15,key),value[0],value[1]*2)])
+            toPrint = [["{0}:\t{1:.3f} ± {2:.3f}".format(CalculatorManager.left(15,key),value[0],value[1]*2)] for key,value in ticket_efficiency3_sorted]
             msgDict = {
                 "title":title,
                 "msgList" : [CalculatorManager.dumpToPrint(toPrint)]
@@ -1085,31 +1097,19 @@ class CalculatorManager:
         elif toPrintTarget is CalculatorManager.ToPrint.SPECIAL_LIST:
             title = "特別引換証効率"
             ticket_efficiency_special = {ItemIdToName.zhToJa(x):(riseiValues.getValueFromZH(x)/Price_Special[x],riseiValues.getStdDevFromZH(x)/Price_Special[x]) for x in getItemRarity2(isGlobal)+getItemRarity3(isGlobal)}
-            toPrint = []
             ticket_efficiency_special_sorted = sorted(ticket_efficiency_special.items(),key = lambda x:x[1][0],reverse=True)
-            for key,value in ticket_efficiency_special_sorted:
-                toPrint.append(["{0}:\t{1:.3f} ± {2:.3f}".format(CalculatorManager.left(15,key),value[0],value[1]*2)])
+            toPrint = [["{0}:\t{1:.3f} ± {2:.3f}".format(CalculatorManager.left(15,key),value[0],value[1]*2)] for key,value in ticket_efficiency_special_sorted]
             msgDict = {
                 "title":title,
                 "msgList" : [CalculatorManager.dumpToPrint(toPrint)]
             }
         elif toPrintTarget is CalculatorManager.ToPrint.CCLIST:
             #契約賞金引換証
-            ccNumber = '11'
-            Price_CC = list()
-            try:
-                with open('riseicalculator2/price_cc{0}.txt'.format(ccNumber), 'r', encoding='utf8') as f:
-                    for line in f.readlines():
-                        name, value ,quantity = line.split()
-                        Price_CC.append([name,float(value),quantity])
-            except FileNotFoundError as e:
-                return "CC#{0}の交換値段が未設定です！".format(ccNumber)
-            title = "契約賞金引換効率(CC#{0})".format(ccNumber)
-            ticket_efficiency_CC = [(ItemIdToName.zhToJa(x[0]),(riseiValues.getValueFromZH(x[0])/x[1],riseiValues.getStdDevFromZH(x[0])/x[1]),x[2]) for x in Price_CC if x[0] in getValueTarget(isGlobal)]
+            Price_CC = getCCList()
+            title = "契約賞金引換効率(CC#12)"
+            ticket_efficiency_CC = [(x.fullname(),(riseiValues.getValueFromZH(x.name)/x.value,riseiValues.getStdDevFromZH(x.name)/x.value)) for x in Price_CC]
             ticket_efficiency_CC_sorted = sorted(ticket_efficiency_CC,key = lambda x:x[1][0],reverse=True)
-            toPrint = []
-            for key,value,quantity in ticket_efficiency_CC_sorted:
-                toPrint.append(["{0}: {1:.3f} ± {2:.3f}".format(CalculatorManager.left(20,key+'({0})'.format(quantity)),value[0],value[1]*2)])
+            toPrint = [["{0}: {1:.3f} ± {2:.3f}".format(CalculatorManager.left(20,name),value[0],value[1]*2)] for name,value in ticket_efficiency_CC_sorted]
             msgDict = {
                 "title":title,
                 "msgList" : [CalculatorManager.dumpToPrint(toPrint)]
