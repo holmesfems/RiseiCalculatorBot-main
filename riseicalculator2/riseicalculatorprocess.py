@@ -1071,6 +1071,7 @@ class CalculatorManager:
         riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         calculator = CalculatorManager.selectCalculator(isGlobal)
         msgDict:dict = {}
+        file = None
         if toPrintTarget is CalculatorManager.ToPrint.BASEMAPS:
             baseMapStr = str(calculator.getBaseStageMatrix(mode))
             msg = "`{0}`".format(baseMapStr)
@@ -1120,16 +1121,26 @@ class CalculatorManager:
             }
         elif toPrintTarget is CalculatorManager.ToPrint.CCLIST:
             #契約賞金引換証
+            CCLIST_FILENAME = "CCList.xlsx"
             Price_CC = getCCList()
             title = f"契約賞金引換効率(CC#{CalculatorManager.CC_NUMBER})"
-            ticket_efficiency_CC = [(x.fullname(),(riseiValues.getValueFromZH(x.name)/x.value,riseiValues.getStdDevFromZH(x.name)/x.value)) for x in Price_CC]
-            ticket_efficiency_CC_sorted = sorted(ticket_efficiency_CC,key = lambda x:x[1][0],reverse=True)
+            def efficiency(x:CCExchangeItem):
+                return riseiValues.getValueFromZH(x.name)/x.value
+            sorted_PriceCC = sorted(Price_CC,key = efficiency,reverse=True)
+            ticket_efficiency_CC_sorted = [(x.fullname(),(efficiency(x),riseiValues.getStdDevFromZH(x.name)/x.value)) for x in sorted_PriceCC]
             toPrint = [["{0}: {1:.3f} ± {2:.3f}".format(CalculatorManager.left(18,name),value[0],value[1]*2)] for name,value in ticket_efficiency_CC_sorted]
             msgDict = {
                 "title":title,
                 "msgList" : [CalculatorManager.dumpToPrint(toPrint)]
             }
-        file = None
+            if toCsv:
+                columns = ["素材名","値段","在庫","交換効率"]
+                rows = [[x.name,x.value,x.quantity,efficiency(x)]for x in sorted_PriceCC]
+                df = pd.DataFrame(rows,columns=columns)
+                df.to_excel(CCLIST_FILENAME)
+                file = CCLIST_FILENAME
+                toCsv = False
+                
         if toCsv:
             calculator.dumpToFile(mode)
             file = EXCEL_FILENAME
