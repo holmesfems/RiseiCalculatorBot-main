@@ -225,7 +225,7 @@ class StageItem:
         self.stageType = dictItem["stageType"]
         #一部のクリア時間は理論値と乖離するので、個別で調整
         minClearTime = dictItem["minClearTime"]
-        if(minClearTime == None): minClearTime = 0
+        if(minClearTime is None): minClearTime = 0
         self.minClearTime = minClearTimeInjection.get(self.name,minClearTime/1000) #等倍秒
         #ドロップリストを記録する
         self.dropList = DropList()
@@ -734,18 +734,18 @@ class Calculator:
         self.initialized = True
     
     def calculate(self,mode:CalculateMode = None,validBaseMinTimes:int=3000):
-        if (mode == None or mode is CalculateMode.SANITY):
+        if (mode is None or mode is CalculateMode.SANITY):
             self.baseStageMatrixForSanity = Calculator.BaseStageMatrix(self.isGlobal,self.stageInfo,validBaseMinTimes)
             self.riseiValues = self.solveOptimizedValue(CalculateMode.SANITY)
-        if (mode == None or mode is CalculateMode.TIME):
+        if (mode is None or mode is CalculateMode.TIME):
             self.baseStageMatrixForTime = Calculator.BaseStageMatrix(self.isGlobal,self.stageInfo,validBaseMinTimes)
             self.timeValues = self.solveOptimizedValue(CalculateMode.TIME)
         
     def tryRecalculate(self,mode:CalculateMode = None, validBaseMinTimes:int = 3000)->bool:
-        #mode == None: いずれかのvalidBaseMinTimesと違う
-        if (mode == None and self.baseStageMatrixForSanity.validBaseMinTimes == validBaseMinTimes and self.baseStageMatrixForTime.validBaseMinTimes == validBaseMinTimes):
+        #mode is None: いずれかのvalidBaseMinTimesと違う
+        if (mode is None and self.baseStageMatrixForSanity.validBaseMinTimes == validBaseMinTimes and self.baseStageMatrixForTime.validBaseMinTimes == validBaseMinTimes):
             return False
-        if mode != None:
+        if mode is not None:
             baseStageMatrix = self.getBaseStageMatrix(mode)
             if baseStageMatrix.lastUpdated > self.stageInfo.lastUpdated and baseStageMatrix.validBaseMinTimes == validBaseMinTimes:
                 return False
@@ -841,7 +841,7 @@ class CalculatorManager:
 
     def getValues(isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME) -> RiseiOrTimeValues:
         calculator = CalculatorManager.selectCalculator(isGlobal)
-        if (calculator == None):
+        if (calculator is None):
             calculator = Calculator(isGlobal,False) 
             CalculatorManager.setCalculator(isGlobal,calculator)
         calculator.tryReInit(CalculatorManager.__getTimeDelta(cache_minutes),baseMinTimes,mode)
@@ -1135,7 +1135,7 @@ class CalculatorManager:
             }
             if toCsv:
                 columns = ["素材名","値段","在庫","交換効率"]
-                rows = [[x.name,x.value,x.quantity,efficiency(x)]for x in sorted_PriceCC]
+                rows = [[ItemIdToName.zhToJa(x.name),x.value,x.quantity,efficiency(x)]for x in sorted_PriceCC]
                 df = pd.DataFrame(rows,columns=columns)
                 df.to_excel(CCLIST_FILENAME)
                 file = CCLIST_FILENAME
