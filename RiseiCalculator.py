@@ -97,11 +97,12 @@ def showException():
     return msg
 
 def safeCallChoiceVal(choice):
-    if choice != None:
-        if(isinstance(choice,Choice)):
-            return choice.value
-        return choice
-    return None
+    if choice is None:
+        return None
+    if(isinstance(choice,Choice)):
+        return choice.value
+    return choice
+    
 
 tree = app_commands.CommandTree(client)
 

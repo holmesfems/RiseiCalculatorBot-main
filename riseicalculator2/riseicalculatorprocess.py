@@ -313,8 +313,8 @@ class StageItem:
     
     #誤差項を計算
     def getStdDev(self,riseiValue:RiseiOrTimeValues) -> float:
-        stdev = self.toStdDevArray(riseiValue.isGlobal)
-        dev1 = np.dot(stdev**2,riseiValue.valueArray**2)
+        stdDev = self.toStdDevArray(riseiValue.isGlobal)
+        dev1 = np.dot(stdDev**2,riseiValue.valueArray**2)
         dev2 = np.dot(self.toDropArray(riseiValue.isGlobal)**2,riseiValue.devArray**2)
         dev = dev1 + dev2
         return dev ** 0.5
@@ -799,9 +799,9 @@ class Calculator:
         rowsName = self.convertionMatrix.getRowsName() + self.constStageMatrix.getRowsName() + baseMatrix.getRowsName() + ["理性価値","標準偏差"]
         probMatrix = self.getProbMatrix(mode)
         values = self.getValues(mode).valueArray
-        stdev = self.getValues(mode).devArray
+        stdDev = self.getValues(mode).devArray
         costs = self.getCostArray(mode)
-        mainData = np.vstack((probMatrix,values,stdev))
+        mainData = np.vstack((probMatrix,values,stdDev))
         mainData = np.hstack((mainData,np.concatenate([costs,[0,0]]).reshape(-1,1)))
         return pd.DataFrame(mainData,columns=columnsName,index=rowsName)
     
@@ -1085,9 +1085,9 @@ class CalculatorManager:
             toPrint = []
             for key in getValueTarget(isGlobal):
                 value = riseiValues.getValueFromZH(key)
-                stddev = riseiValues.getStdDevFromZH(key)
+                stdDev = riseiValues.getStdDevFromZH(key)
                 toPrint.append([
-                    "{0}: {1:.3f} ± {2:.3f}".format(CalculatorManager.left(15,valueTargetZHToJA(key)),value,stddev*2)
+                    "{0}: {1:.3f} ± {2:.3f}".format(CalculatorManager.left(15,valueTargetZHToJA(key)),value,stdDev*2)
                 ])
             msgDict = {
                 "title":title,

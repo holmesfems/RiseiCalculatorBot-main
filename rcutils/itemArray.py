@@ -110,7 +110,7 @@ class ItemArray:
             else:
                 return None
         def addDict(id,value):
-            if(newDict.get(id,None)!=None):
+            if(newDict.get(id,None) is not None):
                 newDict[id] += value
             else:
                 newDict[id] = value

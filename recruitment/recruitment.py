@@ -80,7 +80,7 @@ def createTagList(tagNameList):
     ret = list()
     for tagName in tagNameList:
         tagClass = createTag(tagName)
-        if(tagClass != None): ret.append(tagClass)
+        if(tagClass is not None): ret.append(tagClass)
     return ret
 
 def createCombinations(tagClassList,number):
