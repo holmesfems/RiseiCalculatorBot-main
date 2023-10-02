@@ -45,6 +45,7 @@ with open('riseicalculator2/price_special.txt', 'r', encoding='utf8') as f:
 new_zone:List[str] = [
 #    'main_11', #11章
     'main_12', #12章
+    'main_13', #13章
     'permanent_sidestory_14_zone1', #LE
     'permanent_sidestory_15_zone1', #DV
     'permanent_sub_5_zone1', #CW
