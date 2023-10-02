@@ -11,7 +11,7 @@ valueDict = {
     "芯片助剂":90*(30*(1-12*LMDVALUE_1000/1000)/21),
 }
 valueDict["双芯片"] = 2*valueDict["芯片组"] + valueDict["芯片助剂"]
-valueDict["模组数据块"]=120*(30/21*(1-0.012*LMDVALUE_1000/1000))
+valueDict["模组数据块"]=120*(30*(1-12*LMDVALUE_1000/1000)/21)
 
 print(valueDict)
 
