@@ -1,9 +1,9 @@
-from paddleocr import PaddleOCR, draw_ocr
+import os
 import yaml
 import itertools
 from typing import Any,List
-
-ocr = PaddleOCR(lang="japan")
+from google.cloud import vision
+from google.auth import api_key
 
 with open("./recruitment/tagList.json","rb") as file:
     __tagList = yaml.safe_load(file)
@@ -16,18 +16,22 @@ __ocrDict = {item:item for item in __tagList}
 def filterNotNone(_list:list) -> list:
     return list(filter(lambda x: x is not None,_list))
 
-def matchTag(ocrtext:str) -> str:
+def matchTag(result:str) -> str:
+    ret = []
     for key in __ocrDict.keys():
-        if(key in ocrtext): return __ocrDict[key]
-    return None
+        if(key in result): ret.append(key)
+    return ret
 
 def taglistFromImage(image:Any)->List[str]:
-    result = ocr.ocr(image)
-    result = [line[1][0] for line in result]
+    API_KEY = os.environ["CLOUDVISION_API_KEY"]
+    client = vision.ImageAnnotatorClient(credentials=api_key.Credentials(API_KEY))
+    visionImage = vision.Image()
+    visionImage.source.image_uri = image
+    result = client.document_text_detection(image=visionImage).text_annotations
+    result = result[0].description
     print(result)
-    tagList = filterNotNone([matchTag(text) for text in result])
+    tagList = matchTag(result)
     print(tagList)
-    if(len(tagList != 5)):
+    if(len(tagList) != 5):
         print("warning:識別できていないタグがあります")
     return tagList
-    
