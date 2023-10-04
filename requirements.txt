@@ -7,7 +7,7 @@ pyyaml
 openai
 openpyxl
 StrEnum
-torch==2.1.0+cpu
+torch==2.0.1+cpu
 torchvision==0.15.2+cpu
 torchaudio
 easyocr
