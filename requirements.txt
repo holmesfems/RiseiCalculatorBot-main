@@ -7,5 +7,5 @@ openai
 openpyxl
 StrEnum
 PyMuPDF==1.23.4
-paddlepaddle
+--force-reinstall paddlepaddle==2.5
 paddleocr>=2.0.6
