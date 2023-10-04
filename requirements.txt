@@ -6,6 +6,6 @@ pyyaml
 openai
 openpyxl
 StrEnum
-PyMuPDF==1.14.20
+PyMuPDF==1.23.4
 paddlepaddle
 paddleocr>=2.0.6
