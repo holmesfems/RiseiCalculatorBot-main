@@ -17,6 +17,7 @@ TOKEN = os.environ["BOT_TOKEN"]
 ID = os.environ["BOT_ID"]
 url_botCommands = "https://discord.com/api/v8/applications/{0}/commands".format(ID)
 intents=discord.Intents.default()
+intents.message_content = True
 client = discord.Client(intents=intents,command_prefix = '/')
 t_delta = datetime.timedelta(hours=9)  # 9時間
 JST = datetime.timezone(t_delta, 'JST')  # UTCから9時間差の「JST」タイムゾーン
@@ -422,7 +423,6 @@ async def checkBirtyday():
         embeds = createEmbedList(msg)
         await channel.send(embeds=embeds)
 
-from PIL import Image
 MAXLOG = 10
 MAXMSGLEN = 200
 ISINPROCESS_AICHAT = False
