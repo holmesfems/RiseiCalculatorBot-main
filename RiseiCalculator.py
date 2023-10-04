@@ -422,7 +422,7 @@ async def checkBirtyday():
         embeds = createEmbedList(msg)
         await channel.send(embeds=embeds)
 
-
+from PIL import Image
 MAXLOG = 10
 MAXMSGLEN = 200
 ISINPROCESS_AICHAT = False
@@ -465,7 +465,7 @@ async def on_message(message:discord.Message):
         if(not file): return
         if(not file.width or not file.height): return
         print("画像を確認")
-        image = file.read()
+        image = Image.open(file.read())
         tags = recruitFromOCR.taglistFromImage(image)
         print("タグを読みました",tags)
         if(not tags):return

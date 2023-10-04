@@ -1,7 +1,10 @@
-import easyocr
+from paddleocr import PaddleOCR, draw_ocr
 import yaml
 import itertools
 from typing import Any,List
+
+ocr = PaddleOCR(lang="japan")
+
 with open("./recruitment/tagList.json","rb") as file:
     __tagList = yaml.safe_load(file)
     __tagList = list(itertools.chain.from_iterable(__tagList.values()))
@@ -9,9 +12,6 @@ with open("./recruitment/tagList.json","rb") as file:
 print(__tagList)
 
 __ocrDict = {item:item for item in __tagList}
-__ocrDict['近亜離'] = '近距離'
-__ocrDict['遠亜離'] = '遠距離'
-__ocrDict['回復']   = 'COST回復'
 
 def filterNotNone(_list:list) -> list:
     return list(filter(lambda x: x is not None,_list))
@@ -22,8 +22,8 @@ def matchTag(ocrtext:str) -> str:
     return None
 
 def taglistFromImage(image:Any)->List[str]:
-    reader = easyocr.Reader(['ja'],gpu=False)
-    result = reader.readtext(image,detail=0)
+    result = ocr.ocr(image)
+    result = [line[1][0] for line in result]
     print(result)
     tagList = filterNotNone([matchTag(text) for text in result])
     print(tagList)
