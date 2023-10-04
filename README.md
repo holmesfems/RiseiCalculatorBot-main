@@ -44,6 +44,7 @@ python -m pip install -r ./requirements.txt
 * CHANNEL_ID_HAPPYBIRTHDAY オペレーター誕生日のお祝いに使うチャンネルのID
 * OPENAI_API_KEY chat-gpt会話用、openaiアカウントのAPIキー
 * OPENAI_CHANNELID chat-gpt会話用、会話を受け付けるチャンネルのID
+* CLOUDVISION_API_KEY google cloud visionのAPIキー 公開求人のスクショ認識用
 
 5. メインアプリを起動
 ```
@@ -55,6 +56,8 @@ Herokuなどのサービス(有料)を使えば、リモートサーバーに本
 詳しくは[こちら](https://devcenter.heroku.com/ja/articles/github-integration)の公式記事を参照し、本リポジトリと連携して自動Deploy環境を構築してください
 
 ## ChangedLog
+2023/10/04 公開求人にスクショ認識機能を追加
+
 2023/09/10 riseimaterials,riseievents,riseistagesのコマンドに、excel出力機能を追加。表示したステージのドロップ率を出力します。
 
 ## Licence

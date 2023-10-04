@@ -12,14 +12,16 @@ with open("./recruitment/tagList.json","rb") as file:
 #print(__tagList)
 
 __ocrDict = {item:item for item in __tagList}
+__ocrDict["範囲攻"] = "範囲攻撃"
 
 def filterNotNone(_list:list) -> list:
     return list(filter(lambda x: x is not None,_list))
 
 def matchTag(result:str) -> str:
     ret = []
-    for key in __ocrDict.keys():
-        if(key in result): ret.append(key)
+    for key,value in __ocrDict.items():
+        if value in ret: continue
+        if(key in result): ret.append(value)
     return ret
 
 def taglistFromImage(image:Any)->List[str]:
