@@ -8,4 +8,4 @@ openai
 openpyxl
 StrEnum
 paddlepaddle
-"paddleocr>=2.0.6"
+paddleocr>=2.0.6
