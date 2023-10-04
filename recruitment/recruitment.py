@@ -1,5 +1,6 @@
 import yaml
 import itertools
+from typing import List
 
 class RecruitTag:
     def __init__(self,tagName):
@@ -176,7 +177,7 @@ def searchMapToStringChunks(searchMap):
         chunks.append(chunk)
     return chunks
             
-def recruitDoProcess(inputTagList,minStar):
+def recruitDoProcess(inputTagList:List[str],minStar:int):
     inputList = list(filter(lambda x:x is not None and x in tagNameList,inputTagList))
     inputList = sorted(inputList,key=lambda x:tagNameList.index(x))
     if(minStar is None): minStar = 1

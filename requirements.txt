@@ -6,3 +6,4 @@ pyyaml
 openai
 openpyxl
 StrEnum
+easyocr

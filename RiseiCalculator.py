@@ -5,7 +5,7 @@ from discord.app_commands import Choice
 from discord.utils import MISSING
 from discord.ext import tasks
 import traceback
-from recruitment.recruitment import *
+from recruitment import recruitment,recruitFromOCR
 import happybirthday.happybirthday as birthday
 import openaichat.openaichat as chatbot
 from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode,getStageCategoryDict,DEFAULT_CACHE_TIME,DEFAULT_SHOW_MIN_TIMES
@@ -77,6 +77,13 @@ async def replyToDiscord(inter:Interaction,msg):
     if(msgStr):
         await inter.followup.send(content=msgStr,file=file)
     #await inter.followup
+
+async def sendToDiscord(channel:discord.channel.TextChannel,msg):
+    embeds = createEmbedList(msg)
+    await channel.send(embeds = embeds)
+    msgStr,file = extractFileAndMsg(msg)
+    if(msgStr):
+        await channel.send(content=msgStr,file=file)
 
 def showException():
     ex_type, ex_value, ex_traceback = sys.exc_info()
@@ -284,7 +291,7 @@ class RecruitView(discord.ui.View):
     @discord.ui.select(
         cls=discord.ui.Select,
         placeholder="エリートタグ選択",
-        options=[discord.SelectOption(label = x) for x in eliteTags],
+        options=[discord.SelectOption(label = x) for x in recruitment.eliteTags],
         min_values=0,max_values=2
     )
     async def elite_selected(self,inter:Interaction,select:discord.ui.Select):
@@ -294,7 +301,7 @@ class RecruitView(discord.ui.View):
     @discord.ui.select(
         cls=discord.ui.Select,
         placeholder="職タグ選択",
-        options=[discord.SelectOption(label = x) for x in jobTags],
+        options=[discord.SelectOption(label = x) for x in recruitment.jobTags],
         min_values=0,max_values=5
     )
     async def job_selected(self,inter:Interaction,select:discord.ui.Select):
@@ -305,7 +312,7 @@ class RecruitView(discord.ui.View):
     @discord.ui.select(
         cls=discord.ui.Select,
         placeholder="その他タグ選択",
-        options=[discord.SelectOption(label = x) for x in otherTags],
+        options=[discord.SelectOption(label = x) for x in recruitment.otherTags],
         min_values=0,max_values=5
     )
     async def other_selected(self,inter:Interaction,select:discord.ui.Select):
@@ -328,7 +335,7 @@ class RecruitView(discord.ui.View):
         selectedList = self.eliteTags+self.jobTags+self.otherTags
         if(selectedList):
             await inter.response.defer(thinking=True)
-            msg = recruitDoProcess(selectedList,minstar)
+            msg = recruitment.recruitDoProcess(selectedList,minstar)
             await replyToDiscord(inter,msg)
         else:
             await inter.response.defer()
@@ -355,7 +362,7 @@ async def recruitsim(inter:Interaction):
 async def recruitlist(inter:Interaction, star:Choice[int]):
     _star = safeCallChoiceVal(star)
     await inter.response.defer(thinking=True)
-    msg = showHighStars(_star)
+    msg = recruitment.showHighStars(_star)
     await replyToDiscord(inter,msg)
 
 @tree.command(
@@ -417,35 +424,50 @@ async def checkBirtyday():
 
 MAXLOG = 10
 MAXMSGLEN = 200
-OPENAI_CHANNELID = int(os.environ["OPENAI_CHANNELID"])
 ISINPROCESS_AICHAT = False
 @client.event
 async def on_message(message:discord.Message):
-    global ISINPROCESS_AICHAT
-    if(message.channel.id != OPENAI_CHANNELID): return
-    if(message.author.bot): return
-    if(ISINPROCESS_AICHAT): return
-    try:
-        ISINPROCESS_AICHAT = True
-        messageable = client.get_partial_messageable(OPENAI_CHANNELID)
-        messages = [message async for message in messageable.history(limit = MAXLOG, after = datetime.datetime.now(tz=JST) - datetime.timedelta(minutes = 10),oldest_first=False)]
-        toAI = [{"role": "assistant" if message.author.bot else "user", "content" : message.content} for message in messages]
-        toAI.reverse()
-        def emptyFilter(msg): #空メッセージ、長すぎるメッセージを除外
-            content = msg["content"]
-            if content == "": return False
-            if len(content) > MAXMSGLEN: return False
-            return True
-        toAI = list(filter(emptyFilter,toAI))
-        reply = chatbot.openaichat(toAI)
-        if(reply):
-            channel = client.get_channel(OPENAI_CHANNELID)
-            await channel.send(content = reply)
-    except Exception as e:
-        msg = showException()
-        print(msg)
-    finally:
-        ISINPROCESS_AICHAT = False
+    OPENAI_CHANNELID = int(os.environ["OPENAI_CHANNELID"])
+    RECRUIT_CHANNELID = int(os.environ["RECRUIT_CHANNELID"])
+
+    if message.channel.id == OPENAI_CHANNELID:
+        global ISINPROCESS_AICHAT
+        if(message.author.bot): return
+        if(ISINPROCESS_AICHAT): return
+        try:
+            ISINPROCESS_AICHAT = True
+            messageable = client.get_partial_messageable(OPENAI_CHANNELID)
+            messages = [message async for message in messageable.history(limit = MAXLOG, after = datetime.datetime.now(tz=JST) - datetime.timedelta(minutes = 10),oldest_first=False)]
+            toAI = [{"role": "assistant" if message.author.bot else "user", "content" : message.content} for message in messages]
+            toAI.reverse()
+            def emptyFilter(msg): #空メッセージ、長すぎるメッセージを除外
+                content = msg["content"]
+                if content == "": return False
+                if len(content) > MAXMSGLEN: return False
+                return True
+            toAI = list(filter(emptyFilter,toAI))
+            reply = chatbot.openaichat(toAI)
+            if(reply):
+                channel = client.get_channel(OPENAI_CHANNELID)
+                await channel.send(content = reply)
+        except Exception as e:
+            msg = showException()
+            print(msg)
+        finally:
+            ISINPROCESS_AICHAT = False
+
+    elif message.channel.id == RECRUIT_CHANNELID:
+        attachment = message.attachments
+        if(not attachment): return
+        file = attachment[0]
+        if(not file): return
+        if(not file.width or not file.height): return
+        image = file.read()
+        tags = recruitFromOCR.taglistFromImage(image)
+        if(not tags):return
+        msg = recruitment.recruitDoProcess(tags,4)
+        channel = client.get_channel(RECRUIT_CHANNELID)
+        await sendToDiscord(channel,msg)
 
 @client.event
 async def on_ready():
