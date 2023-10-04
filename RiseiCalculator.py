@@ -5,7 +5,7 @@ from discord.app_commands import Choice
 from discord.utils import MISSING
 from discord.ext import tasks
 import traceback
-from recruitment import recruitment,recruitFromOCR
+from recruitment import recruitment
 import happybirthday.happybirthday as birthday
 import openaichat.openaichat as chatbot
 from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode,getStageCategoryDict,DEFAULT_CACHE_TIME,DEFAULT_SHOW_MIN_TIMES
@@ -456,21 +456,21 @@ async def on_message(message:discord.Message):
         finally:
             ISINPROCESS_AICHAT = False
 
-    elif message.channel.id == RECRUIT_CHANNELID:
-        print("messageを確認")
-        attachment = message.attachments
-        if(not attachment): return
-        print("ファイルを確認")
-        file = attachment[0]
-        if(not file): return
-        if(not file.width or not file.height): return
-        print("画像を確認")
-        image = Image.open(file.read())
-        tags = recruitFromOCR.taglistFromImage(image)
-        print("タグを読みました",tags)
-        if(not tags):return
-        msg = recruitment.recruitDoProcess(tags,4)
-        await replyToDiscord(message,msg)
+    # elif message.channel.id == RECRUIT_CHANNELID:
+    #     print("messageを確認")
+    #     attachment = message.attachments
+    #     if(not attachment): return
+    #     print("ファイルを確認")
+    #     file = attachment[0]
+    #     if(not file): return
+    #     if(not file.width or not file.height): return
+    #     print("画像を確認")
+    #     image = Image.open(file.read())
+    #     tags = recruitFromOCR.taglistFromImage(image)
+    #     print("タグを読みました",tags)
+    #     if(not tags):return
+    #     msg = recruitment.recruitDoProcess(tags,4)
+    #     await replyToDiscord(message,msg)
 
 @client.event
 async def on_ready():
