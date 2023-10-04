@@ -29,7 +29,12 @@ def taglistFromImage(image:Any)->List[str]:
     client = vision.ImageAnnotatorClient(credentials=api_key.Credentials(API_KEY))
     visionImage = vision.Image()
     visionImage.source.image_uri = image
-    result = client.document_text_detection(image=visionImage).text_annotations
+
+    #text_detectionとdocument_text_detectionの違いがよくわからない
+    #料金節約のために、ランダムでどちらかを使うという手もある
+    #今は一旦前者のみを使う
+    
+    result = client.text_detection(image=visionImage).text_annotations
     result = result[0].description
     print("OCR result:" + result)
     tagList = matchTag(result)
