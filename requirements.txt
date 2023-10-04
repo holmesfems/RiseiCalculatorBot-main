@@ -1,3 +1,4 @@
+--force-reinstall 
 discord.py
 pandas
 scipy
@@ -7,5 +8,5 @@ openai
 openpyxl
 StrEnum
 PyMuPDF==1.23.4
---force-reinstall paddlepaddle==2.5
+paddlepaddle==2.5
 paddleocr>=2.0.6
