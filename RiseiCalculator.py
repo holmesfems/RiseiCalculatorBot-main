@@ -78,7 +78,7 @@ async def actionToDiscord(func,msg):
     if(msgStr):
         await func(content=msgStr,file=file)
 
-async def replyToDiscord(inter:Interaction,msg):
+async def followupToDiscord(inter:Interaction,msg):
     await actionToDiscord(inter.followup.send,msg)
 
 async def sendToDiscord(channel:discord.channel.TextChannel,msg):
@@ -122,7 +122,7 @@ async def riseicalculatorMaster(inter:Interaction,target:str,target_item:str=Non
         mode = CalculateMode(mode)
         await inter.response.defer(thinking=True)
         msg = CalculatorManager.riseicalculatorMaster(target,target_item,event_code,is_global,mode,min_basetimes,cache_time,min_times,max_items,csv_file)
-        await replyToDiscord(inter,msg)
+        await followupToDiscord(inter,msg)
 
     except Exception as e:
         msg = showException()
@@ -193,7 +193,7 @@ async def riseimaterials(inter:Interaction,target_item:Choice[str],mode:Choice[s
     mode = CalculateMode(_mode)
     await inter.response.defer(thinking=True)
     reply = CalculatorManager.riseimaterials(_target_item,is_global,mode,toCsv=csv_file)
-    await replyToDiscord(inter,reply)
+    await followupToDiscord(inter,reply)
 
 
 @tree.command(
@@ -215,7 +215,7 @@ async def riseistages(inter:Interaction,stage:str,mode:Choice[str]="sanity",is_g
     mode = CalculateMode(_mode)
     await inter.response.defer(thinking=True)
     reply = CalculatorManager.riseistages(stage,is_global,mode,toCsv=csv_file)
-    await replyToDiscord(inter,reply)
+    await followupToDiscord(inter,reply)
 
 @riseistages.autocomplete("stage")
 async def mainstage_autocomplete(inter:Interaction,current:str)->List[app_commands.Choice[str]]:
@@ -241,7 +241,7 @@ async def riseievents(inter:Interaction,stage:str,mode:Choice[str]="sanity",is_g
     mode = CalculateMode(_mode)
     await inter.response.defer(thinking=True)
     reply = CalculatorManager.riseievents(stage,is_global,mode,toCsv=csv_file)
-    await replyToDiscord(inter,reply)
+    await followupToDiscord(inter,reply)
 
 @riseievents.autocomplete("stage")
 async def eventstage_autocomplete(inter:Interaction,current:str)->List[app_commands.Choice[str]]:
@@ -276,7 +276,7 @@ async def riseilists(inter:Interaction,target:Choice[str],mode:Choice[str]="sani
     target = CalculatorManager.ToPrint(_target)
     await inter.response.defer(thinking=True)
     reply = CalculatorManager.riseilists(target,is_global,mode,toCsv=csv_file)
-    await replyToDiscord(inter,reply)
+    await followupToDiscord(inter,reply)
 
 #毎日3時に情報自動更新
 @tasks.loop(time=datetime.time(hour=3, minute = 0, tzinfo=JST))
@@ -338,7 +338,7 @@ class RecruitView(discord.ui.View):
         if(selectedList):
             await inter.response.defer(thinking=True)
             msg = recruitment.recruitDoProcess(selectedList,minstar)
-            await replyToDiscord(inter,msg)
+            await followupToDiscord(inter,msg)
         else:
             await inter.response.defer()
 
@@ -365,7 +365,7 @@ async def recruitlist(inter:Interaction, star:Choice[int]):
     _star = safeCallChoiceVal(star)
     await inter.response.defer(thinking=True)
     msg = recruitment.showHighStars(_star)
-    await replyToDiscord(inter,msg)
+    await followupToDiscord(inter,msg)
 
 @tree.command(
     name = "operatormastercost",
@@ -383,7 +383,7 @@ async def operatormastercost(inter:Interaction,operator_name:str,skill_num:Choic
     skill_num = safeCallChoiceVal(skill_num)
     await inter.response.defer(thinking=True)
     msg = OperatorCostsCalculator.skillMasterCosts(operator_name,skill_num)
-    await replyToDiscord(inter,msg)
+    await followupToDiscord(inter,msg)
 
 @operatormastercost.autocomplete("operator_name")
 async def operator_name_autocomplete(inter:Interaction,current:str)->List[app_commands.Choice[str]]:
@@ -408,7 +408,7 @@ async def operatorcostlist(inter:Interaction,selection:Choice[str]):
     selection = OperatorCostsCalculator.CostListSelection(selection)
     await inter.response.defer(thinking=True)
     msg = OperatorCostsCalculator.operatorCostList(selection)
-    await replyToDiscord(inter,msg)
+    await followupToDiscord(inter,msg)
 
 
 CHANNEL_ID_HAPPYBIRTHDAY = int(os.environ["CHANNEL_ID_HAPPYBIRTHDAY"])
