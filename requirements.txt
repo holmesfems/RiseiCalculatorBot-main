@@ -8,6 +8,6 @@ openai
 openpyxl
 StrEnum
 torch==1.13.0+cpu
-torchvision==0.15.0+cpu
+torchvision==0.14.1+cpu
 torchaudio
 easyocr
