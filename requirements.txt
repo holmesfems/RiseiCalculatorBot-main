@@ -6,4 +6,7 @@ pyyaml
 openai
 openpyxl
 StrEnum
+torch 
+torchvision 
+torchaudio
 easyocr
