@@ -70,20 +70,21 @@ def extractFileAndMsg(msg):
             msgStr = sendMsg
     return (msgStr,file)
 
-async def replyToDiscord(inter:Interaction,msg):
+async def actionToDiscord(func,msg):
     embeds = createEmbedList(msg)
-    await inter.followup.send(embeds = embeds)
+    await func(embeds = embeds)
     msgStr,file = extractFileAndMsg(msg)
     if(msgStr):
-        await inter.followup.send(content=msgStr,file=file)
-    #await inter.followup
+        await func(content=msgStr,file=file)
+
+async def replyToDiscord(inter:Interaction,msg):
+    await actionToDiscord(inter.followup.send,msg)
 
 async def sendToDiscord(channel:discord.channel.TextChannel,msg):
-    embeds = createEmbedList(msg)
-    await channel.send(embeds = embeds)
-    msgStr,file = extractFileAndMsg(msg)
-    if(msgStr):
-        await channel.send(content=msgStr,file=file)
+    await actionToDiscord(channel.send,msg)
+
+async def replyToDiscord(message:discord.Message,msg):
+    await actionToDiscord(message.reply,msg)
 
 def showException():
     ex_type, ex_value, ex_traceback = sys.exc_info()
@@ -429,10 +430,9 @@ ISINPROCESS_AICHAT = False
 async def on_message(message:discord.Message):
     OPENAI_CHANNELID = int(os.environ["OPENAI_CHANNELID"])
     RECRUIT_CHANNELID = int(os.environ["RECRUIT_CHANNELID"])
-
+    if(message.author.bot): return
     if message.channel.id == OPENAI_CHANNELID:
         global ISINPROCESS_AICHAT
-        if(message.author.bot): return
         if(ISINPROCESS_AICHAT): return
         try:
             ISINPROCESS_AICHAT = True
@@ -457,17 +457,20 @@ async def on_message(message:discord.Message):
             ISINPROCESS_AICHAT = False
 
     elif message.channel.id == RECRUIT_CHANNELID:
+        print("messageを確認")
         attachment = message.attachments
         if(not attachment): return
+        print("ファイルを確認")
         file = attachment[0]
         if(not file): return
         if(not file.width or not file.height): return
+        print("画像を確認")
         image = file.read()
         tags = recruitFromOCR.taglistFromImage(image)
+        print("タグを読みました",tags)
         if(not tags):return
         msg = recruitment.recruitDoProcess(tags,4)
-        channel = client.get_channel(RECRUIT_CHANNELID)
-        await sendToDiscord(channel,msg)
+        await replyToDiscord(message,msg)
 
 @client.event
 async def on_ready():
