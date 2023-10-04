@@ -2,7 +2,6 @@ import easyocr
 import yaml
 import itertools
 from typing import Any,List
-reader = easyocr.Reader(['ja'],gpu=False)
 with open("./recruitment/tagList.json","rb") as file:
     __tagList = yaml.safe_load(file)
     __tagList = list(itertools.chain.from_iterable(__tagList.values()))
@@ -23,6 +22,7 @@ def matchTag(ocrtext:str) -> str:
     return None
 
 def taglistFromImage(image:Any)->List[str]:
+    reader = easyocr.Reader(['ja'],gpu=False)
     result = reader.readtext(image,detail=0)
     print(result)
     tagList = filterNotNone([matchTag(text) for text in result])
