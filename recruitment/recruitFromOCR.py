@@ -1,28 +1,37 @@
 import os
-import yaml
-import itertools
 from typing import Any,List
 from google.cloud import vision
 from google.auth import api_key
-
-with open("./recruitment/tagList.json","rb") as file:
-    __tagList = yaml.safe_load(file)
-    __tagList = list(itertools.chain.from_iterable(__tagList.values()))
+import sys
+sys.path.append('../')
+from recruitment import recruitment
 
 #print(__tagList)
-
-__ocrDict = {item:item for item in __tagList}
-__ocrDict["範囲攻"] = "範囲攻撃"
+__eliteTagDict = {item:item for item in recruitment.eliteTags}
+__jobTagDict = {item:item for item in recruitment.jobTags}
+__otherTagDict = {item:item for item in recruitment.positionTags + recruitment.otherTags}
+__otherTagDict["範囲攻"] = "範囲攻撃"
 
 def filterNotNone(_list:list) -> list:
     return list(filter(lambda x: x is not None,_list))
 
-def matchTag(result:str) -> str:
+def matchEliteTag(result:List[str]) -> List[str]:
     ret = []
-    for key,value in __ocrDict.items():
-        if value in ret: continue
-        if(key in result): ret.append(value)
+    for key,value in __eliteTagDict.items():
+        if(key in result):
+            ret.append(value)
     return ret
+
+def matchOtherTag(result:List[str]) -> List[str]:
+    ret = []
+    for key,value in __eliteTagDict.items():
+        if(any((key in text) for text in result)):
+            ret.append(value)
+    return ret
+
+def matchTag(result:str) -> List[str]:
+    listResult = result.split("\n")
+    return matchEliteTag(listResult) + matchOtherTag(listResult)
 
 def taglistFromImage(image:Any)->List[str]:
     API_KEY = os.environ["CLOUDVISION_API_KEY"]
@@ -30,10 +39,10 @@ def taglistFromImage(image:Any)->List[str]:
     visionImage = vision.Image()
     visionImage.source.image_uri = image
 
+    #メモ
     #text_detectionとdocument_text_detectionの違いがよくわからない
     #料金節約のために、ランダムでどちらかを使うという手もある
     #今は一旦前者のみを使う
-    
     result = client.text_detection(image=visionImage).text_annotations
     result = result[0].description
     print("OCR result:" + result)

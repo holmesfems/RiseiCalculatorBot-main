@@ -286,9 +286,19 @@ async def updateRiseiCalculatorInstances():
 class RecruitView(discord.ui.View):
     def __init__(self,timeout=180):
         super().__init__(timeout=timeout)
+        self.jobAndPositionTags = []
         self.eliteTags = []
-        self.jobTags = []
         self.otherTags = []
+    
+    @discord.ui.select(
+        cls=discord.ui.Select,
+        placeholder="職&位置タグ選択",
+        options=[discord.SelectOption(label = x) for x in recruitment.jobTags + recruitment.positionTags],
+        min_values=0,max_values=5
+    )
+    async def jobAndPosition_selected(self,inter:Interaction,select:discord.ui.Select):
+        self.jobAndPositionTags = select.values
+        await inter.response.defer()
     
     @discord.ui.select(
         cls=discord.ui.Select,
@@ -299,18 +309,7 @@ class RecruitView(discord.ui.View):
     async def elite_selected(self,inter:Interaction,select:discord.ui.Select):
         self.eliteTags = select.values
         await inter.response.defer()
-    
-    @discord.ui.select(
-        cls=discord.ui.Select,
-        placeholder="職タグ選択",
-        options=[discord.SelectOption(label = x) for x in recruitment.jobTags],
-        min_values=0,max_values=5
-    )
-    async def job_selected(self,inter:Interaction,select:discord.ui.Select):
-        self.jobTags = select.values
-        await inter.response.defer()
-        
-    
+
     @discord.ui.select(
         cls=discord.ui.Select,
         placeholder="その他タグ選択",
@@ -334,7 +333,7 @@ class RecruitView(discord.ui.View):
         await self.execute(inter,button,1)
     
     async def execute(self,inter:Interaction,button:discord.ui.Button,minstar:int):
-        selectedList = self.eliteTags+self.jobTags+self.otherTags
+        selectedList = self.jobAndPositionTags+self.eliteTags+self.otherTags
         if(selectedList):
             await inter.response.defer(thinking=True)
             msg = recruitment.recruitDoProcess(selectedList,minstar)
@@ -457,14 +456,14 @@ async def on_message(message:discord.Message):
             ISINPROCESS_AICHAT = False
 
     elif message.channel.id == RECRUIT_CHANNELID:
-        print("messageを確認")
+        #print("messageを確認")
         attachment = message.attachments
         if(not attachment): return
-        print("ファイルを確認")
+        #print("ファイルを確認")
         file = attachment[0]
         if(not file): return
         if(not file.width or not file.height): return
-        print("画像を確認")
+        #print("画像を確認")
         image = file.url
         tags = recruitFromOCR.taglistFromImage(image)
         print("タグを読みました",tags)

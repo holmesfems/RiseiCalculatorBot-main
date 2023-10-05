@@ -5,9 +5,9 @@ from typing import List
 class RecruitTag:
     def __init__(self,tagName):
         self.name = tagName
+        self.type = ...
 
-    def containedIn(operator):
-        pass
+    def containedIn(operator):...
 
     def __repr__(self):
         return self.name
@@ -15,7 +15,7 @@ class RecruitTag:
 class EliteTag(RecruitTag):
     def __init__(self,tagName):
         RecruitTag.__init__(self,tagName)
-        self.type = "elite"
+        super().type = "elite"
 
     def containedIn(self,operator):
         stars = operator.stars
@@ -28,17 +28,17 @@ class EliteTag(RecruitTag):
 class JobTag(RecruitTag):
     def __init__(self,tagName):
         RecruitTag.__init__(self,tagName)
-        self.type = "job"
+        super().type = "job"
     
     def containedIn(self,operator):
         if(operator.job == self.name):
             return True
         return False
 
-class OtherTag(RecruitTag):
+class PositionAndOtherTag(RecruitTag):
     def __init__(self,tagName):
         RecruitTag.__init__(self,tagName)
-        self.type = "other"
+        super().type = "other"
     
     def containedIn(self,operator):
         if(self.name in operator.tags):
@@ -62,11 +62,13 @@ with open("./recruitment/recruitmentOperators.json","rb") as file:
 with open("./recruitment/tagList.json","rb") as file:
     tagList = yaml.safe_load(file)
 
-eliteTags = tagList["eliteTags"]
-jobTags = tagList["jobTags"]
-otherTags = tagList["positionTags"]+tagList["otherTags"]
 
-tagNameList = eliteTags + jobTags + otherTags
+jobTags = tagList["jobTags"]
+positionTags = tagList["positionTags"]
+eliteTags = tagList["eliteTags"]
+otherTags = tagList["otherTags"]
+
+tagNameList:List[str] =  jobTags + positionTags + eliteTags + otherTags
 
 def createTag(tagName):
     if tagName in tagList["eliteTags"]:
@@ -74,7 +76,7 @@ def createTag(tagName):
     if tagName in tagList["jobTags"]:
         return JobTag(tagName)
     if tagName in tagList["positionTags"] + tagList["otherTags"]:
-        return OtherTag(tagName)
+        return PositionAndOtherTag(tagName)
     return None
 
 def createTagList(tagNameList):
@@ -87,7 +89,7 @@ def createTagList(tagNameList):
 def createCombinations(tagClassList,number):
     return list(itertools.combinations(tagClassList,number))
 
-def satisfyTags(operator,tagClassList):
+def satisfyTags(operator,tagClassList:List[RecruitTag]):
     #星6は上級エリート必須
     needElite = (int(operator.stars) == 6)
     hasElite = False
@@ -100,12 +102,12 @@ def satisfyTags(operator,tagClassList):
         return False
     return True
 
-def maxStar(operatorList):
+def maxStar(operatorList:List[Operator]):
     starList = [operator.stars for operator in operatorList]
     if(starList): return max(starList)
     return 0
 
-def minStar(operatorList,least:int = 3):
+def minStar(operatorList:List[Operator],least:int = 3):
     allstarList = list(dict.fromkeys([operator.stars for operator in operatorList]))
     starList = [x for x in allstarList if x>=least]
     restList = [x for x in allstarList if x not in starList]
@@ -124,7 +126,7 @@ def isIndependent(key,keyList):
             return False
     return True
 
-def clearSearchMap(redundantMap):
+def clearSearchMap(redundantMap:dict):
     return {key:value for (key,value) in redundantMap.items() if isIndependent(key,redundantMap.keys())}
 
 def createSearchMap(tagNameList,targetOperatorList,minStarToShow,equals = False,clearRedundant = False):
@@ -160,7 +162,7 @@ def allAinBnotEq(a:tuple,b:tuple):
 
 def searchMapToStringChunks(searchMap):
     if(not searchMap):
-        return ["条件を満たす組み合わせはありません"]
+        return []
     chunks = []
     keyLenSorted = sorted(searchMap.items(),key=lambda x:len(x[0]),reverse=True)
     valueLenSorted = sorted(keyLenSorted,key=lambda x:len(x[1]))
@@ -173,7 +175,7 @@ def searchMapToStringChunks(searchMap):
         valueStrList = toStrList(valueSortedByStar)
         keyMsg = "+".join(keyStrList)
         valueMsg = ",".join(valueStrList)
-        chunk = keyMsg+" -> ★{0}".format(minStarValue)+ "```"+valueMsg+"```\n"
+        chunk = keyMsg + " -> ★{0}".format(minStarValue) + "```\n" + valueMsg+"```\n"
         chunks.append(chunk)
     return chunks
             
@@ -183,6 +185,7 @@ def recruitDoProcess(inputTagList:List[str],minStar:int):
     if(minStar is None): minStar = 1
     searchMap = createSearchMap(inputList,operatorDB,minStar)
     chunks = searchMapToStringChunks(searchMap)
+    if(not chunks): chunks = [f"★{minStar}以上になる組み合わせはありません"]
     return {"title":" ".join(inputList),"msgList":chunks}
 
 starCombineListMap = {}
@@ -197,9 +200,9 @@ def compareTagTupleKey(tagTuple:tuple):
         ret += compareTagKey(tagTuple[i]) * order**(2-i)
     return ret
 
-def mapToMsgChunksHighStars(combineList):
+def mapToMsgChunksHighStars(combineList:dict):
     if(not combineList):
-        return ["条件を満たす組み合わせはありません"]
+        return []
     chunks = []
     keySorted = sorted(combineList.items(),key=lambda x:compareTagTupleKey(x[0]))
     for (key,value) in keySorted:
@@ -220,6 +223,7 @@ def showHighStars(minStar:int = 4):
         starCombineListMap[minStar] = allCombineList
         combineList = allCombineList
     chunks = mapToMsgChunksHighStars(combineList)
+    if(not chunks): chunks = [f"★{minStar}の確定タグはありません"]
     return {
         "title":"★{0}確定タグ一覧".format(minStar),
         "msgList":chunks

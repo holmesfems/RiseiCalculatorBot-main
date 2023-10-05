@@ -842,9 +842,6 @@ class CalculatorManager:
 
     def getValues(isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME) -> RiseiOrTimeValues:
         calculator = CalculatorManager.selectCalculator(isGlobal)
-        if (calculator is None):
-            calculator = Calculator(isGlobal,False) 
-            CalculatorManager.setCalculator(isGlobal,calculator)
         calculator.tryReInit(CalculatorManager.__getTimeDelta(cache_minutes),baseMinTimes,mode)
         return calculator.getValues(mode)
     
