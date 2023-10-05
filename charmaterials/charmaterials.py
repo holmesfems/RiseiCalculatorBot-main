@@ -10,6 +10,7 @@ from infoFromOuterSource.formulation import Formula
 from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode
 from enum import StrEnum
 import enum
+import yaml
 
 CHAR_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/character_table.json"
 CHAR_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/ja_JP/gamedata/excel/character_table.json"
@@ -120,7 +121,6 @@ class ItemCost:
         ret.itemArray = self.itemArray.filterByZH(getValueTarget(False))
         return ret
     
-
 class OperatorCosts:
     def __init__(self,key,value):
         self.name = value["name"]
@@ -158,6 +158,7 @@ class OperatorCosts:
         #昇格オペレーター(前衛アーミヤ)かの判定
         self.isPatch = value["isPatch"]
 
+    #モジュールの素材を追加する
     def addEq(self,uniEq):
         eqType = uniEq["typeName2"]
         if(not eqType):return #デフォルトのやつは追加しない
@@ -213,6 +214,12 @@ class AllOperatorsInfo:
     def init(self):
         allInfoCN = get_json(CHAR_TABLE_URL_CN)
         allInfoJP = get_json(CHAR_TABLE_URL_JP)
+        allUEQ:dict = get_json(UNI_EQ_URL_CN)["equipDict"]
+        allUEQ_JP:dict = get_json(UNI_EQ_URL_JP)["equipDict"]
+
+        with open("charmaterials/customZhToJa.yaml","rb") as f:
+            customZhToJaDict:Dict[str,str] = yaml.safe_load(f)
+
         for key,value in allInfoCN.items():
             keyRegex = r"([^_]+)_(\d+)_([^_]+)"
             #print(key)
@@ -227,6 +234,9 @@ class AllOperatorsInfo:
                 value["cnOnly"] = False
             else:
                 value["cnOnly"] = True
+                jpName = customZhToJaDict.get(value["name"],None)
+                if(jpName):
+                    value["name"] = jpName
             value["isPatch"] = False
             self.operatorDict[key] = OperatorCosts(key,value)
             self.nameToId[value["name"]] = key
@@ -241,8 +251,6 @@ class AllOperatorsInfo:
             self.operatorDict[key] = OperatorCosts(key,value)
             self.nameToId[value["name"]] = key
         
-        allUEQ:dict = get_json(UNI_EQ_URL_CN)["equipDict"]
-        allUEQ_JP:dict = get_json(UNI_EQ_URL_JP)["equipDict"]
         for key,value in allUEQ.items():
             charId = value["charId"]
             jpValue = allUEQ_JP.get(key)
@@ -319,7 +327,6 @@ class OperatorCostsCalculator:
             "title" : title,
             "msgList":msgList
         }
-    
 
     def operatorCostList(selection:CostListSelection) -> Dict:
         if(selection is OperatorCostsCalculator.CostListSelection.STAR5ELITE):
