@@ -22,10 +22,10 @@ DEFAULT_SHOW_MIN_TIMES = 1000
 DEFAULT_CACHE_TIME = 120 #minutes
 EXCEL_FILENAME = 'BaseStages.xlsx'
 
-headers = {'User-Agent':'ArkPlanner'}
+header = {'User-Agent':'ArkPlanner'}
 def get_json(s,AdditionalReq=None):
-    return netutil.get_json(PENGUIN_URL+s,AdditionalReq,headers)
-
+    return netutil.get_json(PENGUIN_URL+s,AdditionalReq,header)
+    
 #初級&上級資格証
 Price = dict()
 with open('riseicalculator2/price.txt', 'r', encoding='utf8') as f:

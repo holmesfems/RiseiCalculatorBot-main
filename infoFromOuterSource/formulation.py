@@ -38,14 +38,14 @@ class FormulaItem:
         return self.name
 
 FORMULA_URL = 'https://penguin-stats.io/PenguinStats/api/v2/formula'
-headers = {'User-Agent':'ArkPlanner'}
+header = {'User-Agent':'ArkPlanner'}
 
 get_json = netutil.get_json
 
 class Formula:
     __idToFormula:Dict[str,FormulaItem] = {}
     def init():
-        allInfo = get_json(FORMULA_URL,headers=headers)
+        allInfo = get_json(FORMULA_URL,header=header)
         Formula.__idToFormula:Dict[str,FormulaItem] = {}
         for item in allInfo:
             key = item["id"]
