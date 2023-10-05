@@ -8,8 +8,8 @@ from recruitment import recruitment
 
 #print(__tagList)
 __eliteTagDict = {item:item for item in recruitment.eliteTags}
-__jobTagDict = {item:item for item in recruitment.jobTags}
-__otherTagDict = {item:item for item in recruitment.positionTags + recruitment.otherTags}
+
+__otherTagDict = {item:item for item in recruitment.jobTags + recruitment.positionTags + recruitment.otherTags}
 __otherTagDict["範囲攻"] = "範囲攻撃"
 
 def filterNotNone(_list:list) -> list:
@@ -24,7 +24,7 @@ def matchEliteTag(result:List[str]) -> List[str]:
 
 def matchOtherTag(result:List[str]) -> List[str]:
     ret = []
-    for key,value in __eliteTagDict.items():
+    for key,value in __otherTagDict.items():
         if(any((key in text) for text in result)):
             ret.append(value)
     return ret
