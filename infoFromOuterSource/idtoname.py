@@ -15,9 +15,8 @@ class ItemIdToName:
     __idToZH = {}
     __JAToid = {}
     def init():
-        jsonList = netutil.get_json_multiThread([ITEM_TABLE_URL_CN,ITEM_TABLE_URL_JP])
-        allInfoCN:dict = jsonList[0]["items"]
-        allInfoJP:dict = jsonList[1]["items"]
+        allInfoCN:dict = get_json(ITEM_TABLE_URL_CN)["items"]
+        allInfoJP:dict = get_json(ITEM_TABLE_URL_JP)["items"]
         ItemIdToName.__idToStr = {}
         ItemIdToName.__ZHToJA = {}
         ItemIdToName.__ZHToid = {}
@@ -75,9 +74,8 @@ SKILL_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameD
 class SkillIdToName:
     __idToStr = {}
     def init():
-        jsonList = netutil.get_json_multiThread([SKILL_TABLE_URL_CN,SKILL_TABLE_URL_JP])
-        allInfoCN = jsonList[0]
-        allInfoJP = jsonList[1]
+        allInfoCN = get_json(SKILL_TABLE_URL_CN)
+        allInfoJP = get_json(SKILL_TABLE_URL_JP)
         SkillIdToName.__idToStr = {}
         for key,value in allInfoCN.items():
             jpValue = allInfoJP.get(key)
@@ -95,9 +93,8 @@ STAGE_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameD
 class StageIdToName:
     __idToStr = {}
     def init():
-        jsonList = netutil.get_json_multiThread([STAGE_TABLE_URL_CN,STAGE_TABLE_URL_JP])
-        allInfoCN = jsonList[0]["stages"]
-        allInfoJP = jsonList[1]["stages"]
+        allInfoCN = get_json(STAGE_TABLE_URL_CN)["stages"]
+        allInfoJP = get_json(STAGE_TABLE_URL_JP)["stages"]
         StageIdToName.__idToStr = {}
         for key,value in allInfoCN.items():
             jpValue = allInfoJP.get(key)
@@ -115,7 +112,7 @@ headers = {'User-Agent':'ArkPlanner'}
 class ZoneIdToName:
     __idToStr = {}
     def init():
-        allInfo = get_json(ZONE_TABLE_URL,header=headers)
+        allInfo = get_json(ZONE_TABLE_URL,headers=headers)
         ZoneIdToName.__idToStr = {}
         for items in allInfo:
             ZoneIdToName.__idToStr[items["zoneId"]] = items["zoneName_i18n"]["ja"]

@@ -212,12 +212,10 @@ class AllOperatorsInfo:
         self.init()
 
     def init(self):
-        jsonLists = netutil.get_json_multiThread([CHAR_TABLE_URL_CN,CHAR_TABLE_URL_JP,UNI_EQ_URL_CN,UNI_EQ_URL_JP,PATCH_CHAR_TABLE_URL_JP])
-        allInfoCN = jsonLists[0]
-        allInfoJP = jsonLists[1]
-        allUEQ:dict = jsonLists[2]["equipDict"]
-        allUEQ_JP:dict = jsonLists[3]["equipDict"]
-        patchInfoJP:dict = jsonLists[4]["patchChars"]
+        allInfoCN = get_json(CHAR_TABLE_URL_CN)
+        allInfoJP = get_json(CHAR_TABLE_URL_JP)
+        allUEQ:dict = get_json(UNI_EQ_URL_CN)["equipDict"]
+        allUEQ_JP:dict = get_json(UNI_EQ_URL_JP)["equipDict"]
 
         with open("charmaterials/customZhToJa.yaml","rb") as f:
             customZhToJaDict:Dict[str,str] = yaml.safe_load(f)
@@ -244,6 +242,7 @@ class AllOperatorsInfo:
             self.nameToId[value["name"]] = key
         
         #昇格(前衛アーミヤ)
+        patchInfoJP:dict = get_json(PATCH_CHAR_TABLE_URL_JP)["patchChars"]
         for key,value in patchInfoJP.items():
             #今は前衛アーミヤ一人だけ、今後追加されたらまた調整する必要があるかも
             value["cnOnly"] = False
