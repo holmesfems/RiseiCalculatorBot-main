@@ -15,7 +15,7 @@ class RecruitTag:
 class EliteTag(RecruitTag):
     def __init__(self,tagName):
         RecruitTag.__init__(self,tagName)
-        super().type = "elite"
+        self.type = "elite"
 
     def containedIn(self,operator):
         stars = operator.stars
@@ -28,7 +28,7 @@ class EliteTag(RecruitTag):
 class JobTag(RecruitTag):
     def __init__(self,tagName):
         RecruitTag.__init__(self,tagName)
-        super().type = "job"
+        self.type = "job"
     
     def containedIn(self,operator):
         if(operator.job == self.name):
@@ -38,7 +38,7 @@ class JobTag(RecruitTag):
 class PositionAndOtherTag(RecruitTag):
     def __init__(self,tagName):
         RecruitTag.__init__(self,tagName)
-        super().type = "other"
+        self.type = "other"
     
     def containedIn(self,operator):
         if(self.name in operator.tags):
