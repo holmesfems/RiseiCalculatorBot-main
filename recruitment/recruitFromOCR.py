@@ -18,6 +18,7 @@ def filterNotNone(_list:list) -> list:
 def matchEliteTag(result:List[str]) -> List[str]:
     ret = []
     for key,value in __eliteTagDict.items():
+        if value in ret: continue
         if(key in result):
             ret.append(value)
     return ret
@@ -25,6 +26,7 @@ def matchEliteTag(result:List[str]) -> List[str]:
 def matchOtherTag(result:List[str]) -> List[str]:
     ret = []
     for key,value in __otherTagDict.items():
+        if value in ret: continue
         if(any((key in text) for text in result)):
             ret.append(value)
     return ret
