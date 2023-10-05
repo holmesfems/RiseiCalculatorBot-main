@@ -37,14 +37,14 @@ class FormulaItem:
     def __repr__(self)->str:
         return self.name
 
-FORMULA_URL = 'https://penguin-stats.io/PenguinStats/api/v2/formula'
-headers = {'User-Agent':'ArkPlanner'}
 
 get_json = netutil.get_json
 
 class Formula:
     __idToFormula:Dict[str,FormulaItem] = {}
     def init():
+        FORMULA_URL = 'https://penguin-stats.io/PenguinStats/api/v2/formula'
+        headers = {'User-Agent':'ArkPlanner'}
         allInfo = get_json(FORMULA_URL,headers=headers)
         Formula.__idToFormula:Dict[str,FormulaItem] = {}
         for item in allInfo:

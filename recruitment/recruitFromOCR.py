@@ -35,11 +35,11 @@ def matchTag(result:str) -> List[str]:
     listResult = result.split("\n")
     return matchEliteTag(listResult) + matchOtherTag(listResult)
 
-def taglistFromImage(image:Any)->List[str]:
+def taglistFromImage(imageURI:str)->List[str]:
     API_KEY = os.environ["CLOUDVISION_API_KEY"]
     client = vision.ImageAnnotatorClient(credentials=api_key.Credentials(API_KEY))
     visionImage = vision.Image()
-    visionImage.source.image_uri = image
+    visionImage.source.image_uri = imageURI
 
     #メモ
     #text_detectionとdocument_text_detectionの違いがよくわからない
@@ -51,5 +51,5 @@ def taglistFromImage(image:Any)->List[str]:
     tagList = matchTag(result)
     print(tagList)
     if(len(tagList) != 5):
-        print("warning:識別できていないタグがあります")
+        print("warning:タグの数が想定と違います")
     return tagList
