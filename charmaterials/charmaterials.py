@@ -269,7 +269,7 @@ class AllOperatorsInfo:
     
     def getAllCostItems(self)->Dict[str,OperatorCosts]:
         return self.operatorDict.copy()
-    
+
 class OperatorCostsCalculator:
     class CostListSelection(StrEnum):
         STAR5ELITE = enum.auto()
@@ -288,17 +288,20 @@ class OperatorCostsCalculator:
         title = "スキル特化素材検索"
         if(not costItem): return {
             "title" : title,
-            "msgList":["オペレーター【"+operatorName+"】は存在しません"]
+            "msgList":["オペレーター【"+operatorName+"】は存在しません"],
+            "type": "err"
         }
         skillCostList = costItem.skills
         if(skillNum > len(skillCostList)):return{
             "title" : title,
-            "msgList":["オペレーター【"+operatorName+"】のスキル"+str(skillNum)+"は存在しません"]
+            "msgList":["オペレーター【"+operatorName+"】のスキル"+str(skillNum)+"は存在しません"],
+            "type": "err"
         }
         skillName,skillCost = skillCostList[skillNum-1]
         if(not skillCost):return{
             "title" : title,
-            "msgList":["オペレーター【"+operatorName+"】のスキル"+str(skillNum)+"の特化は存在しません"]
+            "msgList":["オペレーター【"+operatorName+"】のスキル"+str(skillNum)+"の特化は存在しません"],
+            "type": "err"
         }
 
         allCost = ItemCost.sum(skillCost)
@@ -381,3 +384,48 @@ class OperatorCostsCalculator:
                 "title":"エラー",
                 "msgList":"未知のコマンド:" + str(selection)
             }
+    def autoCompleteForEliteCosts(name:str,limit:int = 25) -> List[Tuple[str,str]]:
+        return [(value.name,value.name) for value in OperatorCostsCalculator.operatorInfo.operatorDict.values() if name in value.name and value.stars>=4 and not value.isPatch][:limit]
+    
+    def operatorEliteCost(operatorName:str):
+        costItem = OperatorCostsCalculator.operatorInfo.getOperatorCostFromName(operatorName)
+        title = "昇進必要素材検索"
+        if(not costItem): return {
+            "title" : title,
+            "msgList":["オペレーター【"+operatorName+"】は存在しません"],
+            "type": "err"
+        }
+        eliteCostList = costItem.phases
+        if(not eliteCostList): return{
+            "title" : title,
+            "msgList":["オペレーター【"+operatorName+"】の昇進は存在しません"],
+            "type": "err"
+        }
+
+        totalCost = ItemCost.sum(eliteCostList)
+        title = "昇進必要素材検索: " + costItem.name
+        msgList = []
+        for i in range(1,3):
+            eliteCost = eliteCostList[i-1]
+            riseiValue = eliteCost.toRiseiValue()
+            headerMsg = "昇進{0} 理性価値:{1:.2f}".format(i,riseiValue)
+            blockMsg = eliteCost.toStrBlock()
+            msgList.append(headerMsg + blockMsg + "\n")
+        
+        #合計素材
+        riseiValue = totalCost.toRiseiValue()
+        headerMsg = "合計  理性価値:{0:.2f}".format(riseiValue)
+        blockMsg = totalCost.toStrBlock()
+        msgList.append(headerMsg + blockMsg + "\n")
+
+        #中級換算
+        r2Cost = totalCost.rare3and4ToRare2()
+        headerMsg = "合計  中級換算"
+        blockMsg = r2Cost.toStrBlock()
+        msgList.append(headerMsg + blockMsg)
+
+        return{
+            "title" : title,
+            "msgList":msgList
+        }
+

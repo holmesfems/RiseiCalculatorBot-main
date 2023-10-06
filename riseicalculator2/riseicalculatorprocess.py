@@ -882,21 +882,24 @@ class CalculatorManager:
             if(not targetItem): 
                 return {
                     "title":"エラー",
-                    "msgList": ["target_itemに素材カテゴリを入れてください"]
+                    "msgList": ["target_itemに素材カテゴリを入れてください"],
+                    "type": "err"
                 }
             return CalculatorManager.riseimaterials(targetItem,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems,toCsv)
         elif toPrint == "zone":
             if(not targetStage):
                 return {
                     "title":"エラー",
-                    "msgList": ["event_codeにマップ名を入れてください"]
+                    "msgList": ["event_codeにマップ名を入れてください"],
+                    "type": "err"
                 }
             return CalculatorManager.riseistages(targetStage,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems,toCsv)
         elif toPrint == "events":
             if(not targetStage):
                 return {
                     "title":"エラー",
-                    "msgList": ["event_codeにマップ名を入れてください"]
+                    "msgList": ["event_codeにマップ名を入れてください"],
+                    "type": "err"
                 }
             return CalculatorManager.riseievents(targetStage,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems,toCsv)
         else:
@@ -915,7 +918,8 @@ class CalculatorManager:
         if not stagesToShow:
             return {
                 "title":title,
-                "msgList":["無効なカテゴリ:" + targetCategory]
+                "msgList":["無効なカテゴリ:" + targetCategory],
+                "type": "err"
             }
         msgHeader = categoryValue["to_ja"]+ ": 理性価値(中級)={0:.3f}±{1:.3f}\n".format(riseiValues.getValueFromZH(categoryValue["MainItem"]),riseiValues.getStdDevFromZH(categoryValue["MainItem"]))
         msgChunks = [msgHeader]
@@ -969,7 +973,8 @@ class CalculatorManager:
         if(not stagesToShow):
             return {
                 "title" : title,
-                "msgList" : ["無効なステージ指定"+targetStage]
+                "msgList" : ["無効なステージ指定"+targetStage],
+                "type": "err"
             }
         msgHeader = "検索内容 = " + targetStage
         #名前順でソート
@@ -1028,7 +1033,8 @@ class CalculatorManager:
         if(not stagesToShow):
             return {
                 "title" : title,
-                "msgList" : ["無効なステージ指定"+targetStage]
+                "msgList" : ["無効なステージ指定"+targetStage],
+                "type": "err"
             }
         msgHeader = "検索内容 = " + targetStage
         #名前順でソート
@@ -1149,5 +1155,6 @@ class CalculatorManager:
         return {
             "title":"エラー",
             "msgList" : ["未知のコマンド："+str(toPrintTarget)],
+            "type": "err"
         }
         

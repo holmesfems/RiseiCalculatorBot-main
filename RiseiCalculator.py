@@ -9,13 +9,13 @@ from recruitment import recruitment,recruitFromOCR
 import happybirthday.happybirthday as birthday
 import openaichat.openaichat as chatbot
 from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode,getStageCategoryDict,DEFAULT_CACHE_TIME,DEFAULT_SHOW_MIN_TIMES
-from typing import List
+from typing import List,Dict
 import datetime
 from charmaterials.charmaterials import OperatorCostsCalculator
 
 TOKEN = os.environ["BOT_TOKEN"]
 ID = os.environ["BOT_ID"]
-url_botCommands = "https://discord.com/api/v8/applications/{0}/commands".format(ID)
+url_botCommands = f"https://discord.com/api/v8/applications/{ID}/commands"
 intents=discord.Intents.default()
 intents.message_content = True
 client = discord.Client(intents=intents,command_prefix = '/')
@@ -34,23 +34,30 @@ def arrangementChunks(msgList, maxLength:int):
                 chunks.append(item)
     return chunks
 
+embedColourDict:Dict[str,discord.Colour] = {
+    "err" : discord.Colour.magenta,
+    "ok" : 0x8be02b
+}
+
+
 #ディスコード返信用のEmbedを作る関数
 def createEmbedList(msg):
     maxLength = 1900
     title = "reply"
-    color = 0x8be02b
-    if type(msg) == type(str()):
+    color = embedColourDict["ok"]
+    if type(msg) is str:
         chunks = [msg[i:i+maxLength] for i in range(0, len(msg), maxLength)]
-    elif type(msg) == type(list()):
+    elif type(msg) is list:
         chunks = arrangementChunks(msg,maxLength)
-    elif type(msg) == type(dict()):
+    elif type(msg) is dict:
         #タイトル設定
         title = msg.get("title",title)
         #メッセージ本文、改ページされたくないブロックをまとめる
         msgList = msg.get("msgList",[])
         chunks = arrangementChunks(msgList,maxLength)
         #左のバーの色を指定
-        color = msg.get("color",color)
+        colorType = msg.get("type","ok")
+        color = embedColourDict.get(colorType,color)
     embeds = [discord.Embed(
             title = title,
             description = item,
@@ -371,7 +378,7 @@ async def recruitlist(inter:Interaction, star:Choice[int]):
     description= "オペレーターのスキル特化消費素材を調べる"
 )
 @app_commands.describe(
-    operator_name = "オペレーターの名前、大陸先行オペレーターは中国語名を入れてください",
+    operator_name = "オペレーターの名前、大陸先行オペレーターも日本語を入れてください",
     skill_num = "何番目のスキル",
 )
 @app_commands.choices(
@@ -387,6 +394,23 @@ async def operatormastercost(inter:Interaction,operator_name:str,skill_num:Choic
 @operatormastercost.autocomplete("operator_name")
 async def operator_name_autocomplete(inter:Interaction,current:str)->List[app_commands.Choice[str]]:
     strList = OperatorCostsCalculator.autoCompleteForMasterCosts(current)
+    return [app_commands.Choice(name = name, value = value) for name,value in strList]
+
+@tree.command(
+    name = "operatorelitecost",
+    description= "オペレーターの昇進消費素材を調べる"
+)
+@app_commands.describe(
+    operator_name = "オペレーターの名前、大陸先行オペレーターも日本語を入れてください",
+)
+async def operatorelitecost(inter:Interaction,operator_name:str):
+    operator_name = safeCallChoiceVal(operator_name)
+    await inter.response.defer(thinking=True)
+    msg = OperatorCostsCalculator.operatorEliteCost(operator_name)
+    await followupToDiscord(inter,msg)
+@operatorelitecost.autocomplete("operator_name")
+async def operator_name_autocomplete_forelite(inter:Interaction,current:str)->List[app_commands.Choice[str]]:
+    strList = OperatorCostsCalculator.autoCompleteForEliteCosts(current)
     return [app_commands.Choice(name = name, value = value) for name,value in strList]
 
 @tree.command(
@@ -408,7 +432,6 @@ async def operatorcostlist(inter:Interaction,selection:Choice[str]):
     await inter.response.defer(thinking=True)
     msg = OperatorCostsCalculator.operatorCostList(selection)
     await followupToDiscord(inter,msg)
-
 
 CHANNEL_ID_HAPPYBIRTHDAY = int(os.environ["CHANNEL_ID_HAPPYBIRTHDAY"])
 
