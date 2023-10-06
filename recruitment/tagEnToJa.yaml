@@ -1,0 +1,35 @@
+#職業
+Vanguard: 先鋒
+Guard: 前衛
+Sniper: 狙撃
+Defender: 重装
+Medic: 医療
+Supporter: 補助
+Caster: 術師
+Specialist: 特殊
+
+#配置
+Melee: 近距離
+Ranged: 遠距離
+
+#ランク
+Starter: 初期
+Senior Operator: エリート
+Top Operator: 上級エリート
+
+#その他
+Crowd control: 牽制
+Nuker: 爆発力
+Healing: 治療
+Support: 支援
+DP-Recovery: COST回復
+DPS: 火力
+Survival: 生存
+AOE: 範囲攻撃
+Defense: 防御
+Slow: 減速
+Debuff: 弱化
+Fast-deploy: 高速再配置
+Shift: 強制移動
+Summon: 召喚
+Robot: ロボット

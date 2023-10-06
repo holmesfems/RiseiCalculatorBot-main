@@ -12,8 +12,9 @@ def get_json(url:str,AdditionalReq:Dict[str,str]=None,headers = {}) -> dict:
             req = urllib.request.Request(url, None,headers)
             with urllib.request.urlopen(req, timeout=10) as response: #謎に一回目だけTimeout なぜ
                 #print(response)
+                ret = yaml.safe_load(response.read().decode(),)
                 print("recieved:"+url)
-                return yaml.safe_load(response.read().decode(),)
+                return ret
         except Exception as e:
             Err = e
     raise Err

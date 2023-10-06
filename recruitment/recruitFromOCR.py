@@ -5,12 +5,16 @@ from google.auth import api_key
 import sys
 sys.path.append('../')
 from recruitment import recruitment
+import yaml
 
 #print(__tagList)
 __eliteTagDict = {item:item for item in recruitment.eliteTags}
 
 __otherTagDict = {item:item for item in recruitment.jobTags + recruitment.positionTags + recruitment.otherTags}
 __otherTagDict["範囲攻"] = "範囲攻撃"
+
+with open("recruitment/tagEnToJa.yaml","rb") as f:
+    __enTagDict = yaml.safe_load(f)
 
 def filterNotNone(_list:list) -> list:
     return list(filter(lambda x: x is not None,_list))
@@ -31,9 +35,21 @@ def matchOtherTag(result:List[str]) -> List[str]:
             ret.append(value)
     return ret
 
+def matchEnTag(result:List[str]) -> List[str]:
+    ret = []
+    for key,value in __enTagDict.items():
+        if value in ret: continue
+        if(key in result):
+            ret.append(value)
+    return ret
+
 def matchTag(result:str) -> List[str]:
     listResult = result.split("\n")
-    return matchEliteTag(listResult) + matchOtherTag(listResult)
+    jpMatch = matchEliteTag(listResult) + matchOtherTag(listResult)
+    if(len(jpMatch)>=5):return jpMatch
+    enMatch = matchEnTag(listResult)
+    if(len(enMatch) >= len(jpMatch)): return enMatch
+    return jpMatch
 
 def taglistFromImage(imageURI:str)->List[str]:
     API_KEY = os.environ["CLOUDVISION_API_KEY"]
