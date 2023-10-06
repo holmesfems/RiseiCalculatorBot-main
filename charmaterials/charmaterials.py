@@ -264,7 +264,8 @@ class AllOperatorsInfo:
         return self.nameToId.keys()
     
     def getOperatorCostFromName(self,nameStr:str):
-        id = self.nameToId[nameStr]
+        id = self.nameToId.get(nameStr,None)
+        if(not id): return None
         return self.operatorDict.get(id,None)
     
     def getAllCostItems(self)->Dict[str,OperatorCosts]:

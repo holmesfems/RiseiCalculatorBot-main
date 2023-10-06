@@ -35,8 +35,8 @@ def arrangementChunks(msgList, maxLength:int):
     return chunks
 
 embedColourDict:Dict[str,discord.Colour] = {
-    "err" : discord.Colour.magenta,
-    "ok" : 0x8be02b
+    "err" : discord.Colour.magenta.__code__,
+    "ok" : discord.Colour.from_str("0x8be02b")
 }
 
 
@@ -44,7 +44,7 @@ embedColourDict:Dict[str,discord.Colour] = {
 def createEmbedList(msg):
     maxLength = 1900
     title = "reply"
-    color = embedColourDict["ok"]
+    colour = embedColourDict["ok"]
     if type(msg) is str:
         chunks = [msg[i:i+maxLength] for i in range(0, len(msg), maxLength)]
     elif type(msg) is list:
@@ -56,12 +56,12 @@ def createEmbedList(msg):
         msgList = msg.get("msgList",[])
         chunks = arrangementChunks(msgList,maxLength)
         #左のバーの色を指定
-        colorType = msg.get("type","ok")
-        color = embedColourDict.get(colorType,color)
+        colourType = msg.get("type","ok")
+        colour = embedColourDict.get(colourType,colour)
     embeds = [discord.Embed(
             title = title,
             description = item,
-            color = color
+            colour = colour
         ) for item in chunks]
     return embeds
 
