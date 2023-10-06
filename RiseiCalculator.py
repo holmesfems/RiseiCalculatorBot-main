@@ -35,7 +35,7 @@ def arrangementChunks(msgList, maxLength:int):
     return chunks
 
 embedColourDict:Dict[str,discord.Colour] = {
-    "err" : discord.Colour.magenta.__code__,
+    "err" : discord.Colour.magenta,
     "ok" : discord.Colour.from_str("0x8be02b")
 }
 
