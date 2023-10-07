@@ -1191,11 +1191,11 @@ class CalculatorManager:
         #課金パック効率
         def strBlock(item):
             return "```\n" +\
-                f"パック値段  :{item[1]:.0f}円\n" +\
-                f"合計理性価値:{item[2]:.2f}\n" +\
-                f"純正源石換算:{item[3]:.2f}\n" +\
-                f"日本円換算  :{item[4]:.2f}円\n" +\
-                f"課金効率    :{item[5]*100:.2f}%```\n"
+                f"パック値段  : {item[1]:.0f}円\n" +\
+                f"合計理性価値: {item[2]:.2f}\n" +\
+                f"純正源石換算: {item[3]:.2f}\n" +\
+                f"日本円換算  : {item[4]:.2f}円\n" +\
+                f"課金効率    : {item[5]*100:.2f}%```\n"
         if toPrintTarget in ["Total","全体比較表"]:
             title = "課金パック比較"
             msgList = []
@@ -1215,8 +1215,16 @@ class CalculatorManager:
                 msgList.append(f"{item[0]}:{strBlock(item)}")
             #比較用
             constantList = [(key,value) for key,value in kakinList.items() if value["isConstant"]]
+            constantEfficiencyList = []
+            for name,priceAndContents in constantList:
+                price = priceAndContents["price"]
+                contents = priceAndContents["contents"]
+                value = riseiValues.getValueFromJaCountDict(contents)
+                moneyPrice = value/ basicValue * basicPrice
+                efficiency = moneyPrice / price
+                constantEfficiencyList.append((name,efficiency))
             msgList.append("参考用課金効率:```\n"
-                           + "\n".join([f"{key}: {riseiValues.getValueFromJaCountDict(value['contents'])}" for key,value in constantList])
+                           + "\n".join([f"{key}: {value}" for key,value in constantList])
                            + "```")
             return {
                 "title":title,
