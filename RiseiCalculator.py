@@ -296,7 +296,7 @@ async def riseikakin(inter:Interaction,target:str):
     target = safeCallChoiceVal(target)
     await inter.response.defer(thinking=True)
     reply = CalculatorManager.riseikakin(target,True)
-    await followupToDiscord(reply)
+    await followupToDiscord(inter,reply)
 @riseikakin.autocomplete("target")
 async def riseikakin_autoCompleteName(inter:Interaction,current:str)->List[app_commands.Choice[str]]:
     return [app_commands.Choice(name = name, value = value) for (name,value) in CalculatorManager.autoCompletion_riseikakin(current)]

@@ -1208,7 +1208,7 @@ class CalculatorManager:
                 moneyPrice = value/ basicValue * basicPrice
                 efficiency = moneyPrice / price
                 dataSet.append((name,price,value,stoneCounts,moneyPrice,efficiency))
-            sortedDataSet = list(sorted(dataSet,lambda x: x[5],reverse=True))
+            sortedDataSet = list(sorted(dataSet,key=lambda x: x[5],reverse=True))
             for item in sortedDataSet:
                 msgList.append(f"{item[0]}:{strBlock(item)}")
             return {
