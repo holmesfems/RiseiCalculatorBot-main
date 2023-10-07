@@ -62,7 +62,6 @@ with open("./recruitment/recruitmentOperators.json","rb") as file:
 with open("./recruitment/tagList.json","rb") as file:
     tagList = yaml.safe_load(file)
 
-
 jobTags = tagList["jobTags"]
 positionTags = tagList["positionTags"]
 eliteTags = tagList["eliteTags"]
@@ -129,6 +128,9 @@ def isIndependent(key,keyList):
 def clearSearchMap(redundantMap:dict):
     return {key:value for (key,value) in redundantMap.items() if isIndependent(key,redundantMap.keys())}
 
+#星〇確定タグの組み合わせリストを出力する
+#equals: ジャスト星〇確定なのか
+#clearRedundant: 冗長タグを消すか(例： 先鋒+治療→星4なので、先鋒+治療+cost回復は要らないよね)
 def createSearchMap(tagNameList,targetOperatorList,minStarToShow,equals = False,clearRedundant = False):
     tagClasses = createTagList(tagNameList)
     tagCombinations = list()

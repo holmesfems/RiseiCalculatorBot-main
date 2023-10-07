@@ -51,7 +51,6 @@ new_zone:List[str] = [
     'permanent_sub_5_zone1', #CW
 ]
 
-
 def valueTargetZHToJA(zhStr:str) -> str:
     return ItemIdToName.zhToJa(zhStr)
 
@@ -151,7 +150,7 @@ class DropList:
     
 class RiseiOrTimeValues:
     with open("riseicalculator2/constValues.yaml","rb") as f:
-        __constValueDict = yaml.safe_load(f)
+        __constValueDict:Dict[str,float] = yaml.safe_load(f)
 
     def __init__(self,valueArray:np.ndarray,isGlobal:bool,mode:CalculateMode):
         self.isGlobal = isGlobal
@@ -179,12 +178,20 @@ class RiseiOrTimeValues:
         if(index >= 0):
             return self.valueArray[index]
         else:
-            return RiseiOrTimeValues.__constValueDict.get(zhstr,0.0)
+            jastr = ItemIdToName.zhToJa(zhstr)
+            return RiseiOrTimeValues.__constValueDict.get(jastr,0.0)
     
+    def getValueFromJa(self,jastr:str) -> float:
+        zhStr = ItemIdToName.getZH(ItemIdToName.jaToId(jastr))
+        return self.getValueFromZH(zhStr)
+
     def getValueFromCode(self,codeStr:str) -> float:
         zhstr = ItemIdToName.getZH(codeStr)
         return self.getValueFromZH(zhstr)
     
+    def getValueFromJaCountDict(self,jaCountDict:Dict[str,float]):
+        return sum([self.getValueFromJa(name)*count for name,count in jaCountDict.items()])
+
     def getStdDevFromZH(self,zhstr:str) -> float:
         index = valueTargetIndexOf(zhstr,self.isGlobal)
         if(index >= 0):
@@ -1157,4 +1164,78 @@ class CalculatorManager:
             "msgList" : ["未知のコマンド："+str(toPrintTarget)],
             "type": "err"
         }
+    
+    def autoCompletion_riseikakin(current:str,limit:int=25)->List[Tuple[str,str]]:
+        kakinList = getKakinList(True)
+        return [(name,name) for name in kakinList.keys() if current in name][:limit]
+
+    def riseikakin(toPrintTarget:str,isGlobal:bool,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME):
+        riseiValues = CalculatorManager.getValues(isGlobal,CalculateMode.SANITY,baseMinTimes,cache_minutes)
+    
+        kakinList = getKakinList(isGlobal)
+        def getRiseiValueFromKakinName(jaStr)->float:
+            priceAndContents = kakinList.get(jaStr,None)
+            if(not priceAndContents): return 0
+            return riseiValues.getValueFromJaCountDict(priceAndContents["contents"])
+        
+        def getPriceFromKakinName(jaStr)->float:
+            priceAndContents = kakinList.get(jaStr,None)
+            if(not priceAndContents): return 0
+            return priceAndContents["price"]
+        
+        basicValue = getRiseiValueFromKakinName("10000円恒常パック")
+        basicPrice = getPriceFromKakinName("10000円恒常パック")
+
+        #課金パック効率
+        def strBlock(item):
+            return "'''\n" +\
+                f"パック値段  :{item[1]:.0f}円\n" +\
+                f"合計理性価値:{item[2]:.2f}\n" +\
+                f"純正源石換算:{item[3]:.2f}\n" +\
+                f"日本円換算  :{item[4]:.2f}円\n" +\
+                f"課金効率    :{item[5]*100:.2f}%```\n"
+        if toPrintTarget == "Total":
+            title = "課金パック比較"
+            msgList = []
+            dataSet = []
+            for name,priceAndContents in kakinList.items():
+                price = priceAndContents["price"]
+                contents = priceAndContents["contents"]
+                value = riseiValues.getValueFromJaCountDict(contents)
+                stoneCounts = value / riseiValues.getValueFromJa('純正源石')
+                moneyPrice = value/ basicValue * basicPrice
+                efficiency = moneyPrice / price
+                dataSet.append((name,price,value,stoneCounts,moneyPrice,efficiency))
+            sortedDataSet = list(sorted(dataSet,lambda x: x[5],reverse=True))
+            for item in sortedDataSet:
+                msgList.append(f"{item[0]}:{strBlock(item)}")
+            return {
+                "title":title,
+                "msgList":msgList
+            }
+
+        priceAndContents = kakinList.get(toPrintTarget)
+        if(not priceAndContents): return {
+            "title":"エラー",
+            "msgList" : ["存在しない課金パック："+toPrintTarget],
+            "type" : "err"
+        }
+        price = priceAndContents["price"]
+        contents = priceAndContents["contents"]
+        title = toPrintTarget
+        value = riseiValues.getValueFromJaCountDict(contents)
+        stoneCounts = stoneCounts = value / riseiValues.getValueFromJa('純正源石')
+        moneyPrice = value/ basicValue * basicPrice
+        efficiency = moneyPrice / price
+        def contentsStrBlock(contents:Dict[str,float]):
+            return '```\n'+'\n'.join([f"{name} × {count}" for name,count in contents.items()]) + '```\n'
+        
+        msgList = []
+        msgList.append(f"内容物:" + contentsStrBlock(contents))
+        msgList.append(f"理性価値情報:" + strBlock(toPrintTarget,price,value,stoneCounts,moneyPrice,efficiency))
+        return {
+            "title":title,
+            "msgList":msgList
+        }
+        
         

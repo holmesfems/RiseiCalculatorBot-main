@@ -58,10 +58,10 @@ class ItemIdToName:
             ItemIdToName.init()
         return ItemIdToName.__ZHToid.get(zhStr,None)
     
-    def jaToId(zhStr:str)->str:
+    def jaToId(jaStr:str)->str:
         if(not ItemIdToName.__JAToid):
             ItemIdToName.init()
-        return ItemIdToName.__JAToid.get(zhStr,None)
+        return ItemIdToName.__JAToid.get(jaStr,None)
     
     def getZH(id:str)->str:
         if(not ItemIdToName.__idToZH):

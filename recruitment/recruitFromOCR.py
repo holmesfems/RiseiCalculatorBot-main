@@ -7,12 +7,14 @@ sys.path.append('../')
 from recruitment import recruitment
 import yaml
 
-#print(__tagList)
+#エリートは上級エリートの中に含まれるので、単独で処理を書く
 __eliteTagDict = {item:item for item in recruitment.eliteTags}
 
+#その他タグは、認識した文字列の中に含まれていればOK
 __otherTagDict = {item:item for item in recruitment.jobTags + recruitment.positionTags + recruitment.otherTags}
 __otherTagDict["範囲攻"] = "範囲攻撃"
 
+#英語版認識用
 with open("recruitment/tagEnToJa.yaml","rb") as f:
     __enTagDict = yaml.safe_load(f)
 
@@ -51,6 +53,8 @@ def matchTag(result:str) -> List[str]:
     if(len(enMatch) >= len(jpMatch)): return enMatch
     return jpMatch
 
+#入力: 画像のURI
+#出力: 検出されたタグが含まれるリスト 画像によっては6個以上になってしまうこともある
 def taglistFromImage(imageURI:str)->List[str]:
     API_KEY = os.environ["CLOUDVISION_API_KEY"]
     client = vision.ImageAnnotatorClient(credentials=api_key.Credentials(API_KEY))

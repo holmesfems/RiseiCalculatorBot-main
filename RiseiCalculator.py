@@ -285,6 +285,22 @@ async def riseilists(inter:Interaction,target:Choice[str],mode:Choice[str]="sani
     reply = CalculatorManager.riseilists(target,is_global,mode,toCsv=csv_file)
     await followupToDiscord(inter,reply)
 
+@tree.command(
+    name="riseikakin",
+    description="課金理性効率表を出力します。"
+)
+@app_commands.describe(
+    target = "表示する効率表を選んでください"
+)
+async def riseikakin(inter:Interaction,target:str):
+    target = safeCallChoiceVal(target)
+    await inter.response.defer(thinking=True)
+    reply = CalculatorManager.riseikakin(target,True)
+    await followupToDiscord(reply)
+@riseikakin.autocomplete("target")
+async def riseikakin_autoCompleteName(inter:Interaction,current:str)->List[app_commands.Choice[str]]:
+    return [app_commands.Choice(name = name, value = value) for (name,value) in CalculatorManager.autoCompletion_riseikakin(current)]
+
 #毎日3時に情報自動更新
 @tasks.loop(time=datetime.time(hour=3, minute = 0, tzinfo=JST))
 async def updateRiseiCalculatorInstances():
@@ -479,20 +495,16 @@ async def on_message(message:discord.Message):
             ISINPROCESS_AICHAT = False
 
     elif message.channel.id == RECRUIT_CHANNELID:
-        #print("messageを確認")
         attachment = message.attachments
         if(not attachment): return
-        #print("ファイルを確認")
-        file = attachment[0]
-        if(not file): return
-        if(not file.width or not file.height): return
-        #print("画像を確認")
-        image = file.url
-        tags = recruitFromOCR.taglistFromImage(image)
-        print("タグを読みました",tags)
-        if(not tags):return
-        msg = recruitment.recruitDoProcess(tags,4)
-        await replyToDiscord(message,msg)
+        for file in attachment:
+            if(not file.width or not file.height): return
+            image = file.url
+            tags = recruitFromOCR.taglistFromImage(image)
+            print("タグを読みました",tags)
+            if(not tags):return
+            msg = recruitment.recruitDoProcess(tags,4)
+            await replyToDiscord(message,msg)
 
 @client.event
 async def on_ready():

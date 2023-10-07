@@ -3,16 +3,20 @@ import yaml
 LMDVALUE_1000 = 3.6
 
 valueDict = {
-    "合成玉":0.75, #合成玉
-    "寻访凭证":450.0, #スカウト券
-    "应急理智加强剂":80.0, #初級理性回復材+
-    "芯片":18*(1-12*LMDVALUE_1000/1000), #初級SoC
-    "芯片组":36*(1-12*LMDVALUE_1000/1000), #中級SoC
-    "芯片助剂":90*(30*(1-12*LMDVALUE_1000/1000)/21),
+    "合成玉":0.75,
+    "スカウト券":450.0,
+    "初級理性回復剤+":80.0,
+    "初級SoC":18*(1-12*LMDVALUE_1000/1000),
+    "中級SoC":36*(1-12*LMDVALUE_1000/1000),
+    "SoC強化剤":90*(30*(1-12*LMDVALUE_1000/1000)/21),
 }
-valueDict["双芯片"] = 2*valueDict["芯片组"] + valueDict["芯片助剂"]
-valueDict["模组数据块"]=120*(30*(1-12*LMDVALUE_1000/1000)/21)
-
+valueDict["上級SoC"] = 2*valueDict["中級SoC"] + valueDict["SoC強化剤"]
+valueDict["モジュールデータ"]=120*(30*(1-12*LMDVALUE_1000/1000)/21)
+valueDict["純正源石"] = 135
+valueDict["コーデ交換券"] = valueDict["純正源石"]*18
+valueDict["中級SoCセルフプリンター"] = valueDict["中級SoC"]
+valueDict["★6印交換券"] = valueDict["スカウト券"]*69.2
+valueDict["10回スカウト券"] = valueDict["スカウト券"]*10
 print(valueDict)
 
 with open("riseicalculator2/constValues.yaml","wb") as f:

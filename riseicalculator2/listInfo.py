@@ -1,4 +1,4 @@
-from typing import List
+from typing import List,Dict,Union
 import yaml
 from collections import ChainMap
 import sys
@@ -100,6 +100,12 @@ with open(f"riseicalculator2/price_cc{__ccNumber}.yaml","rb") as f:
 def getCCList() -> List[CCExchangeItem]:
     return __price_CC
 
+#課金パック情報
+with open("riseicalculator2/price_kakin.yaml","rb") as f:
+    kakinList_JP:Dict[str,Dict[str,Union[float,Dict[str,float]]]] = yaml.safe_load(f)
+
+def getKakinList(glob:bool)->Dict[str,Dict[str,Union[float,Dict[str,float]]]]:
+    return kakinList_JP
 
 #大陸版基準、グロ版基準調整用
 def getGlobalOrMainland(ParamName,glob:bool):
