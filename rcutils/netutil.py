@@ -7,7 +7,7 @@ def get_json(url:str,AdditionalReq:Dict[str,str]=None,headers = {}) -> dict:
         url += "?" + "&".join(['%s=%s'%(x,AdditionalReq[x]) for x in AdditionalReq])
     print("request:"+url)
     Err = None
-    for _ in range(5):
+    for i in range(5):
         try:
             req = urllib.request.Request(url, None,headers)
             with urllib.request.urlopen(req, timeout=10) as response: #謎に一回目だけTimeout なぜ
@@ -17,4 +17,5 @@ def get_json(url:str,AdditionalReq:Dict[str,str]=None,headers = {}) -> dict:
                 return ret
         except Exception as e:
             Err = e
+            print(f"failed (epoch: {i+1})")
     raise Err

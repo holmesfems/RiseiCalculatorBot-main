@@ -1167,7 +1167,9 @@ class CalculatorManager:
     
     def autoCompletion_riseikakin(current:str,limit:int=25)->List[Tuple[str,str]]:
         kakinList = getKakinList(True)
-        return [(name,name) for name in kakinList.keys() if current in name][:limit]
+        nameList = [(name,name) for name in kakinList.keys()]
+        totalList = [("全体比較表","Total")]
+        return [item for item in totalList+nameList if current in item[0]][:limit]
 
     def riseikakin(toPrintTarget:str,isGlobal:bool,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME):
         riseiValues = CalculatorManager.getValues(isGlobal,CalculateMode.SANITY,baseMinTimes,cache_minutes)
@@ -1194,7 +1196,7 @@ class CalculatorManager:
                 f"純正源石換算:{item[3]:.2f}\n" +\
                 f"日本円換算  :{item[4]:.2f}円\n" +\
                 f"課金効率    :{item[5]*100:.2f}%```\n"
-        if toPrintTarget == "Total":
+        if toPrintTarget in ["Total","全体比較表"]:
             title = "課金パック比較"
             msgList = []
             dataSet = []
@@ -1232,7 +1234,7 @@ class CalculatorManager:
         
         msgList = []
         msgList.append(f"内容物:" + contentsStrBlock(contents))
-        msgList.append(f"理性価値情報:" + strBlock(toPrintTarget,price,value,stoneCounts,moneyPrice,efficiency))
+        msgList.append(f"理性価値情報:" + strBlock((toPrintTarget,price,value,stoneCounts,moneyPrice,efficiency)))
         return {
             "title":title,
             "msgList":msgList
