@@ -1,6 +1,7 @@
 #limited
 【冬隠帰路/PERISH IN FROST】Blu-ray BOX特典:
   price: 14445
+  isConstant: false
   contents:
     コーデ交換券: 2
     中級SoCセルフプリンター: 2
@@ -17,17 +18,26 @@
 #constant
 10000円恒常パック:
   price: 10000
+  isConstant: true
   contents:
     純正源石: 175
 
+10000円初回パック:
+  price: 10000
+  isConstant: true
+  contents:
+    純正源石: 250
+
 月間スカウトパック:
   price: 2600
+  isConstant: true
   contents:
     純正源石: 42
     10回スカウト券: 1
 
 月パス:
   price: 650
+  isConstant: true
   contents:
     純正源石: 6
     合成玉: 6000

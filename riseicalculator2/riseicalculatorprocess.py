@@ -1190,7 +1190,7 @@ class CalculatorManager:
 
         #課金パック効率
         def strBlock(item):
-            return "'''\n" +\
+            return "```\n" +\
                 f"パック値段  :{item[1]:.0f}円\n" +\
                 f"合計理性価値:{item[2]:.2f}\n" +\
                 f"純正源石換算:{item[3]:.2f}\n" +\
@@ -1200,7 +1200,9 @@ class CalculatorManager:
             title = "課金パック比較"
             msgList = []
             dataSet = []
-            for name,priceAndContents in kakinList.items():
+            #限定パックの情報表示
+            limitedList = [(key,value) for key,value in kakinList.items() if not value["isConstant"]]
+            for name,priceAndContents in limitedList:
                 price = priceAndContents["price"]
                 contents = priceAndContents["contents"]
                 value = riseiValues.getValueFromJaCountDict(contents)
@@ -1211,6 +1213,11 @@ class CalculatorManager:
             sortedDataSet = list(sorted(dataSet,key=lambda x: x[5],reverse=True))
             for item in sortedDataSet:
                 msgList.append(f"{item[0]}:{strBlock(item)}")
+            #比較用
+            constantList = [(key,value) for key,value in kakinList.items() if value["isConstant"]]
+            msgList.append("参考用課金効率:```\n"
+                           + "\n".join([f"{key}: {riseiValues.getValueFromJaCountDict(value['contents'])}" for key,value in constantList])
+                           + "```")
             return {
                 "title":title,
                 "msgList":msgList
