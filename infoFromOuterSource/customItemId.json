@@ -18,5 +18,10 @@
         "id":"3201_CUSTOM",
         "zh":"芯片",
         "ja":"初級SoC"
+    },
+    {
+        "id": "voucher_pcharPack",
+        "zh": "皇家信物交换券",
+        "ja": "★6印交換券"
     }
 ]
