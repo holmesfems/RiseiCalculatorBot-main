@@ -848,6 +848,7 @@ class CalculatorManager:
         CCLIST = enum.auto()
 
     def getValues(isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME) -> RiseiOrTimeValues:
+        print(f"mode:{mode},baseMinTimes:{baseMinTimes},cacheMinutes:{cache_minutes}")
         calculator = CalculatorManager.selectCalculator(isGlobal)
         calculator.tryReInit(CalculatorManager.__getTimeDelta(cache_minutes),baseMinTimes,mode)
         return calculator.getValues(mode)
@@ -1201,7 +1202,6 @@ class CalculatorManager:
             return "```\n" +\
                 "\n".join([f"{name} × {count}" for name,count in self.array.toNameCountDict().items()]) +\
                 "```\n"
-        
     
     def autoCompletion_riseikakin(current:str,limit:int=25)->List[Tuple[str,str]]:
         totalCommandList = [("全体比較(グローバル)","Total_Global"),("全体比較(大陸版)","Total_Mainland")]
@@ -1252,7 +1252,7 @@ class CalculatorManager:
             }
 
         kakinPack = CalculatorManager.KakinPack(toPrintTarget,kakinList[toPrintTarget],riseiValues)
-        
+        title = kakinPack.name
         msgList = []
         msgList.append(f"内容物:" + kakinPack.contentsStrBlock())
         msgList.append(f"理性価値情報:" + kakinPack.strBlock())
