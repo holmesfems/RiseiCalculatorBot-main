@@ -1224,7 +1224,7 @@ class CalculatorManager:
                 efficiency = moneyPrice / price
                 constantEfficiencyList.append((name,efficiency))
             msgList.append("参考用課金効率:```\n"
-                           + "\n".join([f"{key}: {value}" for key,value in constantEfficiencyList])
+                           + "\n".join([f"{key}: {100*value:.2f}%" for key,value in constantEfficiencyList])
                            + "```")
             return {
                 "title":title,
