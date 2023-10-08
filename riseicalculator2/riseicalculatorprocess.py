@@ -940,7 +940,7 @@ class CalculatorManager:
             cnt += 1
             toPrint = [
                 ["マップ名       : ",stage.name],
-                ["{1}効率       : {0:.1f}%".format(100*stage.getEfficiency(riseiValues),str(mode))],
+                ["{1}効率       : {0:.1%}".format(stage.getEfficiency(riseiValues),str(mode))],
                 ["理性消費       : ",str(stage.apCost)]
             ]
             if stage.minClearTime > 0:
@@ -953,9 +953,9 @@ class CalculatorManager:
                     ["分入手数(中級) : {0:.2f}".format(dropPerMin)],
                 ]
             toPrint += [
-                ["主素材効率     : {0:.1f}%".format(100*stage.getPartialEfficiency(riseiValues,categoryValue["Items"]))],
-                ["99%信頼区間(3σ): {0:.1f}%".format(100*calculator.getStageDev(stage,riseiValues)*3)],
-                ["昇進効率       : {0:.1f}%".format(100*stage.getPartialEfficiency(riseiValues,getValueTarget(isGlobal)[4:]))],
+                ["主素材効率     : {0:.1%}".format(stage.getPartialEfficiency(riseiValues,categoryValue["Items"]))],
+                ["99%信頼区間(3σ): {0:.1%}".format(calculator.getStageDev(stage,riseiValues)*3)],
+                ["昇進効率       : {0:.1%}".format(stage.getPartialEfficiency(riseiValues,getValueTarget(isGlobal)[4:]))],
                 ["試行数         : ",str(stage.maxTimes())],
             ]
             #print(toPrint)
@@ -993,8 +993,8 @@ class CalculatorManager:
             cnt += 1
             toPrint = [
                 ["マップ名       : ",stage.name],
-                ["総合{1}効率    : {0:.1f}%".format(100*stage.getEfficiency(riseiValues),str(mode))],
-                ["99%信頼区間(3σ): {0:.1f}%".format(100*calculator.getStageDev(stage,riseiValues)*3)],
+                ["総合{1}効率    : {0:.1%}".format(stage.getEfficiency(riseiValues),str(mode))],
+                ["99%信頼区間(3σ): {0:.1%}".format(calculator.getStageDev(stage,riseiValues)*3)],
             ]
             dropCategoryList = calculator.stageInfo.stageToCategory(stage)
             if len(dropCategoryList) == 0:
@@ -1002,8 +1002,8 @@ class CalculatorManager:
             else:
                 for category in dropCategoryList:
                     categoryValue = calculator.stageInfo.categoryDict[category]
-                    toPrint.append(["{0}: {1:.1f}%".format(CalculatorManager.left(15,categoryValue["to_ja"]+"効率"),
-                        100*stage.getPartialEfficiency(riseiValues,categoryValue["Items"]))])
+                    toPrint.append(["{0}: {1:.1%}".format(CalculatorManager.left(15,categoryValue["to_ja"]+"効率"),
+                        stage.getPartialEfficiency(riseiValues,categoryValue["Items"]))])
                     if stage.minClearTime > 0:
                         dropValues = stage.getDropRate(categoryValue["MainItem"],isGlobal)
                         for item,order in zip(categoryValue["SubItem"],categoryValue["SubOrder"]):
@@ -1016,7 +1016,7 @@ class CalculatorManager:
             if stage.minClearTime > 0:
                 toPrint.append(["時間消費(倍速) : ", str(stage.minClearTime/2.0)])
             toPrint += [
-                ["昇進効率       : {0:.1f}%".format(100*stage.getPartialEfficiency(riseiValues,getValueTarget(isGlobal)[4:]))],
+                ["昇進効率       : {0:.1%}".format(stage.getPartialEfficiency(riseiValues,getValueTarget(isGlobal)[4:]))],
                 ["試行数         : ",str(stage.maxTimes())],
             ]
             msgChunks.append(CalculatorManager.dumpToPrint(toPrint))
@@ -1055,9 +1055,9 @@ class CalculatorManager:
             toPrint = [
                 ["マップ名       : ",str(stage)],
                 ["イベント名     : ",stage.zoneName],
-                ["総合{1}効率   : {0:.1f}%".format(100*stage.getEfficiency(riseiValues),str(mode))],
+                ["総合{1}効率   : {0:.1%}".format(stage.getEfficiency(riseiValues),str(mode))],
                 ["主ドロップ     : ",maindrop],
-                ["ドロップ率     : {0:.2f}%".format(100*droprate)],
+                ["ドロップ率     : {0:.2%}".format(droprate)],
                 ["試行数         : ",str(stage.maxTimes())],
                 ["理性消費       : ",str(stage.apCost)],
             ]
@@ -1194,9 +1194,9 @@ class CalculatorManager:
                 f"合計理性価値: {self.totalValue:.2f}\n" +\
                 f"純正源石換算: {self.totalOriginium:.2f}\n" +\
                 f"マネー換算  : {self.totalRealMoney:.2f}{moneyUnit}\n" +\
-                f"総合課金効率: {self.totalEfficiency*100:.2f}%\n" +\
-                f"ガチャ数    : {self.gachaCount}\n" +\
-                f"ガチャ効率  : {self.gachaEfficiency*100:.2f}%```\n"
+                f"総合課金効率: {self.totalEfficiency:.2%}\n" +\
+                f"ガチャ数    : {self.gachaCount:.2f}\n" +\
+                f"ガチャ効率  : {self.gachaEfficiency:.2%}```\n"
         
         def contentsStrBlock(self):
             return "```\n" +\
@@ -1235,7 +1235,7 @@ class CalculatorManager:
         def getConstantStrBlock():
             constantList = [CalculatorManager.KakinPack(key,value,riseiValues) for key,value in kakinList.items() if value["isConstant"]]
             return "参考用課金効率:```\n" +\
-                "\n".join([f"{pack.name}: {100*pack.totalEfficiency:.2f}%" for pack in constantList]) +\
+                "\n".join([f"{pack.name}: {pack.totalEfficiency:.2%}" for pack in constantList]) +\
                 "```"
         if toPrintTarget in totalJATuple or toPrintTarget in totalCNTuple:
             title = "課金パック比較"
