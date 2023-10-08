@@ -1167,7 +1167,7 @@ class CalculatorManager:
     
     def autoCompletion_riseikakin(current:str,limit:int=25)->List[Tuple[str,str]]:
         kakinList = getKakinList(True)
-        nameList = [(name,name) for name in kakinList.keys()]
+        nameList = [(name,name) for name,value in kakinList.items() if not value["isConstant"]]
         totalList = [("全体比較表","Total")]
         return [item for item in totalList+nameList if current in item[0]][:limit]
 
@@ -1196,6 +1196,20 @@ class CalculatorManager:
                 f"純正源石換算: {item[3]:.2f}\n" +\
                 f"日本円換算  : {item[4]:.2f}円\n" +\
                 f"課金効率    : {item[5]*100:.2f}%```\n"
+        #比較用
+        def getConstantStrBlock():
+            constantList = [(key,value) for key,value in kakinList.items() if value["isConstant"]]
+            constantEfficiencyList = []
+            for name,priceAndContents in constantList:
+                price = priceAndContents["price"]
+                contents = priceAndContents["contents"]
+                value = riseiValues.getValueFromJaCountDict(contents)
+                moneyPrice = value/ basicValue * basicPrice
+                efficiency = moneyPrice / price
+                constantEfficiencyList.append((name,efficiency))
+            return "参考用課金効率:```\n" +\
+                "\n".join([f"{key}: {100*value:.2f}" for key,value in constantEfficiencyList]) +\
+                + "```"
         if toPrintTarget in ["Total","全体比較表"]:
             title = "課金パック比較"
             msgList = []
@@ -1213,19 +1227,7 @@ class CalculatorManager:
             sortedDataSet = list(sorted(dataSet,key=lambda x: x[5],reverse=True))
             for item in sortedDataSet:
                 msgList.append(f"{item[0]}:{strBlock(item)}")
-            #比較用
-            constantList = [(key,value) for key,value in kakinList.items() if value["isConstant"]]
-            constantEfficiencyList = []
-            for name,priceAndContents in constantList:
-                price = priceAndContents["price"]
-                contents = priceAndContents["contents"]
-                value = riseiValues.getValueFromJaCountDict(contents)
-                moneyPrice = value/ basicValue * basicPrice
-                efficiency = moneyPrice / price
-                constantEfficiencyList.append((name,efficiency))
-            msgList.append("参考用課金効率:```\n"
-                           + "\n".join([f"{key}: {100*value:.2f}%" for key,value in constantEfficiencyList])
-                           + "```")
+            msgList.append(getConstantStrBlock())
             return {
                 "title":title,
                 "msgList":msgList
@@ -1250,6 +1252,7 @@ class CalculatorManager:
         msgList = []
         msgList.append(f"内容物:" + contentsStrBlock(contents))
         msgList.append(f"理性価値情報:" + strBlock((toPrintTarget,price,value,stoneCounts,moneyPrice,efficiency)))
+        msgList.append(getConstantStrBlock())
         return {
             "title":title,
             "msgList":msgList
