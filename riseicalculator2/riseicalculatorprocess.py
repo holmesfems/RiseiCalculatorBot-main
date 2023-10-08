@@ -1190,13 +1190,14 @@ class CalculatorManager:
         def strBlock(self):
             moneyUnit = '円' if self.isGlobal else '元'
             return "```\n" +\
+                f"総合効率    : {self.totalEfficiency:.2%}\n" +\
+                f"ガチャ効率  : {self.gachaEfficiency:.2%}\n" +\
                 f"パック値段  : {self.price:.0f}{moneyUnit}\n" +\
                 f"合計理性価値: {self.totalValue:.2f}\n" +\
                 f"純正源石換算: {self.totalOriginium:.2f}\n" +\
                 f"マネー換算  : {self.totalRealMoney:.2f}{moneyUnit}\n" +\
-                f"総合課金効率: {self.totalEfficiency:.2%}\n" +\
                 f"ガチャ数    : {round(self.gachaCount,2)}\n" +\
-                f"ガチャ効率  : {self.gachaEfficiency:.2%}```\n"
+                "```\n"
         
         def contentsStrBlock(self):
             return "```\n" +\
