@@ -848,7 +848,7 @@ class CalculatorManager:
         CCLIST = enum.auto()
 
     def getValues(isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME) -> RiseiOrTimeValues:
-        print(f"mode:{mode},baseMinTimes:{baseMinTimes},cacheMinutes:{cache_minutes}")
+        #print(f"mode:{mode},baseMinTimes:{baseMinTimes},cacheMinutes:{cache_minutes}")
         calculator = CalculatorManager.selectCalculator(isGlobal)
         calculator.tryReInit(CalculatorManager.__getTimeDelta(cache_minutes),baseMinTimes,mode)
         return calculator.getValues(mode)
