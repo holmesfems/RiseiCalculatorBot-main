@@ -1300,7 +1300,7 @@ class CalculatorManager:
                 columns = materialSet + kakinPack.targetNameList()
                 index = [kakinPack.name,"理性価値"]
                 data = np.array([kakinPack.array.getByJaList(materialSet),riseiValues.getValueFromJaList(materialSet)])
-                valueData = np.array([kakinPack.targetValueList,[0 for _ in kakinPack.targetNameList()]])
+                valueData = np.array([kakinPack.targetValueList(),[0 for _ in kakinPack.targetNameList()]])
                 data = np.concatenate([data,valueData],axis=1)
                 df = pd.DataFrame(data,index=index,columns=columns)
                 df.to_excel(KAKIN_FILENAME)
