@@ -11,7 +11,7 @@ _INDEX_INFINITY = 10000
 
 class ItemArray:
     #ガチャ数計算用
-    with open("riseicalculator2/constGacha.yaml","rb") as f:
+    with open("rcutils/constGacha.yaml","rb") as f:
         __gachaDict:Dict[str,float] = yaml.safe_load(f)
 
     def __init__(self,itemIdToCountDict:Dict[str,float]={}):
