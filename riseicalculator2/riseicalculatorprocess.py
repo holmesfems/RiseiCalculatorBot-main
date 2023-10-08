@@ -416,7 +416,8 @@ class StageInfo:
 
     def categoryValidStages(self,category:str,validBaseMinTimes:int)->List[StageItem]:
         allStageList:List[StageItem] = self.categoryDict[category]["Stages"]
-        validStageList:List[StageItem] = [x for x in allStageList if x.maxTimes() >= validBaseMinTimes]
+        #新素材のステージは一旦validBaseMinTimesを無視する(有効ステージが存在しなくなる恐れがあるため)
+        validStageList:List[StageItem] = [x for x in allStageList if x.maxTimes() >= validBaseMinTimes or category in StageCategoryDict["new"].keys()]
         return validStageList
     
     def stageToCategory(self,stage:StageItem) -> List[str]:
