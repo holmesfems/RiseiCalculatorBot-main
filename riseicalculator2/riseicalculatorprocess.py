@@ -1209,7 +1209,7 @@ class CalculatorManager:
                 constantEfficiencyList.append((name,efficiency))
             return "参考用課金効率:```\n" +\
                 "\n".join([f"{key}: {100*value:.2f}" for key,value in constantEfficiencyList]) +\
-                + "```"
+                "```"
         if toPrintTarget in ["Total","全体比較表"]:
             title = "課金パック比較"
             msgList = []
