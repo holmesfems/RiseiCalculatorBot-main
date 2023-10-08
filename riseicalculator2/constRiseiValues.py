@@ -1,6 +1,8 @@
 import yaml
+#理性価値が固定値であるものを列挙、計算する
 
-LMDVALUE_1000 = 3.6
+LMDVALUE_1000 = 3.6 #幣1000の理性価値
+EXPVALUE_1000 = 17.55696 #経験値1000(中級作戦記録)の理性価値
 
 valueDict = {
     "合成玉":0.75,
@@ -17,6 +19,9 @@ valueDict["コーデ交換券"] = valueDict["純正源石"]*18
 valueDict["中級SoCセルフプリンター"] = valueDict["中級SoC"]
 valueDict["★6印交換券"] = valueDict["スカウト券"]*69.2
 valueDict["10回スカウト券"] = valueDict["スカウト券"]*10
+valueDict["エリート特訓装置"] = EXPVALUE_1000*495 + LMDVALUE_1000*447.378
+valueDict["上級エリート特訓装置"] = EXPVALUE_1000*750 + LMDVALUE_1000*744.955
+
 print(valueDict)
 
 with open("riseicalculator2/constValues.yaml","wb") as f:

@@ -1,0 +1,105 @@
+#limited
+汐斯塔风物组合包:
+  price: 45
+  isConstant: false
+  contents:
+    純正源石: 13
+    焼結核凝晶: 2
+    ナノフレーク: 2
+    融合ゲル: 2
+    半自然溶剤: 2
+
+诗怀雅的手提箱:
+  price: 68
+  isConstant: false
+  contents:
+    純正源石: 16
+    龍門幣1000: 700
+
+假日氤氲组合包:
+  price: 68
+  isConstant: false
+  contents:
+    合成玉: 4500
+    龍門幣1000: 100
+    SoC強化剤: 2
+    アーツ学Ⅰ: 80
+    モジュールデータ: 2
+
+特训意向礼包:
+  price: 68
+  isConstant: false
+  contents:
+    純正源石: 11
+    エリート特訓装置: 1
+
+高级特训意向礼包:
+  price: 128
+  isConstant: false
+  contents:
+    純正源石: 19
+    上級エリート特訓装置: 1
+
+温泉观光组合包:
+  price: 198
+  isConstant: false
+  contents:
+    純正源石: 24
+    10回スカウト券: 2
+    龍門幣1000: 200
+    上級作戦記録: 20
+    中級作戦記録: 30
+    SoC強化剤: 2
+    モジュールデータ: 2
+    上級切削液: 4
+
+火山狂欢组合包:
+  price: 328
+  isConstant: false
+  contents:
+    純正源石: 90
+    10回スカウト券: 1
+    龍門幣1000: 220
+    上級作戦記録: 30
+    SoC強化剤: 4
+    モジュールデータ: 4
+    データ補完マシン: 20
+    データ補完チップ: 60
+
+芯片礼包:
+  price: 30
+  isConstant: false
+  contents:
+    上級SoC: 4
+    初級SoC: 5
+
+#constant
+648元源石:
+  price: 648
+  isConstant: true
+  contents:
+    純正源石: 185
+
+648元源石(首充):
+  price: 648
+  isConstant: true
+  contents:
+    純正源石: 260
+
+每月寻访组合包:
+  price: 168
+  isConstant: true
+  contents:
+    純正源石: 42
+    10回スカウト券: 1
+    アーツ学Ⅲ: 45
+    アーツ学Ⅱ: 25
+    アーツ学Ⅰ: 10
+
+月卡:
+  price: 30
+  isConstant: true
+  contents:
+    純正源石: 6
+    合成玉: 6000
+    初級理性回復剤+: 30

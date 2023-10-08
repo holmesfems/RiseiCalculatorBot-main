@@ -10,6 +10,10 @@ _ORDERCRITERIA = listInfo.getValueTarget(False)
 _INDEX_INFINITY = 10000
 
 class ItemArray:
+    #ガチャ数計算用
+    with open("riseicalculator2/constGacha.yaml","rb") as f:
+        __gachaDict:Dict[str,float] = yaml.safe_load(f)
+
     def __init__(self,itemIdToCountDict:Dict[str,float]={}):
         if(not itemIdToCountDict):
             self.__dict:Dict[str,float] = {}
@@ -129,6 +133,16 @@ class ItemArray:
         id = ItemIdToName.zhToId(zhStr)
         return self.getById(id)
     
+    def getByJa(self,jaStr:str) -> float:
+        id = ItemIdToName.jaToId(jaStr)
+        return self.getById(id)
+    
+    def getGachaCount(self) -> float:
+        sum = 0
+        for key,value in ItemArray.__gachaDict.items():
+            sum += self.getByJa(key) * value
+        return sum
+    
     def toIdCountDict(self) -> Dict[str,float]:
         self.normalize()
         return self.__dict.copy()
@@ -149,4 +163,9 @@ class ItemArray:
     
     def filterByZH(self,zhList:Dict[str]) -> ItemArray:
         return self.filterById([ItemIdToName.zhToId(zh) for zh in zhList])
+    
+    @staticmethod
+    def fromJaCountDict(jaCountDict:Dict[str,float]) -> ItemArray:
+        idCountDict = {ItemIdToName.jaToId(key):value for key,value in jaCountDict.items() if ItemIdToName.jaToId(key)}
+        return ItemArray(idCountDict)
     

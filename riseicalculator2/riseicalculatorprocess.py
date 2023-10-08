@@ -1165,93 +1165,98 @@ class CalculatorManager:
             "type": "err"
         }
     
-    def autoCompletion_riseikakin(current:str,limit:int=25)->List[Tuple[str,str]]:
-        kakinList = getKakinList(True)
-        nameList = [(name,name) for name,value in kakinList.items() if not value["isConstant"]]
-        totalList = [("全体比較表","Total")]
-        return [item for item in totalList+nameList if current in item[0]][:limit]
-
-    def riseikakin(toPrintTarget:str,isGlobal:bool,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME):
-        riseiValues = CalculatorManager.getValues(isGlobal,CalculateMode.SANITY,baseMinTimes,cache_minutes)
-    
-        kakinList = getKakinList(isGlobal)
-        def getRiseiValueFromKakinName(jaStr)->float:
-            priceAndContents = kakinList.get(jaStr,None)
-            if(not priceAndContents): return 0
-            return riseiValues.getValueFromJaCountDict(priceAndContents["contents"])
+    #課金パック効率モジュール
+    #課金パック情報
+    class KakinPack:
+        def __init__(self,name:str,priceAndContents:Dict[str,Union[float,Dict[str,float]]],isGlobal:bool):
+            riseiValues = CalculatorManager.getValues(isGlobal,CalculateMode.SANITY)
+            self.name = name
+            self.price = priceAndContents["price"]
+            self.isConstant = priceAndContents["isConstant"]
+            self.array = itemArray.ItemArray.fromJaCountDict(priceAndContents["contents"])
+            self.totalValue = riseiValues.getValueFromItemArray(self.itemArray)
+            self.totalOriginium = self.totalValue / riseiValues.getValueFromJa('純正源石')
+            self.isGlobal = isGlobal
+            basicPackName = "10000円恒常パック" if isGlobal else "648元源石"
+            basicPrice = getKakinList(self.isGlobal)[basicPackName]["price"]
+            basicArray = itemArray.ItemArray.fromJaCountDict(getKakinList(self.isGlobal)[basicPackName]["contents"])
+            basicValue = riseiValues.getValueFromItemArray(basicArray)
+            self.totalRealMoney = self.totalValue / basicValue * basicPrice
+            self.totalEfficiency = self.totalRealMoney / self.price
+            self.gachaCount = self.array.getGachaCount()
+            basicGachaCount = basicArray.getGachaCount()
+            self.gachaEfficiency = self.gachaCount / self.price * basicPrice / basicGachaCount
         
-        def getPriceFromKakinName(jaStr)->float:
-            priceAndContents = kakinList.get(jaStr,None)
-            if(not priceAndContents): return 0
-            return priceAndContents["price"]
-        
-        basicValue = getRiseiValueFromKakinName("10000円恒常パック")
-        basicPrice = getPriceFromKakinName("10000円恒常パック")
-
-        #課金パック効率
-        def strBlock(item):
+        def strBlock(self):
+            moneyUnit = '円' if self.isGlobal else '元'
             return "```\n" +\
-                f"パック値段  : {item[1]:.0f}円\n" +\
-                f"合計理性価値: {item[2]:.2f}\n" +\
-                f"純正源石換算: {item[3]:.2f}\n" +\
-                f"日本円換算  : {item[4]:.2f}円\n" +\
-                f"課金効率    : {item[5]*100:.2f}%```\n"
+                f"パック値段  : {self.price:.0f}{moneyUnit}\n" +\
+                f"合計理性価値: {self.totalValue:.2f}\n" +\
+                f"純正源石換算: {self.totalOriginium:.2f}\n" +\
+                f"日本円換算  : {self.totalRealMoney:.2f}{moneyUnit}\n" +\
+                f"総合課金効率: {self.totalEfficiency*100:.2f}%\n" +\
+                f"ガチャ数    : {self.gachaCount}\n" +\
+                f"ガチャ効率  : {self.gachaEfficiency}```\n"
+        
+        def contentsStrBlock(self):
+            return "```\n" +\
+                "\n".join([f"{name} × {count}" for name,count in self.array.toNameCountDict()]) +\
+                "```\n"
+        
+    
+    def autoCompletion_riseikakin(current:str,limit:int=25)->List[Tuple[str,str]]:
+        totalCommandList = [("全体比較(グローバル)","Total_Global"),("全体比較(大陸版)","Total_Mainland")]
+        nameList = [(name,name) for name,value in getKakinList(True).items() if not value["isConstant"]]
+        nameList = [(name,name) for name,value in getKakinList(False).items() if not value["isConstant"]]
+        return [item for item in totalCommandList+nameList if current in item[0]][:limit]
+
+    def riseikakin(toPrintTarget:str,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME):
+        #グローバル状態を計算
+        isGlobal:bool = ...
+        totalJATuple = ("全体比較(グローバル)","Total_Global")
+        totalCNTuple = ("全体比較(大陸版)","Total_Mainland")
+        if(toPrintTarget in totalJATuple):
+            isGlobal = True
+        elif(toPrintTarget in totalCNTuple):
+            isGlobal = False
+        elif(toPrintTarget in getKakinList(True).keys()):
+            isGlobal = True
+        elif(toPrintTarget in getKakinList(False).keys()):
+            isGlobal = False
+        else:
+            return {
+                "title":"エラー",
+                "msgList" : ["存在しない課金パック："+toPrintTarget],
+                "type" : "err"
+            }
+        riseiValues = CalculatorManager.getValues(isGlobal,CalculateMode.SANITY,baseMinTimes,cache_minutes)
+        kakinList = getKakinList(isGlobal)
+            
         #比較用
         def getConstantStrBlock():
-            constantList = [(key,value) for key,value in kakinList.items() if value["isConstant"]]
-            constantEfficiencyList = []
-            for name,priceAndContents in constantList:
-                price = priceAndContents["price"]
-                contents = priceAndContents["contents"]
-                value = riseiValues.getValueFromJaCountDict(contents)
-                moneyPrice = value/ basicValue * basicPrice
-                efficiency = moneyPrice / price
-                constantEfficiencyList.append((name,efficiency))
+            constantList = [CalculatorManager.KakinPack(key,value,isGlobal) for key,value in kakinList.items() if value["isConstant"]]
             return "参考用課金効率:```\n" +\
-                "\n".join([f"{key}: {100*value:.2f}" for key,value in constantEfficiencyList]) +\
+                "\n".join([f"{pack.name}: {100*pack.totalEfficiency:.2f}%" for pack in constantList]) +\
                 "```"
-        if toPrintTarget in ["Total","全体比較表"]:
+        if toPrintTarget in totalJATuple or toPrintTarget in totalCNTuple:
             title = "課金パック比較"
             msgList = []
-            dataSet = []
             #限定パックの情報表示
-            limitedList = [(key,value) for key,value in kakinList.items() if not value["isConstant"]]
-            for name,priceAndContents in limitedList:
-                price = priceAndContents["price"]
-                contents = priceAndContents["contents"]
-                value = riseiValues.getValueFromJaCountDict(contents)
-                stoneCounts = value / riseiValues.getValueFromJa('純正源石')
-                moneyPrice = value/ basicValue * basicPrice
-                efficiency = moneyPrice / price
-                dataSet.append((name,price,value,stoneCounts,moneyPrice,efficiency))
-            sortedDataSet = list(sorted(dataSet,key=lambda x: x[5],reverse=True))
-            for item in sortedDataSet:
-                msgList.append(f"{item[0]}:{strBlock(item)}")
+            limitedList = [CalculatorManager.KakinPack(key,value,isGlobal) for key,value in kakinList.items() if not value["isConstant"]]
+            sortedList = list(sorted(limitedList,key=lambda x: x.totalEfficiency,reverse=True))
+            for item in sortedList:
+                msgList.append(f"{item.name}:{item.strBlock()}")
             msgList.append(getConstantStrBlock())
             return {
                 "title":title,
                 "msgList":msgList
             }
 
-        priceAndContents = kakinList.get(toPrintTarget)
-        if(not priceAndContents): return {
-            "title":"エラー",
-            "msgList" : ["存在しない課金パック："+toPrintTarget],
-            "type" : "err"
-        }
-        price = priceAndContents["price"]
-        contents = priceAndContents["contents"]
-        title = toPrintTarget
-        value = riseiValues.getValueFromJaCountDict(contents)
-        stoneCounts = stoneCounts = value / riseiValues.getValueFromJa('純正源石')
-        moneyPrice = value/ basicValue * basicPrice
-        efficiency = moneyPrice / price
-        def contentsStrBlock(contents:Dict[str,float]):
-            return '```\n'+'\n'.join([f"{name} × {count}" for name,count in contents.items()]) + '```\n'
+        kakinPack = CalculatorManager.KakinPack(toPrintTarget,kakinList[toPrintTarget],isGlobal)
         
         msgList = []
-        msgList.append(f"内容物:" + contentsStrBlock(contents))
-        msgList.append(f"理性価値情報:" + strBlock((toPrintTarget,price,value,stoneCounts,moneyPrice,efficiency)))
+        msgList.append(f"内容物:" + kakinPack.contentsStrBlock())
+        msgList.append(f"理性価値情報:" + kakinPack.strBlock())
         msgList.append(getConstantStrBlock())
         return {
             "title":title,
