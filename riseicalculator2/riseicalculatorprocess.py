@@ -1174,7 +1174,7 @@ class CalculatorManager:
             self.price = priceAndContents["price"]
             self.isConstant = priceAndContents["isConstant"]
             self.array = itemArray.ItemArray.fromJaCountDict(priceAndContents["contents"])
-            self.totalValue = riseiValues.getValueFromItemArray(self.itemArray)
+            self.totalValue = riseiValues.getValueFromItemArray(self.array)
             self.totalOriginium = self.totalValue / riseiValues.getValueFromJa('純正源石')
             self.isGlobal = isGlobal
             basicPackName = "10000円恒常パック" if isGlobal else "648元源石"
@@ -1207,7 +1207,7 @@ class CalculatorManager:
     def autoCompletion_riseikakin(current:str,limit:int=25)->List[Tuple[str,str]]:
         totalCommandList = [("全体比較(グローバル)","Total_Global"),("全体比較(大陸版)","Total_Mainland")]
         nameList = [(name,name) for name,value in getKakinList(True).items() if not value["isConstant"]]
-        nameList = [(name,name) for name,value in getKakinList(False).items() if not value["isConstant"]]
+        nameList += [(name,name) for name,value in getKakinList(False).items() if not value["isConstant"]]
         return [item for item in totalCommandList+nameList if current in item[0]][:limit]
 
     def riseikakin(toPrintTarget:str,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME):
