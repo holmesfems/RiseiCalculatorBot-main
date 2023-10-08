@@ -1195,7 +1195,7 @@ class CalculatorManager:
                 f"純正源石換算: {self.totalOriginium:.2f}\n" +\
                 f"マネー換算  : {self.totalRealMoney:.2f}{moneyUnit}\n" +\
                 f"総合課金効率: {self.totalEfficiency:.2%}\n" +\
-                f"ガチャ数    : {self.gachaCount:.2f}\n" +\
+                f"ガチャ数    : {round(self.gachaCount,2)}\n" +\
                 f"ガチャ効率  : {self.gachaEfficiency:.2%}```\n"
         
         def contentsStrBlock(self):
