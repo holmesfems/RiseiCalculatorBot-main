@@ -1168,16 +1168,15 @@ class CalculatorManager:
     #課金パック効率モジュール
     #課金パック情報
     class KakinPack:
-        def __init__(self,name:str,priceAndContents:Dict[str,Union[float,Dict[str,float]]],isGlobal:bool):
-            riseiValues = CalculatorManager.getValues(isGlobal,CalculateMode.SANITY)
+        def __init__(self,name:str,priceAndContents:Dict[str,Union[float,Dict[str,float]]],riseiValues:RiseiOrTimeValues):
             self.name = name
             self.price = priceAndContents["price"]
             self.isConstant = priceAndContents["isConstant"]
             self.array = itemArray.ItemArray.fromJaCountDict(priceAndContents["contents"])
             self.totalValue = riseiValues.getValueFromItemArray(self.array)
             self.totalOriginium = self.totalValue / riseiValues.getValueFromJa('純正源石')
-            self.isGlobal = isGlobal
-            basicPackName = "10000円恒常パック" if isGlobal else "648元源石"
+            self.isGlobal = riseiValues.isGlobal
+            basicPackName = "10000円恒常パック" if self.isGlobal else "648元源石"
             basicPrice = getKakinList(self.isGlobal)[basicPackName]["price"]
             basicArray = itemArray.ItemArray.fromJaCountDict(getKakinList(self.isGlobal)[basicPackName]["contents"])
             basicValue = riseiValues.getValueFromItemArray(basicArray)
@@ -1193,14 +1192,14 @@ class CalculatorManager:
                 f"パック値段  : {self.price:.0f}{moneyUnit}\n" +\
                 f"合計理性価値: {self.totalValue:.2f}\n" +\
                 f"純正源石換算: {self.totalOriginium:.2f}\n" +\
-                f"日本円換算  : {self.totalRealMoney:.2f}{moneyUnit}\n" +\
+                f"マネー換算  : {self.totalRealMoney:.2f}{moneyUnit}\n" +\
                 f"総合課金効率: {self.totalEfficiency*100:.2f}%\n" +\
                 f"ガチャ数    : {self.gachaCount}\n" +\
-                f"ガチャ効率  : {self.gachaEfficiency}```\n"
+                f"ガチャ効率  : {self.gachaEfficiency*100:.2f}%```\n"
         
         def contentsStrBlock(self):
             return "```\n" +\
-                "\n".join([f"{name} × {count}" for name,count in self.array.toNameCountDict()]) +\
+                "\n".join([f"{name} × {count}" for name,count in self.array.toNameCountDict().items()]) +\
                 "```\n"
         
     
@@ -1234,7 +1233,7 @@ class CalculatorManager:
             
         #比較用
         def getConstantStrBlock():
-            constantList = [CalculatorManager.KakinPack(key,value,isGlobal) for key,value in kakinList.items() if value["isConstant"]]
+            constantList = [CalculatorManager.KakinPack(key,value,riseiValues) for key,value in kakinList.items() if value["isConstant"]]
             return "参考用課金効率:```\n" +\
                 "\n".join([f"{pack.name}: {100*pack.totalEfficiency:.2f}%" for pack in constantList]) +\
                 "```"
@@ -1242,7 +1241,7 @@ class CalculatorManager:
             title = "課金パック比較"
             msgList = []
             #限定パックの情報表示
-            limitedList = [CalculatorManager.KakinPack(key,value,isGlobal) for key,value in kakinList.items() if not value["isConstant"]]
+            limitedList = [CalculatorManager.KakinPack(key,value,riseiValues) for key,value in kakinList.items() if not value["isConstant"]]
             sortedList = list(sorted(limitedList,key=lambda x: x.totalEfficiency,reverse=True))
             for item in sortedList:
                 msgList.append(f"{item.name}:{item.strBlock()}")
@@ -1252,7 +1251,7 @@ class CalculatorManager:
                 "msgList":msgList
             }
 
-        kakinPack = CalculatorManager.KakinPack(toPrintTarget,kakinList[toPrintTarget],isGlobal)
+        kakinPack = CalculatorManager.KakinPack(toPrintTarget,kakinList[toPrintTarget],riseiValues)
         
         msgList = []
         msgList.append(f"内容物:" + kakinPack.contentsStrBlock())
