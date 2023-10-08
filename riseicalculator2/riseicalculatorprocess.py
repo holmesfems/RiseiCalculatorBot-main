@@ -1257,17 +1257,19 @@ class CalculatorManager:
                 "type" : "err"
             }
         riseiValues = CalculatorManager.getValues(isGlobal,CalculateMode.SANITY,baseMinTimes,cache_minutes)
+        calculator = CalculatorManager.selectCalculator(isGlobal)
         kakinList = getKakinList(isGlobal)
-        file = None
         #比較用
         def getConstantStrBlock():
             constantList = [CalculatorManager.KakinPack(key,value,riseiValues) for key,value in kakinList.items() if value["isConstant"]]
             return "参考用課金効率:```\n" +\
                 "\n".join([f"{pack.name}: {pack.totalEfficiency:.2%}" for pack in constantList]) +\
                 "```"
+        msgList = []
+        title:str = ...
+        file:str = None
         if toPrintTarget in totalJATuple or toPrintTarget in totalCNTuple:
             title = "課金パック比較"
-            msgList = []
             #限定パックの情報表示
             limitedList = [CalculatorManager.KakinPack(key,value,riseiValues) for key,value in kakinList.items() if not value["isConstant"]]
             sortedList = list(sorted(limitedList,key=lambda x: x.totalEfficiency,reverse=True))
@@ -1287,32 +1289,27 @@ class CalculatorManager:
                 df = pd.DataFrame(data,index=index,columns=columns)
                 df.to_excel(KAKIN_FILENAME)
                 file = KAKIN_FILENAME
-            return {
-                "title":title,
-                "msgList":msgList,
-                "file":file
-            }
-
-        kakinPack = CalculatorManager.KakinPack(toPrintTarget,kakinList[toPrintTarget],riseiValues)
-        title = kakinPack.name
-        msgList = []
-        msgList.append(f"内容物:" + kakinPack.contentsStrBlock())
-        msgList.append(f"理性価値情報:" + kakinPack.strBlock())
-        msgList.append(getConstantStrBlock())
-        if toCsv:
-            materialSet = list(kakinPack.array.toNameCountDict().keys())
-            columns = materialSet + kakinPack.targetNameList()
-            index = [kakinPack.name,"理性価値"]
-            data = np.array([kakinPack.array.getByJaList(materialSet),riseiValues.getValueFromJaList(materialSet)])
-            valueData = np.array([kakinPack.targetValueList,[0 for _ in materialSet]])
-            data = np.concatenate([data,valueData],axis=1)
-            df = pd.DataFrame(data,index=index,columns=columns)
-            df.to_excel(KAKIN_FILENAME)
-            file = KAKIN_FILENAME
-
+        else:
+            kakinPack = CalculatorManager.KakinPack(toPrintTarget,kakinList[toPrintTarget],riseiValues)
+            title = kakinPack.name
+            msgList.append(f"内容物:" + kakinPack.contentsStrBlock())
+            msgList.append(f"理性価値情報:" + kakinPack.strBlock())
+            msgList.append(getConstantStrBlock())
+            if toCsv:
+                materialSet = list(kakinPack.array.toNameCountDict().keys())
+                columns = materialSet + kakinPack.targetNameList()
+                index = [kakinPack.name,"理性価値"]
+                data = np.array([kakinPack.array.getByJaList(materialSet),riseiValues.getValueFromJaList(materialSet)])
+                valueData = np.array([kakinPack.targetValueList,[0 for _ in kakinPack.targetNameList()]])
+                data = np.concatenate([data,valueData],axis=1)
+                df = pd.DataFrame(data,index=index,columns=columns)
+                df.to_excel(KAKIN_FILENAME)
+                file = KAKIN_FILENAME
         return {
             "title":title,
-            "msgList":msgList
+            "msgList":msgList,
+            "file":file,
+            "fileMsg":calculator.getUpdatedTimeStr()
         }
         
         
