@@ -4,7 +4,7 @@
 F鯖用、アークナイツプレイに役立つツールを持つ便利なDiscord botです
 
 現在実装している機能：
-* 理性価値表(/riseicalculator,/riseimaterials,/riseistages,/riseievents,/riseilists)
+* 理性価値表(/riseicalculator,/riseimaterials,/riseistages,/riseievents,/riseilists, /riseikakin)
 * 公開求人検索(/recruitsim,/recruitlist)
 * オペレーターの誕生日をお祝い！！
 * chat-gptの会話機能

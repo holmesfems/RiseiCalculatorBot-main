@@ -290,12 +290,14 @@ async def riseilists(inter:Interaction,target:Choice[str],mode:Choice[str]="sani
     description="課金理性効率表を出力します。"
 )
 @app_commands.describe(
-    target = "表示する効率表を選んでください"
+    target = "表示する効率表を選んでください",
+    csv_file = "課金効率CSVファイルを添付する"
 )
-async def riseikakin(inter:Interaction,target:str):
+async def riseikakin(inter:Interaction,target:str,csv_file:bool = False):
     target = safeCallChoiceVal(target)
+    csv_file = safeCallChoiceVal(csv_file)
     await inter.response.defer(thinking=True)
-    reply = CalculatorManager.riseikakin(target)
+    reply = CalculatorManager.riseikakin(target,toCsv=csv_file)
     await followupToDiscord(inter,reply)
 @riseikakin.autocomplete("target")
 async def riseikakin_autoCompleteName(inter:Interaction,current:str)->List[app_commands.Choice[str]]:

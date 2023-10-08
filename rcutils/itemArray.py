@@ -3,7 +3,7 @@ import sys
 import yaml
 sys.path.append('../')
 from infoFromOuterSource.idtoname import ItemIdToName
-from typing import Dict
+from typing import Dict,List
 from riseicalculator2 import listInfo
 EPSILON = 0.0001
 _ORDERCRITERIA = listInfo.getValueTarget(False)
@@ -136,6 +136,9 @@ class ItemArray:
     def getByJa(self,jaStr:str) -> float:
         id = ItemIdToName.jaToId(jaStr)
         return self.getById(id)
+    
+    def getByJaList(self,jastrList:List[str]) -> List[float]:
+        return [self.getByJa(jaStr) for jaStr in jastrList]
     
     def getGachaCount(self) -> float:
         sum = 0

@@ -184,6 +184,9 @@ class RiseiOrTimeValues:
     def getValueFromJa(self,jastr:str) -> float:
         zhStr = ItemIdToName.getZH(ItemIdToName.jaToId(jastr))
         return self.getValueFromZH(zhStr)
+    
+    def getValueFromJaList(self,jastrList:List[str]) -> List[float]:
+        return [self.getValueFromJa(jastr) for jastr in jastrList]
 
     def getValueFromCode(self,codeStr:str) -> float:
         zhstr = ItemIdToName.getZH(codeStr)
@@ -222,6 +225,9 @@ class RiseiOrTimeValues:
             value = self.getValueFromZH(key)
             ret += count * value
         return ret
+    
+    def toRiseiArrayFromColumnJaNameList(self,columns:List[str])->np.ndarray:
+        return np.array([self.getValueFromJa(name) for name in columns])
 
 class StageItem:
     def __init__(self,dictItem):
@@ -1153,10 +1159,10 @@ class CalculatorManager:
                 file = CCLIST_FILENAME
                 toCsv = False
                 
-        if toCsv:
-            calculator.dumpToFile(mode)
-            file = EXCEL_FILENAME
         if(msgDict):
+            if toCsv:
+                calculator.dumpToFile(mode)
+                file = EXCEL_FILENAME
             msgDict["file"] = file
             msgDict["fileMsg"] = calculator.getUpdatedTimeStr()
             return msgDict
@@ -1186,23 +1192,38 @@ class CalculatorManager:
             self.gachaCount = self.array.getGachaCount()
             basicGachaCount = basicArray.getGachaCount()
             self.gachaEfficiency = self.gachaCount / self.price * basicPrice / basicGachaCount
-        
-        def strBlock(self):
             moneyUnit = '円' if self.isGlobal else '元'
+            self.targetValueDict = {
+                "総合効率    " : f"{self.totalEfficiency:.2%}",
+                "ガチャ効率  " : f"{self.gachaEfficiency:.2%}",
+                "パック値段  " : f"{self.price:.0f}{moneyUnit}",
+                "合計理性価値" : f"{self.totalValue:.2f}",
+                "純正源石換算" : f"{self.totalOriginium:.2f}",
+                "マネー換算  " : f"{self.totalRealMoney:.2f}{moneyUnit}",
+                "ガチャ数    " : f"{round(self.gachaCount,2)}"
+            }
+
+        def strBlock(self):
             return "```\n" +\
-                f"総合効率    : {self.totalEfficiency:.2%}\n" +\
-                f"ガチャ効率  : {self.gachaEfficiency:.2%}\n" +\
-                f"パック値段  : {self.price:.0f}{moneyUnit}\n" +\
-                f"合計理性価値: {self.totalValue:.2f}\n" +\
-                f"純正源石換算: {self.totalOriginium:.2f}\n" +\
-                f"マネー換算  : {self.totalRealMoney:.2f}{moneyUnit}\n" +\
-                f"ガチャ数    : {round(self.gachaCount,2)}\n" +\
+                "\n".join([f"{key}: {value}" for key,value in self.targetValueDict.items()]) +\
                 "```\n"
         
         def contentsStrBlock(self):
             return "```\n" +\
                 "\n".join([f"{name} × {count}" for name,count in self.array.toNameCountDict().items()]) +\
                 "```\n"
+        
+        def toCountArrayFromColumnJaNameList(self,columns:List[str])->np.ndarray:
+            return np.array([self.array.getByJa(name) for name in columns])
+        
+        def targetNameList(self)->List[str]:
+            return [key.strip() for key in self.targetValueDict.keys()]
+        
+        def targetValueList(self) -> List[float]:
+            return [self.totalEfficiency,self.gachaEfficiency,
+                    self.price,self.totalValue,
+                    self.totalOriginium,self.totalRealMoney,
+                    self.gachaCount]
     
     def autoCompletion_riseikakin(current:str,limit:int=25)->List[Tuple[str,str]]:
         totalCommandList = [("全体比較(グローバル)","Total_Global"),("全体比較(大陸版)","Total_Mainland")]
@@ -1215,8 +1236,9 @@ class CalculatorManager:
         ret = [item for item in constantNameList if current in item[0]][:limit]
         return ret
 
-    def riseikakin(toPrintTarget:str,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME):
+    def riseikakin(toPrintTarget:str,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME, toCsv:bool = False):
         #グローバル状態を計算
+        KAKIN_FILENAME = "kakinList.xlsx"
         isGlobal:bool = ...
         totalJATuple = ("全体比較(グローバル)","Total_Global")
         totalCNTuple = ("全体比較(大陸版)","Total_Mainland")
@@ -1236,7 +1258,7 @@ class CalculatorManager:
             }
         riseiValues = CalculatorManager.getValues(isGlobal,CalculateMode.SANITY,baseMinTimes,cache_minutes)
         kakinList = getKakinList(isGlobal)
-            
+        file = None
         #比較用
         def getConstantStrBlock():
             constantList = [CalculatorManager.KakinPack(key,value,riseiValues) for key,value in kakinList.items() if value["isConstant"]]
@@ -1252,9 +1274,23 @@ class CalculatorManager:
             for item in sortedList:
                 msgList.append(f"{item.name}:{item.strBlock()}")
             msgList.append(getConstantStrBlock())
+            if toCsv:
+                #CSV出力をする
+                materialSet = []
+                for item in sortedList:
+                    materialSet = list(set(materialSet + list(item.array.toNameCountDict().keys())))
+                columns = materialSet + sortedList[0].targetNameList()
+                index = [item.name for item in sortedList] + ["理性価値"]
+                data = np.array([item.array.getByJaList(materialSet) for item in sortedList] + [riseiValues.getValueFromJaList(materialSet)])
+                valueData = np.array([item.targetValueList() for item in sortedList]+[[0 for _ in sortedList[0].targetNameList()]])
+                data = np.concatenate([data,valueData],1)
+                df = pd.DataFrame(data,index=index,columns=columns)
+                df.to_excel(KAKIN_FILENAME)
+                file = KAKIN_FILENAME
             return {
                 "title":title,
-                "msgList":msgList
+                "msgList":msgList,
+                "file":file
             }
 
         kakinPack = CalculatorManager.KakinPack(toPrintTarget,kakinList[toPrintTarget],riseiValues)
@@ -1263,6 +1299,17 @@ class CalculatorManager:
         msgList.append(f"内容物:" + kakinPack.contentsStrBlock())
         msgList.append(f"理性価値情報:" + kakinPack.strBlock())
         msgList.append(getConstantStrBlock())
+        if toCsv:
+            materialSet = list(kakinPack.array.toNameCountDict().keys())
+            columns = materialSet + kakinPack.targetNameList()
+            index = [kakinPack.name,"理性価値"]
+            data = np.array([kakinPack.array.getByJaList(materialSet),riseiValues.getValueFromJaList(materialSet)])
+            valueData = np.array([kakinPack.targetValueList,[0 for _ in materialSet]])
+            data = np.concatenate([data,valueData],axis=1)
+            df = pd.DataFrame(data,index=index,columns=columns)
+            df.to_excel(KAKIN_FILENAME)
+            file = KAKIN_FILENAME
+
         return {
             "title":title,
             "msgList":msgList
