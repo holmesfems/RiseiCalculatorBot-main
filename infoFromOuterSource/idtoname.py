@@ -36,7 +36,7 @@ class ItemIdToName:
             else:
                 jaName = customZHToJA.get(value["name"])
                 if(jaName): 
-                    ItemIdToName.__ZHToJA[value["name"]] = jpValue["name"]
+                    ItemIdToName.__ZHToJA[value["name"]] = jaName
                     value["name"] = jaName
             ItemIdToName.__idToStr[key] = value["name"]
             ItemIdToName.__JAToid[value["name"]] = key
