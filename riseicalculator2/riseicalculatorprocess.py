@@ -922,6 +922,8 @@ class CalculatorManager:
 
 
     def riseimaterials(targetCategory:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15, toCsv = False):
+        #大陸版先行素材を選ぶ場合、isGlobal指定にかかわらず、自動で大陸版計算とする
+        if(targetCategory in StageCategoryDict["new"].keys()): isGlobal = False
         riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         #print(riseiValue)
         calculator = CalculatorManager.selectCalculator(isGlobal)

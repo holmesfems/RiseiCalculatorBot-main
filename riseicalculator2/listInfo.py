@@ -23,7 +23,7 @@ Item_rarity2:List[str] = [
 ]
 
 Item_rarity2_new:List[str] = [
-    
+    '褐素纤维', '环烃聚质'
 ]
 
 Item_rarity3:List[str] = [
@@ -36,7 +36,7 @@ Item_rarity3:List[str] = [
 ]
 
 Item_rarity3_new:List[str] = [
-    
+    '固化纤维板','环烃预制体'
 ]
 
 Item_rarity4:List[str] = [

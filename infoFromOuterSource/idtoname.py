@@ -2,6 +2,7 @@ import sys
 import yaml
 sys.path.append('../')
 from rcutils import netutil
+from typing import Dict
 
 get_json = netutil.get_json
 
@@ -22,6 +23,8 @@ class ItemIdToName:
         ItemIdToName.__ZHToid = {}
         ItemIdToName.__idToZH = {}
         ItemIdToName.__JAToid = {}
+        with open("./infoFromOuterSource/customItemZHToJA.yaml","rb") as file:
+            customZHToJA:Dict[str,str] = yaml.safe_load(file)
         for key,value in allInfoCN.items():
             jpValue = allInfoJP.get(key)
             cnName = value["name"] 
@@ -30,13 +33,19 @@ class ItemIdToName:
             if(jpValue):
                 ItemIdToName.__ZHToJA[value["name"]] = jpValue["name"]
                 value = jpValue
+            else:
+                jaName = customZHToJA.get(value["name"])
+                if(jaName): 
+                    ItemIdToName.__ZHToJA[value["name"]] = jpValue["name"]
+                    value["name"] = jaName
             ItemIdToName.__idToStr[key] = value["name"]
             ItemIdToName.__JAToid[value["name"]] = key
         
         #理性価値計算で使う特殊なアイテムのIDを入れる
-        with open("./infoFromOuterSource/customItemId.json","rb") as file:
+        with open("./infoFromOuterSource/customItemId.yaml","rb") as file:
             customItems = yaml.safe_load(file)
         for item in customItems:
+            if item["id"] in ItemIdToName.__idToStr.keys(): continue
             ItemIdToName.__idToStr[item["id"]] = item["ja"]
             ItemIdToName.__ZHToJA[item["zh"]] = item["ja"]
             ItemIdToName.__ZHToid[item["zh"]] = item["id"]

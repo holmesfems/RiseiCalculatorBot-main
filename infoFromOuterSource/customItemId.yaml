@@ -1,0 +1,17 @@
+#一部計算用の便利アイテムを自分で定義する
+- id: '4001_1000'
+  zh: 龙门币1000
+  ja: 龍門幣1000
+- id: 3203_CUSTOM
+  zh: 双芯片
+  ja: 上級SoC
+- id: 3202_CUSTOM
+  zh: 芯片组
+  ja: 中級SoC
+- id: 3201_CUSTOM
+  zh: 芯片
+  ja: 初級SoC
+#★6印交換券は大陸版に無いアイテムなので、ここで定義する
+- id: voucher_pcharPack
+  zh: 皇家信物交换券
+  ja: ★6印交換券
