@@ -1207,7 +1207,12 @@ class CalculatorManager:
         totalCommandList = [("全体比較(グローバル)","Total_Global"),("全体比較(大陸版)","Total_Mainland")]
         nameList = [(name,name) for name,value in getKakinList(True).items() if not value["isConstant"]]
         nameList += [(name,name) for name,value in getKakinList(False).items() if not value["isConstant"]]
-        return [item for item in totalCommandList+nameList if current in item[0]][:limit]
+        ret = [item for item in totalCommandList+nameList if current in item[0]][:limit]
+        if(ret): return ret
+        constantNameList = [(name,name) for name,value in getKakinList(True).items() if value["isConstant"]] +\
+            [(name,name) for name,value in getKakinList(False).items() if value["isConstant"]]
+        ret = [item for item in constantNameList if current in item[0]][:limit]
+        return ret
 
     def riseikakin(toPrintTarget:str,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME):
         #グローバル状態を計算
