@@ -1290,7 +1290,7 @@ class CalculatorManager:
             columns = materialSet + packList[0].targetNameList()
             index = [item.name for item in packList] + ["理性価値"]
             data = np.array([item.array.getByJaList(materialSet) for item in packList] + [riseiValues.getValueFromJaList(materialSet)])
-            valueData = np.array([item.targetValueList() for item in packList]+[[0 for _ in packList[0].targetNameList()]])
+            valueData = np.array([item.targetValueList() for item in packList]+[[None for _ in packList[0].targetNameList()]])
             data = np.concatenate([data,valueData],1)
             df = pd.DataFrame(data,index=index,columns=columns)
             df.to_excel(KAKIN_FILENAME)
