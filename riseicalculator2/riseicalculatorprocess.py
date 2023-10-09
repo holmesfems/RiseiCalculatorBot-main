@@ -533,19 +533,19 @@ class Calculator:
             
             # 本の合成
             # 技1*3=技2
-            item = Calculator.ConvertionItem(isGlobal,"スキル本換算1")
-            item.setValue({
-                "技巧概要·卷1":3,
-                "技巧概要·卷2":-1-convertionDropRate
-            })
-            convertionItemList.append(item)
+            # item = Calculator.ConvertionItem(isGlobal,"スキル本換算1")
+            # item.setValue({
+            #     "技巧概要·卷1":3,
+            #     "技巧概要·卷2":-1-convertionDropRate
+            # })
+            # convertionItemList.append(item)
 
-            item = Calculator.ConvertionItem(isGlobal,"スキル本換算2")
-            item.setValue({
-                "技巧概要·卷2":3,
-                "技巧概要·卷3":-1-convertionDropRate
-            })
-            convertionItemList.append(item)
+            # item = Calculator.ConvertionItem(isGlobal,"スキル本換算2")
+            # item.setValue({
+            #     "技巧概要·卷2":3,
+            #     "技巧概要·卷3":-1-convertionDropRate
+            # })
+            # convertionItemList.append(item)
             self.convertionItemList:List[Calculator.ConvertionItem] = convertionItemList
 
         def getMatrix(self):
