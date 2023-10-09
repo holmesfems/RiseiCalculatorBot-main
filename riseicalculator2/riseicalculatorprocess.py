@@ -28,18 +28,14 @@ def get_json(s,AdditionalReq=None):
     return netutil.get_json(PENGUIN_URL+s,AdditionalReq,headers)
 
 #初級&上級資格証
-Price = dict()
-with open('riseicalculator2/price.txt', 'r', encoding='utf8') as f:
-    for line in f.readlines():
-        name, value = line.split()
-        Price[name] = int(value)
+Price:Dict[str,float] = ...
+with open('riseicalculator2/price.yaml', 'rb') as f:
+    Price = yaml.safe_load(f)
 
 #特別引換証
-Price_Special = dict()
-with open('riseicalculator2/price_special.txt', 'r', encoding='utf8') as f:
-    for line in f.readlines():
-        name, value = line.split()
-        Price_Special[name] = float(value)
+Price_Special:Dict[str,float] = ...
+with open('riseicalculator2/price_special.yaml', 'rb') as f:
+    Price_Special = yaml.safe_load(f)
 
 
 #大陸版実装済み、グロ版未実装のステージまとめ 実装次第削除してOK
@@ -1123,7 +1119,7 @@ class CalculatorManager:
             }
         elif toPrintTarget is CalculatorManager.ToPrint.TE2LIST:
             title = "初級資格証効率"
-            ticket_efficiency2 = {ItemIdToName.zhToJa(x):(riseiValues.getValueFromZH(x)/Price[x],riseiValues.getStdDevFromZH(x)/Price[x]) for x in getItemRarity2(isGlobal)}
+            ticket_efficiency2 = {ItemIdToName.zhToJa(x):(riseiValues.getValueFromZH(x)/Price[x],riseiValues.getStdDevFromZH(x)/Price[x]) for x in getItemRarity2(isGlobal) if x in Price.keys()}
             ticket_efficiency2_sorted = sorted(ticket_efficiency2.items(),key = lambda x:x[1][0],reverse=True)
             toPrint = [["{0}:\t{1:.3f} ± {2:.3f}".format(CalculatorManager.left(15,key),value[0],value[1]*2)] for key,value in ticket_efficiency2_sorted]
             msgDict = {
@@ -1132,7 +1128,7 @@ class CalculatorManager:
             }
         elif toPrintTarget is CalculatorManager.ToPrint.TE3LIST:
             title = "上級資格証効率"
-            ticket_efficiency3 = {ItemIdToName.zhToJa(x):(riseiValues.getValueFromZH(x)/Price[x],riseiValues.getStdDevFromZH(x)/Price[x]) for x in getItemRarity3(isGlobal)}
+            ticket_efficiency3 = {ItemIdToName.zhToJa(x):(riseiValues.getValueFromZH(x)/Price[x],riseiValues.getStdDevFromZH(x)/Price[x]) for x in getItemRarity3(isGlobal) if x in Price.keys()}
             ticket_efficiency3_sorted = sorted(ticket_efficiency3.items(),key = lambda x:x[1][0],reverse=True)
             toPrint = [["{0}:\t{1:.3f} ± {2:.3f}".format(CalculatorManager.left(15,key),value[0],value[1]*2)] for key,value in ticket_efficiency3_sorted]
             msgDict = {
@@ -1141,7 +1137,7 @@ class CalculatorManager:
             }
         elif toPrintTarget is CalculatorManager.ToPrint.SPECIAL_LIST:
             title = "特別引換証効率"
-            ticket_efficiency_special = {ItemIdToName.zhToJa(x):(riseiValues.getValueFromZH(x)/Price_Special[x],riseiValues.getStdDevFromZH(x)/Price_Special[x]) for x in getItemRarity2(isGlobal)+getItemRarity3(isGlobal)}
+            ticket_efficiency_special = {ItemIdToName.zhToJa(x):(riseiValues.getValueFromZH(x)/Price_Special[x],riseiValues.getStdDevFromZH(x)/Price_Special[x]) for x in getItemRarity2(isGlobal)+getItemRarity3(isGlobal) if x in Price_Special.keys()}
             ticket_efficiency_special_sorted = sorted(ticket_efficiency_special.items(),key = lambda x:x[1][0],reverse=True)
             toPrint = [["{0}:\t{1:.3f} ± {2:.3f}".format(CalculatorManager.left(15,key),value[0],value[1]*2)] for key,value in ticket_efficiency_special_sorted]
             msgDict = {
