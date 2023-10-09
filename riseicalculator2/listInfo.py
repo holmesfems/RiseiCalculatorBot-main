@@ -71,7 +71,7 @@ ValueTarget:List[str] = [
 ]
 
 ValueTarget_new:List[str] = [
-    
+    '褐素纤维','固化纤维板','环烃聚质','环烃预制体'
 ]
 
 #契約賞金引換証
