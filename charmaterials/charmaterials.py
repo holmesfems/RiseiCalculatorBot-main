@@ -67,8 +67,8 @@ class ItemCost:
     #上級素材→中級換算、副産物無し
     def rare3and4ToRare2(self)->ItemCost:
         copy = self.copy()
-        R4List = getItemRarity4(True)
-        R3List = getItemRarity3(True)
+        R4List = getItemRarity4(False)
+        R3List = getItemRarity3(False)
         for item in R4List + R3List:
             id = ItemIdToName.zhToId(item)
             count = copy.itemArray.getById(id)
@@ -305,18 +305,18 @@ class OperatorCostsCalculator:
             "type": "err"
         }
 
+        isGlobal = not costItem.isCNOnly()
         allCost = ItemCost.sum(skillCost)
         msgList = []
         title = "スキル特化検索: " + skillName
         for i in range(1,4):
             masterCost = skillCost[i-1]
-            riseiValue = masterCost.toRiseiValue()
+            riseiValue = masterCost.toRiseiValue(isGlobal)
             headerMsg = "特化{0} 理性価値:{1:.2f}".format(i,riseiValue)
             blockMsg = masterCost.toStrBlock()
             msgList.append(headerMsg + blockMsg + "\n")
         
         #合計素材
-        riseiValue = allCost.toRiseiValue()
         headerMsg = "合計  理性価値:{0:.2f}".format(riseiValue)
         blockMsg = allCost.toStrBlock()
         msgList.append(headerMsg + blockMsg + "\n")
@@ -335,7 +335,7 @@ class OperatorCostsCalculator:
     def operatorCostList(selection:CostListSelection) -> Dict:
         if(selection is OperatorCostsCalculator.CostListSelection.STAR5ELITE):
             star5Operators = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if value.stars == 5 and not value.isPatch}
-            riseiValueDict = {key:value.totalPhaseCost().toRiseiValue_OnlyValueTarget() for key,value in star5Operators.items()}
+            riseiValueDict = {key:value.totalPhaseCost().toRiseiValue_OnlyValueTarget(not value.isCNOnly()) for key,value in star5Operators.items()}
             sortedValueDict = {key:value for key,value in sorted(riseiValueDict.items(),key=lambda x:x[1],reverse=True)}
             title = "★5昇進素材価値表"
             headerMsg = "SoCは以下の計算に含まれません:"
@@ -402,19 +402,20 @@ class OperatorCostsCalculator:
             "msgList":["オペレーター【"+operatorName+"】の昇進は存在しません"],
             "type": "err"
         }
+        isGlobal = not costItem.isCNOnly()
 
         totalCost = ItemCost.sum(eliteCostList)
         title = "昇進必要素材検索: " + costItem.name
         msgList = []
         for i in range(1,3):
             eliteCost = eliteCostList[i-1]
-            riseiValue = eliteCost.toRiseiValue()
+            riseiValue = eliteCost.toRiseiValue(isGlobal)
             headerMsg = "昇進{0} 理性価値:{1:.2f}".format(i,riseiValue)
             blockMsg = eliteCost.toStrBlock()
             msgList.append(headerMsg + blockMsg + "\n")
         
         #合計素材
-        riseiValue = totalCost.toRiseiValue()
+        riseiValue = totalCost.toRiseiValue(isGlobal)
         headerMsg = "合計  理性価値:{0:.2f}".format(riseiValue)
         blockMsg = totalCost.toStrBlock()
         msgList.append(headerMsg + blockMsg + "\n")
