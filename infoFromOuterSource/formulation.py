@@ -32,7 +32,7 @@ class FormulaItem:
     def toFormulaArrayWithOutcome(self,dropRate:float,isGlobal:bool) -> itemArray.ItemArray:
         filterList = listInfo.getValueTarget(isGlobal)
         outcomeArray = self.outcomeArray.filterByZH(filterList)
-        outcomeArray = outcomeArray/outcomeArray.totalCount()
+        outcomeArray *= 1/outcomeArray.totalCount()
         return self.toFormulaArray() - outcomeArray * dropRate
     
     def __repr__(self)->str:
