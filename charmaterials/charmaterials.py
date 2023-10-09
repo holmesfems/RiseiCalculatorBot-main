@@ -59,7 +59,7 @@ class ItemCost:
         return copy
     
     def filterRare2(self)->ItemCost:
-        R2List = getItemRarity2(True)
+        R2List = getItemRarity2(False)
         copy = self.copy()
         copy.itemArray = copy.itemArray.filterByZH(R2List)
         return copy
