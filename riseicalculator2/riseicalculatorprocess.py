@@ -413,12 +413,13 @@ class StageInfo:
         self.lastUpdated = getnow.getnow()
 
     def validBaseStages(self,validBaseMinTimes:int) -> List[StageItem]:
-        return [x for x in self.mainStageDict.values() if x.maxTimes() >= validBaseMinTimes]
+        return sum([self.categoryValidStages(category,validBaseMinTimes) for category in getStageCategoryDict(self.isGlobal).keys()],[])
 
     def categoryValidStages(self,category:str,validBaseMinTimes:int)->List[StageItem]:
         allStageList:List[StageItem] = self.categoryDict[category]["Stages"]
         #新素材のステージは一旦validBaseMinTimesを無視する(有効ステージが存在しなくなる恐れがあるため)
-        validStageList:List[StageItem] = [x for x in allStageList if x.maxTimes() >= validBaseMinTimes or category in StageCategoryDict["new"].keys()]
+        validStageList:List[StageItem] = [x for x in allStageList if x.maxTimes() >= validBaseMinTimes]
+        if(not validStageList): validStageList = allStageList
         return validStageList
     
     def stageToCategory(self,stage:StageItem) -> List[str]:
@@ -526,7 +527,7 @@ class Calculator:
             for formulaItem in formula:
                 if ItemIdToName.getZH(formulaItem.key) not in getValueTarget(isGlobal):
                     continue
-                print(ItemIdToName.getZH(formulaItem.key))
+                #print(ItemIdToName.getZH(formulaItem.key))
                 item = Calculator.ConvertionItem(isGlobal,"合成-"+ItemIdToName.getStr(formulaItem.key))
                 item.setValue(formulaItem.toFormulaArrayWithOutcome(convertionDropRate,self.isGlobal).toZHStrCountDict())
                 convertionItemList.append(item)
