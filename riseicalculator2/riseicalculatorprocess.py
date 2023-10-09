@@ -866,7 +866,10 @@ class CalculatorManager:
         return calculator.getValues(mode)
     
     def filterStagesByShowMinTimes(stageList:List[StageItem],showMinTimes:int,isGlobal:bool):
-        return [x for x in stageList if x.isValidForShow(showMinTimes,isGlobal)]
+        ret = [x for x in stageList if x.isValidForShow(showMinTimes,isGlobal)]
+        if(not ret):
+            return stageList #フィルターの結果全部なくなってしまう可哀想なカテゴリは全部返す
+        return ret
 
     def dumpToPrint(toPrint,header = ""):
         body = "\n".join(["".join(x) for x in toPrint])

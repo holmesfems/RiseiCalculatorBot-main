@@ -1,6 +1,5 @@
 from typing import List,Dict,Union
 import yaml
-from collections import ChainMap
 import sys
 sys.path.append('../')
 from infoFromOuterSource.idtoname import ItemIdToName
@@ -135,5 +134,5 @@ def getStageCategoryDict(glob:bool):
     if glob:
         return StageCategoryDict["main"]
     else:
-        return ChainMap(StageCategoryDict["main"],StageCategoryDict["new"])
+        return {**StageCategoryDict["main"],**StageCategoryDict["new"]}
     
