@@ -317,6 +317,7 @@ class OperatorCostsCalculator:
             msgList.append(headerMsg + blockMsg + "\n")
         
         #合計素材
+        riseiValue = allCost.toRiseiValue(isGlobal)
         headerMsg = "合計  理性価値:{0:.2f}".format(riseiValue)
         blockMsg = allCost.toStrBlock()
         msgList.append(headerMsg + blockMsg + "\n")
