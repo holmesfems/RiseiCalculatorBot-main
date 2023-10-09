@@ -1286,7 +1286,6 @@ class CalculatorManager:
             return materialSet
         
         def listToCSV(packList:List[CalculatorManager.KakinPack]):
-            global file
             materialSet = getMaterialSet(packList)
             columns = materialSet + packList[0].targetNameList()
             index = [item.name for item in packList] + ["理性価値"]
@@ -1295,7 +1294,7 @@ class CalculatorManager:
             data = np.concatenate([data,valueData],1)
             df = pd.DataFrame(data,index=index,columns=columns)
             df.to_excel(KAKIN_FILENAME)
-            file = KAKIN_FILENAME
+            return KAKIN_FILENAME
 
         if toPrintTarget in totalJATuple or toPrintTarget in totalCNTuple:
             title = "課金パック比較"
@@ -1307,7 +1306,7 @@ class CalculatorManager:
             msgList.append(constantStrBlock)
             if toCsv:
                 #CSV出力をする
-                listToCSV(sortedList + constantList)
+                file = listToCSV(sortedList + constantList)
         else:
             kakinPack = CalculatorManager.KakinPack(toPrintTarget,kakinList[toPrintTarget],riseiValues)
             title = kakinPack.name
@@ -1315,7 +1314,7 @@ class CalculatorManager:
             msgList.append(f"理性価値情報:" + kakinPack.strBlock())
             msgList.append(constantStrBlock)
             if toCsv:
-                listToCSV([kakinPack] + constantList)
+                file = listToCSV([kakinPack] + constantList)
         return {
             "title":title,
             "msgList":msgList,
