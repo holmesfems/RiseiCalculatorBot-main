@@ -524,6 +524,7 @@ class Calculator:
             # 素材合成換算
             formula = Formula.getAllFormulaItems()
             for formulaItem in formula:
+                print(ItemIdToName.getZH(formulaItem.key))
                 if ItemIdToName.getZH(formulaItem.key) not in getValueTarget(isGlobal):
                     continue
                 item = Calculator.ConvertionItem(isGlobal,"合成-"+ItemIdToName.getStr(formulaItem.key))
