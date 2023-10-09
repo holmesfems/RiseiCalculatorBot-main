@@ -1271,14 +1271,32 @@ class CalculatorManager:
         calculator = CalculatorManager.selectCalculator(isGlobal)
         kakinList = getKakinList(isGlobal)
         #比較用
-        def getConstantStrBlock():
-            constantList = [CalculatorManager.KakinPack(key,value,riseiValues) for key,value in kakinList.items() if value["isConstant"]]
-            return "参考用課金効率:```\n" +\
-                "\n".join([f"{pack.name}: {pack.totalEfficiency:.2%}" for pack in constantList]) +\
-                "```"
+        constantList = [CalculatorManager.KakinPack(key,value,riseiValues) for key,value in kakinList.items() if value["isConstant"]]
+        constantStrBlock = "参考用課金効率:```\n" +\
+            "\n".join([f"{pack.name}: {pack.totalEfficiency:.2%}" for pack in constantList]) +\
+            "```"
         msgList = []
         title:str = ...
         file:str = None
+        def getMaterialSet(packList:List[CalculatorManager.KakinPack])->List[str]:
+            materialSet = []
+            for item in packList:
+                materialSet += list(item.array.toNameCountDict().keys())
+                materialSet = list(set(materialSet))
+            return materialSet
+        
+        def listToCSV(packList:List[CalculatorManager.KakinPack]):
+            global file
+            materialSet = getMaterialSet(packList)
+            columns = materialSet + packList[0].targetNameList()
+            index = [item.name for item in packList] + ["理性価値"]
+            data = np.array([item.array.getByJaList(materialSet) for item in packList] + [riseiValues.getValueFromJaList(materialSet)])
+            valueData = np.array([item.targetValueList() for item in packList]+[[0 for _ in packList[0].targetNameList()]])
+            data = np.concatenate([data,valueData],1)
+            df = pd.DataFrame(data,index=index,columns=columns)
+            df.to_excel(KAKIN_FILENAME)
+            file = KAKIN_FILENAME
+
         if toPrintTarget in totalJATuple or toPrintTarget in totalCNTuple:
             title = "課金パック比較"
             #限定パックの情報表示
@@ -1286,36 +1304,18 @@ class CalculatorManager:
             sortedList = list(sorted(limitedList,key=lambda x: x.totalEfficiency,reverse=True))
             for item in sortedList:
                 msgList.append(f"{item.name}:{item.strBlock()}")
-            msgList.append(getConstantStrBlock())
+            msgList.append(constantStrBlock)
             if toCsv:
                 #CSV出力をする
-                materialSet = []
-                for item in sortedList:
-                    materialSet = list(set(materialSet + list(item.array.toNameCountDict().keys())))
-                columns = materialSet + sortedList[0].targetNameList()
-                index = [item.name for item in sortedList] + ["理性価値"]
-                data = np.array([item.array.getByJaList(materialSet) for item in sortedList] + [riseiValues.getValueFromJaList(materialSet)])
-                valueData = np.array([item.targetValueList() for item in sortedList]+[[0 for _ in sortedList[0].targetNameList()]])
-                data = np.concatenate([data,valueData],1)
-                df = pd.DataFrame(data,index=index,columns=columns)
-                df.to_excel(KAKIN_FILENAME)
-                file = KAKIN_FILENAME
+                listToCSV(sortedList + constantList)
         else:
             kakinPack = CalculatorManager.KakinPack(toPrintTarget,kakinList[toPrintTarget],riseiValues)
             title = kakinPack.name
             msgList.append(f"内容物:" + kakinPack.contentsStrBlock())
             msgList.append(f"理性価値情報:" + kakinPack.strBlock())
-            msgList.append(getConstantStrBlock())
+            msgList.append(constantStrBlock)
             if toCsv:
-                materialSet = list(kakinPack.array.toNameCountDict().keys())
-                columns = materialSet + kakinPack.targetNameList()
-                index = [kakinPack.name,"理性価値"]
-                data = np.array([kakinPack.array.getByJaList(materialSet),riseiValues.getValueFromJaList(materialSet)])
-                valueData = np.array([kakinPack.targetValueList(),[0 for _ in kakinPack.targetNameList()]])
-                data = np.concatenate([data,valueData],axis=1)
-                df = pd.DataFrame(data,index=index,columns=columns)
-                df.to_excel(KAKIN_FILENAME)
-                file = KAKIN_FILENAME
+                listToCSV([kakinPack] + constantList)
         return {
             "title":title,
             "msgList":msgList,
