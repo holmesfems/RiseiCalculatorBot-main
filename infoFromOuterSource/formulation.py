@@ -10,18 +10,18 @@ from typing import Dict,List
 #Formulaは全部のレシピをまとめたもの
 class FormulaItem:
     def __init__(self,formulaJson:Dict):
-        self.key = formulaJson["id"]
-        self.name = ItemIdToName.getStr(formulaJson["id"])
+        self.key = formulaJson["itemId"]
+        self.name = ItemIdToName.getStr(self.key)
         baseDict:Dict[str,float] = {}
         for item in formulaJson["costs"]:
             baseDict[item["id"]] = item["count"]
         self.baseArray = itemArray.ItemArray(baseDict)
-        self.selfArray = itemArray.ItemArray({self.key:-1})
+        self.selfArray = itemArray.ItemArray({self.key:-formulaJson["count"]})
         totalWeight = 0
         outcomeDict:Dict[str,float] = {}
-        for item in formulaJson["extraOutcome"]:
+        for item in formulaJson["extraOutcomeGroup"]:
             weight = item["weight"]
-            outcomeDict[item["id"]] = weight * item["count"]
+            outcomeDict[item["itemId"]] = weight * item["itemCount"]
             totalWeight += weight
         self.outcomeArray = itemArray.ItemArray(outcomeDict)
         self.outcomeArray *= 1.0/totalWeight
@@ -43,14 +43,13 @@ get_json = netutil.get_json
 class Formula:
     __idToFormula:Dict[str,FormulaItem] = {}
     def init():
-        FORMULA_URL = 'https://penguin-stats.io/PenguinStats/api/v2/formula'
-        headers = {'User-Agent':'ArkPlanner'}
-        allInfo = get_json(FORMULA_URL,headers=headers)
+        FORMULA_URL = 'https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/building_data.json'
+        allInfo:dict = get_json(FORMULA_URL)["workshopFormulas"]
         Formula.__idToFormula:Dict[str,FormulaItem] = {}
-        for item in allInfo:
-            key = item["id"]
+        for index,item in allInfo.items():
+            id = item["itemId"]
             value = FormulaItem(item)
-            Formula.__idToFormula[key] = value
+            Formula.__idToFormula[id] = value
     
     def __checkAndInit():
         if(not Formula.__idToFormula): Formula.init()

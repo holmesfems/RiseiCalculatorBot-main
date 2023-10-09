@@ -21,6 +21,7 @@ EPSILON = 1e-6
 DEFAULT_SHOW_MIN_TIMES = 1000
 DEFAULT_CACHE_TIME = 120 #minutes
 EXCEL_FILENAME = 'BaseStages.xlsx'
+BASEMINTIMES_UPPER = 3000 #baseMinTimes上限値
 
 headers = {'User-Agent':'ArkPlanner'}
 def get_json(s,AdditionalReq=None):
@@ -856,6 +857,8 @@ class CalculatorManager:
 
     def getValues(isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME) -> RiseiOrTimeValues:
         #print(f"mode:{mode},baseMinTimes:{baseMinTimes},cacheMinutes:{cache_minutes}")
+        if baseMinTimes > BASEMINTIMES_UPPER: baseMinTimes = BASEMINTIMES_UPPER
+        if baseMinTimes < 0: baseMinTimes = 0
         calculator = CalculatorManager.selectCalculator(isGlobal)
         calculator.tryReInit(CalculatorManager.__getTimeDelta(cache_minutes),baseMinTimes,mode)
         return calculator.getValues(mode)
