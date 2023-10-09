@@ -453,7 +453,7 @@ async def operatorcostlist(inter:Interaction,selection:Choice[str]):
 
 CHANNEL_ID_HAPPYBIRTHDAY = int(os.environ["CHANNEL_ID_HAPPYBIRTHDAY"])
 
-@tasks.loop(time=datetime.time(hour=17, minute=30, tzinfo=JST))
+@tasks.loop(time=datetime.time(hour=0, minute=0, tzinfo=JST))
 async def checkBirtyday():
     if(not CHANNEL_ID_HAPPYBIRTHDAY): return
     now=datetime.datetime.now(tz=JST)
