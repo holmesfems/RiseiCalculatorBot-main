@@ -4,6 +4,7 @@ sys.path.append('../')
 from infoFromOuterSource.idtoname import ItemIdToName
 from rcutils import netutil,itemArray
 from typing import Dict,List
+from riseicalculator2 import listInfo
 
 #素材合成の情報を保持するクラス
 #FormulaItemは素材合成のレシピ一つ
@@ -17,22 +18,22 @@ class FormulaItem:
             baseDict[item["id"]] = item["count"]
         self.baseArray = itemArray.ItemArray(baseDict)
         self.selfArray = itemArray.ItemArray({self.key:-formulaJson["count"]})
-        totalWeight = 0
         outcomeDict:Dict[str,float] = {}
         for item in formulaJson["extraOutcomeGroup"]:
             weight = item["weight"]
             outcomeDict[item["itemId"]] = weight * item["itemCount"]
-            totalWeight += weight
         self.outcomeArray = itemArray.ItemArray(outcomeDict)
-        self.outcomeArray *= 1.0/totalWeight
         goldCost = formulaJson["goldCost"]
         self.goldCostArray = itemArray.ItemArray({ItemIdToName.jaToId("龍門幣1000"):goldCost/1000})
 
     def toFormulaArray(self)->itemArray.ItemArray:
         return self.baseArray + self.selfArray + self.goldCostArray
     
-    def toFormulaArrayWithOutcome(self,dropRate:float) -> itemArray.ItemArray:
-        return self.toFormulaArray() - self.outcomeArray * dropRate
+    def toFormulaArrayWithOutcome(self,dropRate:float,isGlobal:bool) -> itemArray.ItemArray:
+        filterList = listInfo.getValueTarget(isGlobal)
+        outcomeArray = self.outcomeArray.filterByZH(filterList)
+        outcomeArray = outcomeArray/outcomeArray.totalCount()
+        return self.toFormulaArray() - outcomeArray * dropRate
     
     def __repr__(self)->str:
         return self.name
@@ -62,9 +63,9 @@ class Formula:
         else:
             return itemArray.ItemArray()
     
-    def getFormulaArrayListWithOutcome(dropRate:float) -> List[itemArray.ItemArray]:
+    def getFormulaArrayListWithOutcome(dropRate:float,isGlobal:bool) -> List[itemArray.ItemArray]:
         Formula.__checkAndInit()
-        return [x.toFormulaArrayWithOutcome(dropRate) for x in Formula.__idToFormula.values()]
+        return [x.toFormulaArrayWithOutcome(dropRate,isGlobal) for x in Formula.__idToFormula.values()]
     
     def getAllFormulaItems() -> List[FormulaItem]:
         Formula.__checkAndInit()

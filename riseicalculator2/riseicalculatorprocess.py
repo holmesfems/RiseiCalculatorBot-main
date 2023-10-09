@@ -528,7 +528,7 @@ class Calculator:
                     continue
                 print(ItemIdToName.getZH(formulaItem.key))
                 item = Calculator.ConvertionItem(isGlobal,"合成-"+ItemIdToName.getStr(formulaItem.key))
-                item.setValue(formulaItem.toFormulaArrayWithOutcome(convertionDropRate).toZHStrCountDict())
+                item.setValue(formulaItem.toFormulaArrayWithOutcome(convertionDropRate,self.isGlobal).toZHStrCountDict())
                 convertionItemList.append(item)
             
             # 本の合成

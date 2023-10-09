@@ -158,14 +158,17 @@ class ItemArray:
         self.normalize()
         return {ItemIdToName.getZH(key) : value for key,value in self.__dict.items()}
     
-    def filterById(self,idList:Dict[str]) -> ItemArray:
+    def filterById(self,idList:List[str]) -> ItemArray:
         ret = ItemArray()
         ret.__dict = {key:value for key,value in self.__dict.items() if key in idList}
         ret.__normalized = self.__normalized
         return ret
     
-    def filterByZH(self,zhList:Dict[str]) -> ItemArray:
+    def filterByZH(self,zhList:List[str]) -> ItemArray:
         return self.filterById([ItemIdToName.zhToId(zh) for zh in zhList])
+
+    def totalCount(self) -> float:
+        return sum(self.__dict.values())
     
     @staticmethod
     def fromJaCountDict(jaCountDict:Dict[str,float]) -> ItemArray:
