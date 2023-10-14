@@ -58,6 +58,9 @@ class ItemCost:
         copy += other
         return copy
     
+    def isNotZero(self) -> bool:
+        return self.itemArray.isNotZero()
+    
     def filterRare2(self)->ItemCost:
         R2List = getItemRarity2(False)
         copy = self.copy()
@@ -141,7 +144,7 @@ class OperatorCosts:
         #大陸版限定オペレーターか
         self.cnOnly:bool = value["cnOnly"] 
         #モジュール initInfoだけでは足りないので、別途追加
-        self.uniqeEq:Dict[str,ItemCost] = {}
+        self.uniqeEq:Dict[str,List[ItemCost]] = {}
         self.uniqeEqIsCNOnly:Dict[str,bool] = {}
         #星の数
         #大陸版では "TIER_n"のstr、日本版ではnのintになる
@@ -167,6 +170,9 @@ class OperatorCosts:
         costs = [ItemCost(costValue) for costKey,costValue in costDicts.items()]
         self.uniqeEq[key] = costs
         self.uniqeEqIsCNOnly[key] = uniEq["cnOnly"]
+
+    def hasUniqeEq(self) -> bool:
+        return bool(self.uniqeEq)
 
     def totalPhaseCost(self)->ItemCost:
         return ItemCost.sum(self.phases)
@@ -281,7 +287,7 @@ class OperatorCostsCalculator:
     def init():
         OperatorCostsCalculator.operatorInfo.init()
 
-    def autoCompleteForMasterCosts(name:str,limit:int = 25) -> List[Tuple[str,str]]:
+    def autoCompleteForMasterCost(name:str,limit:int = 25) -> List[Tuple[str,str]]:
         return [(value.name,value.name) for value in OperatorCostsCalculator.operatorInfo.operatorDict.values() if name in value.name and value.stars>=4][:limit]
     
     def skillMasterCosts(operatorName:str,skillNum:int) -> Dict:
@@ -386,7 +392,7 @@ class OperatorCostsCalculator:
                 "title":"エラー",
                 "msgList":"未知のコマンド:" + str(selection)
             }
-    def autoCompleteForEliteCosts(name:str,limit:int = 25) -> List[Tuple[str,str]]:
+    def autoCompleteForEliteCost(name:str,limit:int = 25) -> List[Tuple[str,str]]:
         return [(value.name,value.name) for value in OperatorCostsCalculator.operatorInfo.operatorDict.values() if name in value.name and value.stars>=4 and not value.isPatch][:limit]
     
     def operatorEliteCost(operatorName:str):
@@ -431,4 +437,45 @@ class OperatorCostsCalculator:
             "title" : title,
             "msgList":msgList
         }
+    
+    def autoCompleteForModuleCost(name:str,limit:int = 25) -> List[Tuple(str,str)]:
+        return [(value.name,value.name) for value in OperatorCostsCalculator.operatorInfo.operatorDict.values() if name in value.name and value.hasUniqeEq()][:limit]
 
+    def operatorModuleCost(operatorName:str):
+        costItem = OperatorCostsCalculator.operatorInfo.getOperatorCostFromName(operatorName)
+        title = "モジュール必要素材検索"
+        if(not costItem): return {
+            "title" : title,
+            "msgList":["オペレーター【"+operatorName+"】は存在しません"],
+            "type": "err"
+        }
+        eqCosts = costItem.uniqeEq
+        if(not eqCosts): return{
+            "title" : title,
+            "msgList":["オペレーター【"+operatorName+"】のモジュールは存在しません"],
+            "type": "err"
+        }
+
+        title = "モジュール必要素材検索: " + costItem.name
+        msgList = []
+        for key,eqCostPhases in eqCosts.items():
+            isGlobal = not costItem.isCNOnly[key]
+            headerMsg = f"モジュール {key}"
+            if(not isGlobal): headerMsg += "(大陸版先行)"
+            headerMsg += "\n"
+            bodyMsg = ""
+            for i in range(3):
+                eqCost = eqCostPhases[i]
+                phaseMsg = f"Stage.{i+1} 理性価値:{eqCost.toRiseiValue_OnlyValueTarget(isGlobal):.2f}"
+                blockMsg = eqCost.toStrBlock()
+                bodyMsg += phaseMsg + blockMsg + "\n"
+            totalCost = ItemCost.sum(eqCostPhases)
+            lastMsg = f"合計 理性価値:{totalCost.toRiseiValue_OnlyValueTarget(isGlobal)}"
+            lastMsg += totalCost.toStrBlock() + "\n"
+            lastMsg += "合計 中級換算:"
+            lastMsg += totalCost.rare3and4ToRare2().toStrBlock()
+            msgList.append(headerMsg + bodyMsg + lastMsg + "\n")
+        return{
+            "title" : title,
+            "msgList":msgList
+        }

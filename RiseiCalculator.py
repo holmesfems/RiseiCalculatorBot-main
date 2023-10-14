@@ -411,7 +411,7 @@ async def operatormastercost(inter:Interaction,operator_name:str,skill_num:Choic
 
 @operatormastercost.autocomplete("operator_name")
 async def operator_name_autocomplete(inter:Interaction,current:str)->List[app_commands.Choice[str]]:
-    strList = OperatorCostsCalculator.autoCompleteForMasterCosts(current)
+    strList = OperatorCostsCalculator.autoCompleteForMasterCost(current)
     return [app_commands.Choice(name = name, value = value) for name,value in strList]
 
 @tree.command(
@@ -428,7 +428,24 @@ async def operatorelitecost(inter:Interaction,operator_name:str):
     await followupToDiscord(inter,msg)
 @operatorelitecost.autocomplete("operator_name")
 async def operator_name_autocomplete_forelite(inter:Interaction,current:str)->List[app_commands.Choice[str]]:
-    strList = OperatorCostsCalculator.autoCompleteForEliteCosts(current)
+    strList = OperatorCostsCalculator.autoCompleteForEliteCost(current)
+    return [app_commands.Choice(name = name, value = value) for name,value in strList]
+
+@tree.command(
+    name = "operatormodulecost",
+    description= "オペレーターのモジュール消費素材を調べる"
+)
+@app_commands.describe(
+    operator_name = "オペレーターの名前、大陸先行オペレーターも日本語を入れてください",
+)
+async def operatormodulecost(inter:Interaction,operator_name:str):
+    operator_name = safeCallChoiceVal(operator_name)
+    await inter.response.defer(thinking=True)
+    msg = OperatorCostsCalculator.operatorModuleCost(operator_name)
+    await followupToDiscord(inter,msg)
+@operatormodulecost.autocomplete("operator_name")
+async def operator_name_autocomplete_formodule(inter:Interaction,current:str)->List[app_commands.Choice[str]]:
+    strList = OperatorCostsCalculator.autoCompleteForModuleCost(current)
     return [app_commands.Choice(name = name, value = value) for name,value in strList]
 
 @tree.command(

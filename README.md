@@ -6,7 +6,8 @@ F鯖用、アークナイツプレイに役立つツールを持つ便利なDisc
 現在実装している機能：
 * 理性価値表(/riseicalculator,/riseimaterials,/riseistages,/riseievents,/riseilists, /riseikakin)
 * 公開求人検索(/recruitsim,/recruitlist)
-* オペレーターの誕生日をお祝い！！
+* オペレーター育成の消費素材を調べる機能(/operetor○○cost)
+* オペレーターの誕生日をお祝いする機能！！
 * chat-gptの会話機能
 
 ## Requirement
@@ -56,6 +57,8 @@ Herokuなどのサービス(有料)を使えば、リモートサーバーに本
 詳しくは[こちら](https://devcenter.heroku.com/ja/articles/github-integration)の公式記事を参照し、本リポジトリと連携して自動Deploy環境を構築してください
 
 ## ChangedLog
+2023/10/14 モジュールの消費素材を調べる機能を追加(/operatormodulecosts)
+
 2023/10/04 公開求人にスクショ認識機能を追加
 
 2023/09/10 riseimaterials,riseievents,riseistagesのコマンドに、excel出力機能を追加。表示したステージのドロップ率を出力します。

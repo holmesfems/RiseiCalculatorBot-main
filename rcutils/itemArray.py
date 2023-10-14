@@ -60,6 +60,10 @@ class ItemArray:
         copy *= factor
         return copy
     
+    def isNotZero(self) -> bool:
+        if not self.__dict: return False
+        return all(x != 0 for x in self.__dict.values())
+
     def isEmpty(self) -> bool:
         if(not self.__dict): return True
         for value in self.__dict.values():
