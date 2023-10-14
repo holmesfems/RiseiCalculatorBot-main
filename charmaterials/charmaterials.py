@@ -458,23 +458,23 @@ class OperatorCostsCalculator:
 
         title = "モジュール必要素材検索: " + costItem.name
         msgList = []
+        eqCosts=dict(sorted(eqCosts.items(),key=lambda x:x[0]))
         for key,eqCostPhases in eqCosts.items():
             isGlobal = not costItem.uniqeEqIsCNOnly[key]
-            headerMsg = f"モジュール {key}"
-            if(not isGlobal): headerMsg += "(大陸版先行)"
-            headerMsg += "\n"
+            header = f"{key}"
+            if(not isGlobal): header += "(大陸版)"
             bodyMsg = ""
             for i in range(3):
                 eqCost = eqCostPhases[i]
-                phaseMsg = f"Stage.{i+1} 理性価値:{eqCost.toRiseiValue_OnlyValueTarget(isGlobal):.2f}"
+                phaseMsg = f"{header} Stage.{i+1} 理性価値:{eqCost.toRiseiValue_OnlyValueTarget(isGlobal):.2f}"
                 blockMsg = eqCost.toStrBlock()
                 bodyMsg += phaseMsg + blockMsg + "\n"
             totalCost = ItemCost.sum(eqCostPhases)
-            lastMsg = f"合計 理性価値:{totalCost.toRiseiValue_OnlyValueTarget(isGlobal)}"
+            lastMsg = f"合計 理性価値:{totalCost.toRiseiValue_OnlyValueTarget(isGlobal):.2f}"
             lastMsg += totalCost.toStrBlock() + "\n"
             lastMsg += "合計 中級換算:"
             lastMsg += totalCost.rare3and4ToRare2().toStrBlock()
-            msgList.append(headerMsg + bodyMsg + lastMsg + "\n")
+            msgList.append(bodyMsg + lastMsg + "\n")
         return{
             "title" : title,
             "msgList":msgList
