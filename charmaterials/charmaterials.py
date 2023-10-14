@@ -459,7 +459,7 @@ class OperatorCostsCalculator:
         title = "モジュール必要素材検索: " + costItem.name
         msgList = []
         for key,eqCostPhases in eqCosts.items():
-            isGlobal = not costItem.isCNOnly[key]
+            isGlobal = not costItem.uniqeEqIsCNOnly[key]
             headerMsg = f"モジュール {key}"
             if(not isGlobal): headerMsg += "(大陸版先行)"
             headerMsg += "\n"
