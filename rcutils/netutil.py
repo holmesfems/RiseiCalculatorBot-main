@@ -25,6 +25,7 @@ def get_json_aio(urlList:List[str],headers = {}) -> tuple:
     try:
         return asyncio.get_running_loop().run_until_complete(mainProcess())
     except Exception as _:
+        print(_)
         return asyncio.run(mainProcess())
 
 def get_json(url:str,AdditionalReq:Dict[str,str]=None,headers = {}) -> Any:
