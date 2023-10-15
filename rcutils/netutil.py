@@ -2,6 +2,7 @@ from typing import Dict,List,Any
 import aiohttp
 import asyncio
 import aiohttp_retry
+import yaml
 
 def getUrlWithReq(url:str,AdditionalReq:Dict[str,str]=None) -> str:
     if AdditionalReq is not None:
@@ -14,7 +15,10 @@ def get_json_aio(urlList:List[str],headers = {}) -> tuple:
         retryOption = aiohttp_retry.retry_options.RetryOptionsBase(attempts=10)
         print("request:"+url)
         async with retryClient.get(url,retry_options=retryOption) as response:
-            ret = await response.json(encoding="utf-8",content_type="text/plain")
+            try:
+                ret = await response.json(encoding="utf-8",content_type="text/plain")
+            except Exception as _:
+                ret = await response.json(encoding="utf-8")
             print("recieved:"+url)
             return ret
         
