@@ -1,7 +1,6 @@
 discord.py
 pandas
 scipy
-requests
 pyyaml
 openai
 openpyxl
