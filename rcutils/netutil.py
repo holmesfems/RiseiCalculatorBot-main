@@ -2,7 +2,8 @@ from typing import Dict,List,Any
 import aiohttp
 import asyncio
 import aiohttp_retry
-
+import nest_asyncio
+nest_asyncio.apply()
 def getUrlWithReq(url:str,AdditionalReq:Dict[str,str]=None) -> str:
     if AdditionalReq is not None:
         url += "?" + "&".join([f'{key}={value}' for key,value in AdditionalReq.items()])
@@ -22,9 +23,8 @@ def get_json_aio(urlList:List[str],headers = {}) -> tuple:
         async with aiohttp.ClientSession(headers=headers) as session:
             tasks = [asyncio.ensure_future(get_json_single(session,url)) for url in urlList]
             return await asyncio.gather(*tasks)
-    loop = asyncio.new_event_loop()
+    loop = asyncio.get_event_loop()
     ret = loop.run_until_complete(mainProcess())
-    loop.close()
     return ret
 
 def get_json(url:str,AdditionalReq:Dict[str,str]=None,headers = {}) -> Any:

@@ -7,3 +7,4 @@ openpyxl
 StrEnum
 google-cloud-vision
 aiohttp_retry
+nest_asyncio
