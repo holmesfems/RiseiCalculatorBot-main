@@ -226,6 +226,24 @@ class RiseiOrTimeValues:
     def toRiseiArrayFromColumnJaNameList(self,columns:List[str])->np.ndarray:
         return np.array([self.getValueFromJa(name) for name in columns])
 
+__allBufferdInfo = {}
+def getBufferedInfo(req:str,additional,force:bool):
+    if(force): __allBufferdInfo.pop(req,None)
+    ret = __allBufferdInfo.get(req,None)
+    if (ret is None):
+        ret = get_json(req,additional)
+    if(not force):
+        __allBufferdInfo[req] = ret
+    return ret
+
+def getStage(force):
+    return getBufferedInfo("stages",None,force)
+
+def getMatrix(force):
+    additionalHeader = {"server":"CN","show_closed_zones":"true"}
+    return getBufferedInfo("result/matrix",additionalHeader,force)["matrix"]
+        
+
 class StageItem:
     def __init__(self,dictItem):
         self.name = dictItem["code"]
@@ -348,10 +366,11 @@ class StageInfo:
         self.mainCodeToStageDict:Dict[str,StageItem] = {}
         self.eventCodeToStageDict:Dict[str,StageItem] = {}
         self.lastUpdated = None
+        self.firstInitialized = False
         self.init()
     #ステージ情報更新できるように外から呼び出せるようにする
     def init(self):
-        allStageList = get_json("stages")
+        allStageList = getStage(self.firstInitialized)
         #イベントステージを除外
         exclusionList = new_zone if self.isGlobal else []
         exclusionList += ["recruit"] #公開求人を除外
@@ -398,8 +417,7 @@ class StageInfo:
     
     def initMatrix(self):
         #matrix代入, targetServerはCNで固定
-        additionalHeader = {"server":"CN","show_closed_zones":"true"}
-        matrix = get_json('result/matrix',additionalHeader)["matrix"] #一回目ここで死んでる
+        matrix = getMatrix(self.firstInitialized)#一回目ここで死んでる
         allStageDict = {**self.mainStageDict,**self.eventStageDict}
         for item in matrix:
             key = item["stageId"]
@@ -407,6 +425,7 @@ class StageInfo:
             if not stageItem: continue
             stageItem.addDropList(item,self.isGlobal)
         self.lastUpdated = getnow.getnow()
+        self.firstInitialized = True
 
     def validBaseStages(self,validBaseMinTimes:int) -> List[StageItem]:
         return sum([self.categoryValidStages(category,validBaseMinTimes) for category in getStageCategoryDict(self.isGlobal).keys()],[])
