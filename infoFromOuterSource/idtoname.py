@@ -16,8 +16,9 @@ class ItemIdToName:
     __idToZH = {}
     __JAToid = {}
     def init():
-        allInfoCN:dict = get_json(ITEM_TABLE_URL_CN)["items"]
-        allInfoJP:dict = get_json(ITEM_TABLE_URL_JP)["items"]
+        allInfoCN,allInfoJP = netutil.get_json_aio([ITEM_TABLE_URL_CN,ITEM_TABLE_URL_JP])
+        allInfoCN = allInfoCN["items"]
+        allInfoJP = allInfoJP["items"]
         ItemIdToName.__idToStr = {}
         ItemIdToName.__ZHToJA = {}
         ItemIdToName.__ZHToid = {}
@@ -83,8 +84,7 @@ SKILL_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameD
 class SkillIdToName:
     __idToStr = {}
     def init():
-        allInfoCN = get_json(SKILL_TABLE_URL_CN)
-        allInfoJP = get_json(SKILL_TABLE_URL_JP)
+        allInfoCN,allInfoJP = netutil.get_json_aio([SKILL_TABLE_URL_CN,SKILL_TABLE_URL_JP])
         SkillIdToName.__idToStr = {}
         for key,value in allInfoCN.items():
             jpValue = allInfoJP.get(key)
@@ -102,8 +102,9 @@ STAGE_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameD
 class StageIdToName:
     __idToStr = {}
     def init():
-        allInfoCN = get_json(STAGE_TABLE_URL_CN)["stages"]
-        allInfoJP = get_json(STAGE_TABLE_URL_JP)["stages"]
+        allInfoCN,allInfoJP = netutil.get_json_aio([STAGE_TABLE_URL_CN,STAGE_TABLE_URL_JP])
+        allInfoCN = allInfoCN["stages"]
+        allInfoJP = allInfoJP["stages"]
         StageIdToName.__idToStr = {}
         for key,value in allInfoCN.items():
             jpValue = allInfoJP.get(key)

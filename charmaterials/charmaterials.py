@@ -218,10 +218,9 @@ class AllOperatorsInfo:
         self.init()
 
     def init(self):
-        allInfoCN = get_json(CHAR_TABLE_URL_CN)
-        allInfoJP = get_json(CHAR_TABLE_URL_JP)
-        allUEQ:dict = get_json(UNI_EQ_URL_CN)["equipDict"]
-        allUEQ_JP:dict = get_json(UNI_EQ_URL_JP)["equipDict"]
+        allInfoCN,allInfoJP,allUEQ,allUEQ_JP = netutil.get_json_aio([CHAR_TABLE_URL_CN,CHAR_TABLE_URL_JP,UNI_EQ_URL_CN,UNI_EQ_URL_JP])
+        allUEQ = allUEQ["equipDict"]
+        allUEQ_JP:dict = allUEQ_JP["equipDict"]
 
         with open("charmaterials/customZhToJa.yaml","rb") as f:
             customZhToJaDict:Dict[str,str] = yaml.safe_load(f)
