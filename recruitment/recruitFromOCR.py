@@ -1,5 +1,5 @@
 import os
-from typing import Any,List
+from typing import Any,List,Set
 from google.cloud import vision
 from google.auth import api_key
 import sys
@@ -21,33 +21,34 @@ with open("recruitment/tagEnToJa.yaml","rb") as f:
 def filterNotNone(_list:list) -> list:
     return list(filter(lambda x: x is not None,_list))
 
-def matchEliteTag(result:List[str]) -> List[str]:
-    ret = []
+def matchEliteTag(result:List[str]) -> Set[str]:
+    ret = set()
     for key,value in __eliteTagDict.items():
         if value in ret: continue
         if(key in result):
-            ret.append(value)
+            ret.add(value)
     return ret
 
-def matchOtherTag(result:List[str]) -> List[str]:
-    ret = []
+def matchOtherTag(result:List[str]) -> Set[str]:
+    ret = set()
     for key,value in __otherTagDict.items():
         if value in ret: continue
         if(any((key in text) for text in result)):
-            ret.append(value)
+            ret.add(value)
     return ret
 
-def matchEnTag(result:List[str]) -> List[str]:
-    ret = []
+def matchEnTag(result:List[str]) -> Set[str]:
+    ret = set()
     for key,value in __enTagDict.items():
         if value in ret: continue
         if(key in result):
-            ret.append(value)
+            ret.add(value)
     return ret
 
-def matchTag(result:str) -> List[str]:
+def matchTag(result:str) -> Set[str]:
     listResult = result.split("\n")
-    jpMatch = matchEliteTag(listResult) + matchOtherTag(listResult)
+    listResult = [item.replace('.','') for item in listResult] #塵の影響を除去..?
+    jpMatch = matchEliteTag(listResult).union(matchOtherTag(listResult))
     if(len(jpMatch)>=5):return jpMatch
     enMatch = matchEnTag(listResult)
     if(len(enMatch) >= len(jpMatch)): return enMatch
@@ -72,4 +73,4 @@ def taglistFromImage(imageURI:str)->List[str]:
     print(tagList)
     if(len(tagList) != 5):
         print("warning:タグの数が想定と違います")
-    return tagList
+    return list(tagList)
