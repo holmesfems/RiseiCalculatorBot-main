@@ -5,7 +5,7 @@ import aiohttp_retry
 
 def getUrlWithReq(url:str,AdditionalReq:Dict[str,str]=None) -> str:
     if AdditionalReq is not None:
-        url += "?" + "&".join(['%s=%s'%(key,value) for key,value in AdditionalReq.items()])
+        url += "?" + "&".join([f'{key}={value}' for key,value in AdditionalReq.items()])
     return url
 
 def get_json_aio(urlList:List[str],headers = {}) -> tuple:
@@ -22,7 +22,10 @@ def get_json_aio(urlList:List[str],headers = {}) -> tuple:
         async with aiohttp.ClientSession(headers=headers) as session:
             tasks = [asyncio.ensure_future(get_json_single(session,url)) for url in urlList]
             return await asyncio.gather(*tasks)
-    return tuple(asyncio.run(mainProcess()))
+    try:
+        return asyncio.get_running_loop().run_until_complete(mainProcess())
+    except Exception as _:
+        return asyncio.run(mainProcess())
 
 def get_json(url:str,AdditionalReq:Dict[str,str]=None,headers = {}) -> Any:
     url = getUrlWithReq(url,AdditionalReq)

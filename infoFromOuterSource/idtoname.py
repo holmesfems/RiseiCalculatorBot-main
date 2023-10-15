@@ -8,7 +8,6 @@ get_json = netutil.get_json
 
 ITEM_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/item_table.json"
 ITEM_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/ja_JP/gamedata/excel/item_table.json"
-
 class ItemIdToName:
     __idToStr = {}
     __ZHToJA = {}
@@ -80,7 +79,6 @@ class ItemIdToName:
 
 SKILL_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/skill_table.json"
 SKILL_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/ja_JP/gamedata/excel/skill_table.json"
-
 class SkillIdToName:
     __idToStr = {}
     def init():
@@ -118,10 +116,10 @@ class StageIdToName:
         return SkillIdToName.__idToStr.get(id,"Missing")
 
 ZONE_TABLE_URL = "https://penguin-stats.io/PenguinStats/api/v2/zones"
-headers = {'User-Agent':'ArkPlanner'}
 class ZoneIdToName:
     __idToStr = {}
     def init():
+        headers = {'User-Agent':'ArkPlanner'}
         allInfo = get_json(ZONE_TABLE_URL,headers=headers)
         ZoneIdToName.__idToStr = {}
         for items in allInfo:
