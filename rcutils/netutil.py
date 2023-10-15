@@ -22,8 +22,9 @@ def get_json_aio(urlList:List[str],headers = {}) -> tuple:
         async with aiohttp.ClientSession(headers=headers) as session:
             tasks = [asyncio.ensure_future(get_json_single(session,url)) for url in urlList]
             return await asyncio.gather(*tasks)
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
     ret = loop.run_until_complete(mainProcess())
+    loop.close()
     return ret
 
 def get_json(url:str,AdditionalReq:Dict[str,str]=None,headers = {}) -> Any:
