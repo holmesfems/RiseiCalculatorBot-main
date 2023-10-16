@@ -138,6 +138,7 @@ class OperatorCosts:
             key = SkillIdToName.getStr(item["skillId"])
             ret.append((key,costs))
         self.skills:List[Tuple[str,List[ItemCost]]] = ret
+        self.skillIds = [item["skillId"] for item in value["skills"]]
         #スキルLv1~7に必要な素材
         self.allSkills:List[ItemCost] = [ItemCost(x["lvlUpCost"]) for x in value["allSkillLvlup"]]
 
@@ -309,11 +310,15 @@ class OperatorCostsCalculator:
             "msgList":["オペレーター【"+operatorName+"】のスキル"+str(skillNum)+"の特化は存在しません"],
             "type": "err"
         }
-
+        
         isGlobal = not costItem.isCNOnly()
         allCost = ItemCost.sum(skillCost)
         msgList = []
         title = "スキル特化検索: " + skillName
+        skillId = costItem.skillIds[skillNum-1]
+        description = SkillIdToName.getDescription(skillId)
+        if(description):
+            msgList.append(description + "\n")
         for i in range(1,4):
             masterCost = skillCost[i-1]
             riseiValue = masterCost.toRiseiValue(isGlobal)

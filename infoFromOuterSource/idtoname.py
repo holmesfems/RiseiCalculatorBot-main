@@ -81,6 +81,7 @@ SKILL_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameD
 SKILL_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/ja_JP/gamedata/excel/skill_table.json"
 class SkillIdToName:
     __idToStr = {}
+    __idToDescription = {}
     def init():
         allInfoCN,allInfoJP = netutil.get_json_aio([SKILL_TABLE_URL_CN,SKILL_TABLE_URL_JP])
         SkillIdToName.__idToStr = {}
@@ -89,11 +90,43 @@ class SkillIdToName:
             if(jpValue):
                 value = jpValue
             SkillIdToName.__idToStr[key] = value["levels"][0]["name"]
+            #最大特化のスキル説明
+            desription:str = value["levels"][-1]["description"]
+            if(desription):
+                desription = desription.replace("<@ba.vup>","").replace("<@ba.vdown>","").replace("<$ba.root>","").replace("</>","").replace("-{-","{").replace("{-","-{")
+                desription = desription.replace("<$bacamou>","").replace("<@barem>","")
+                def cleanStr(string:str)->str:
+                    return string.replace("[","").replace("]","").replace(".","")
+                desription = cleanStr(desription)
+                rawDict = value["levels"][-1]["blackboard"]
+                try:
+                    replaceDict = {cleanStr(item["key"]):item.get("value",None) for item in rawDict}
+                    replaceDict["duration"] = value["levels"][-1]["duration"]
+                    replaceDict_upper = {key.upper():value for key,value in replaceDict.items()}
+                    if(replaceDict):
+                        try:
+                            desription = desription.format(**replaceDict,**replaceDict_upper)
+                            desription = desription.replace("--","")
+                        except Exception as e:
+                            print(f"{desription=}")
+                            print(f"{replaceDict=}")
+                            raise e
+                except Exception as e:
+                    print(f"{rawDict=}")
+                    raise e
+            else:
+                desription = ""
+            SkillIdToName.__idToDescription[key] = desription
     
     def getStr(id):
         if(not SkillIdToName.__idToStr):
             SkillIdToName.init()
         return SkillIdToName.__idToStr.get(id,"Missing")
+    
+    def getDescription(id):
+        if(not SkillIdToName.__idToDescription):
+            SkillIdToName.init()
+        return SkillIdToName.__idToDescription.get(id,"")
 
 STAGE_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/stage_table.json"
 STAGE_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/ja_JP/gamedata/excel/stage_table.json"
