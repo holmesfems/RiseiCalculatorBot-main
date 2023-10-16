@@ -318,7 +318,7 @@ class OperatorCostsCalculator:
         skillId = costItem.skillIds[skillNum-1]
         description = SkillIdToName.getDescription(skillId)
         if(description):
-            msgList.append(description + "\n")
+            msgList.append(description + "\n\n")
         for i in range(1,4):
             masterCost = skillCost[i-1]
             riseiValue = masterCost.toRiseiValue(isGlobal)
