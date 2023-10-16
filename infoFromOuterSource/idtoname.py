@@ -93,15 +93,16 @@ class SkillIdToName:
             #最大特化のスキル説明
             desription:str = value["levels"][-1]["description"]
             if(desription):
-                desription = desription.replace("<@ba.vup>","").replace("<@ba.vdown>","").replace("<$ba.root>","").replace("</>","").replace("-{-","{").replace("{-","-{")
-                desription = desription.replace("<$bacamou>","").replace("<@barem>","")
+                desription = desription.replace("<@ba.vup>","").replace("<@ba.vdown>","").replace("<$ba.root>","").replace("</>","").replace("-{-","{").replace("{-","-{").replace("<$ba.camou>","").replace("<@ba.rem>","")
                 def cleanStr(string:str)->str:
                     return string.replace("[","").replace("]","").replace(".","")
                 desription = cleanStr(desription)
+                desription = desription.replace(":0%",":.0%")
                 rawDict = value["levels"][-1]["blackboard"]
                 try:
                     replaceDict = {cleanStr(item["key"]):item.get("value",None) for item in rawDict}
-                    replaceDict["duration"] = value["levels"][-1]["duration"]
+                    if("duration" not in replaceDict):
+                        replaceDict["duration"] = value["levels"][-1]["duration"]
                     replaceDict_upper = {key.upper():value for key,value in replaceDict.items()}
                     if(replaceDict):
                         try:
