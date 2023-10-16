@@ -3,6 +3,7 @@ import yaml
 sys.path.append('../')
 from rcutils import netutil
 from typing import Dict
+import re
 
 get_json = netutil.get_json
 
@@ -93,7 +94,11 @@ class SkillIdToName:
             #最大特化のスキル説明
             desription:str = value["levels"][-1]["description"]
             if(desription):
-                desription = desription.replace("<@ba.vup>","").replace("<@ba.vdown>","").replace("<$ba.root>","").replace("</>","").replace("-{-","{").replace("{-","-{").replace("<$ba.camou>","").replace("<@ba.rem>","")
+                bareplace1 = re.compile(r"<@ba\.[a-z]+>")
+                desription = bareplace1.sub("",desription)
+                bareplace2 = re.compile(r"<$ba\.[a-z]+>")
+                desription = bareplace2.sub("",desription)
+                desription = desription.replace("</>","").replace("-{-","{").replace("{-","-{").replace("\\n","\n")
                 def cleanStr(string:str)->str:
                     return string.replace("[","").replace("]","").replace(".","")
                 desription = cleanStr(desription)
