@@ -96,7 +96,7 @@ class SkillIdToName:
             if(desription):
                 bareplace1 = re.compile(r"<@ba\.[a-z]+>")
                 desription = bareplace1.sub("",desription)
-                bareplace2 = re.compile(r"<$ba\.[a-z]+>")
+                bareplace2 = re.compile(r"<\$ba\.[a-z]+>")
                 desription = bareplace2.sub("",desription)
                 desription = desription.replace("</>","").replace("-{-","{").replace("{-","-{").replace("\\n","\n")
                 def cleanStr(string:str)->str:
@@ -105,7 +105,11 @@ class SkillIdToName:
                 desription = desription.replace(":0%",":.0%")
                 rawDict = value["levels"][-1]["blackboard"]
                 try:
-                    replaceDict = {cleanStr(item["key"]):item.get("value",None) for item in rawDict}
+                    def checkint(x:float):
+                        if(x is None): return None
+                        if(x==round(x)): return int(x)
+                        return x
+                    replaceDict = {cleanStr(item["key"]):checkint(item.get("value",None)) for item in rawDict}
                     if("duration" not in replaceDict):
                         replaceDict["duration"] = value["levels"][-1]["duration"]
                     replaceDict_upper = {key.upper():value for key,value in replaceDict.items()}
