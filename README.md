@@ -57,6 +57,8 @@ Herokuなどのサービス(有料)を使えば、リモートサーバーに本
 詳しくは[こちら](https://devcenter.heroku.com/ja/articles/github-integration)の公式記事を参照し、本リポジトリと連携して自動Deploy環境を構築してください
 
 ## ChangedLog
+2023/10/18 占い館から理性bot機能を呼び出せるように改修
+
 2023/10/14 モジュールの消費素材を調べる機能を追加(/operatormodulecosts)
 
 2023/10/04 公開求人にスクショ認識機能を追加
