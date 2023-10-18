@@ -502,7 +502,17 @@ async def on_message(message:discord.Message):
                 if len(content) > MAXMSGLEN: return False
                 return True
             toAI = list(filter(msgFilter,toAI))
-            reply = chatbot.openaichat(toAI)
+            sendToAI = []
+            for item in toAI:
+                if(not sendToAI):
+                    sendToAI.append(item)
+                    continue
+                if(sendToAI[-1]["role"] == "assistant"):
+                    if(item["role"] == "assistant"):
+                        #botの連続したメッセージは、二通目以降を無視する
+                        continue
+                    sendToAI.append(item)
+            reply = chatbot.openaichat(sendToAI)
             channel = client.get_channel(OPENAI_CHANNELID)
             if(reply.type is chatbot.ChatType.TEXT):
                 if(reply.plainText):
