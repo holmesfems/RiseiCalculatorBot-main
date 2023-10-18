@@ -66,7 +66,7 @@ def functionCalling(functionName:str,functionArgs:dict) -> ChatReply:
         return ChatReply(ChatType.FUNCTION,content=OperatorCostsCalculator.operatorEliteCost(targetEstimated),plainText=f"{targetEstimated}の昇進必要素材を表示します：")
     elif(functionName == "operatormastercost"):
         targetEstimated = functionArgs["target"]
-        number = functionArgs["number"]
+        number = functionArgs["skillnum"]
         autoComplete = OperatorCostsCalculator.autoCompleteForMasterCost(targetEstimated)
         if(autoComplete):
             targetEstimated = autoComplete[0][1]

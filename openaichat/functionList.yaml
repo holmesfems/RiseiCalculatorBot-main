@@ -76,7 +76,7 @@
         description: スキルの番号
     required:
     - target
-    - number
+    - skillnum
 - name: operatormodulecost
   description: オペレーターのモジュールの消費素材を取得します
   parameters:
