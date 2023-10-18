@@ -512,6 +512,7 @@ async def on_message(message:discord.Message):
                         #botの連続したメッセージは、二通目以降を無視する
                         continue
                     sendToAI.append(item)
+            print(f"{sendToAI=}")
             reply = chatbot.openaichat(sendToAI)
             channel = client.get_channel(OPENAI_CHANNELID)
             if(reply.type is chatbot.ChatType.TEXT):
