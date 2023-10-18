@@ -31,13 +31,13 @@ def functionCalling(functionName:str,functionArgs:dict) -> ChatReply:
     if(functionName == "riseimaterials"):
         target = functionArgs["target"]
         targetEstimated = listInfo.estimateCategoryFromJPName(target)
-        return ChatReply(ChatType.FUNCTION,content=CalculatorManager.riseimaterials(targetEstimated,True,CalculateMode.SANITY),plainText=f"{target}の周回ステージを表示します：")
+        return ChatReply(ChatType.FUNCTION,content=CalculatorManager.riseimaterials(targetEstimated,True,CalculateMode.SANITY,maxItems=5),plainText=f"{target}の周回ステージを表示します：")
     elif(functionName == "riseistages"):
         targetEstimated = functionArgs["target"]
         autoComplete = CalculatorManager.calculatorForMainland.autoCompleteMainStage(targetEstimated)
         if(autoComplete):
             targetEstimated = autoComplete[0][1]
-        return ChatReply(ChatType.FUNCTION,content=CalculatorManager.riseistages(targetEstimated,True,CalculateMode.SANITY),plainText=f"ステージ{targetEstimated}の理性効率を表示します：")
+        return ChatReply(ChatType.FUNCTION,content=CalculatorManager.riseistages(targetEstimated,True,CalculateMode.SANITY,maxItems=5),plainText=f"ステージ{targetEstimated}の理性効率を表示します：")
     elif(functionName == "riseilists"):
         targetEstimated = functionArgs["target"]
         targetDict = {
