@@ -39,7 +39,6 @@ embedColourDict:Dict[str,discord.Colour] = {
     "ok" : discord.Colour.from_str("0x8be02b")
 }
 
-
 #ディスコード返信用のEmbedを作る関数
 def createEmbedList(msg):
     maxLength = 1900
@@ -406,7 +405,7 @@ async def operatormastercost(inter:Interaction,operator_name:str,skill_num:Choic
     operator_name = safeCallChoiceVal(operator_name)
     skill_num = safeCallChoiceVal(skill_num)
     await inter.response.defer(thinking=True)
-    msg = OperatorCostsCalculator.skillMasterCosts(operator_name,skill_num)
+    msg = OperatorCostsCalculator.skillMasterCost(operator_name,skill_num)
     await followupToDiscord(inter,msg)
 
 @operatormastercost.autocomplete("operator_name")
@@ -497,16 +496,20 @@ async def on_message(message:discord.Message):
             messages = [message async for message in messageable.history(limit = MAXLOG, after = datetime.datetime.now(tz=JST) - datetime.timedelta(minutes = 10),oldest_first=False)]
             toAI = [{"role": "assistant" if message.author.bot else "user", "content" : message.content} for message in messages]
             toAI.reverse()
-            def emptyFilter(msg): #空メッセージ、長すぎるメッセージを除外
+            def msgFilter(msg): #空メッセージ、長すぎるメッセージを除外
                 content = msg["content"]
                 if content == "": return False
                 if len(content) > MAXMSGLEN: return False
                 return True
-            toAI = list(filter(emptyFilter,toAI))
+            toAI = list(filter(msgFilter,toAI))
             reply = chatbot.openaichat(toAI)
-            if(reply):
-                channel = client.get_channel(OPENAI_CHANNELID)
-                await channel.send(content = reply)
+            channel = client.get_channel(OPENAI_CHANNELID)
+            if(reply.type is chatbot.ChatType.TEXT):
+                if(reply.plainText):
+                    await channel.send(content = reply.plainText)
+            else:
+                await channel.send(content = reply.plainText)
+                await sendToDiscord(channel,reply.content)
         except Exception as e:
             msg = showException()
             print(msg)

@@ -290,7 +290,7 @@ class OperatorCostsCalculator:
     def autoCompleteForMasterCost(name:str,limit:int = 25) -> List[Tuple[str,str]]:
         return [(value.name,value.name) for value in OperatorCostsCalculator.operatorInfo.operatorDict.values() if name in value.name and value.stars>=4][:limit]
     
-    def skillMasterCosts(operatorName:str,skillNum:int) -> Dict:
+    def skillMasterCost(operatorName:str,skillNum:int) -> Dict:
         costItem = OperatorCostsCalculator.operatorInfo.getOperatorCostFromName(operatorName)
         title = "スキル特化素材検索"
         if(not costItem): return {
