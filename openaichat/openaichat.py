@@ -30,16 +30,16 @@ class ChatReply:
 def functionCalling(functionName:str,functionArgs:dict) -> ChatReply:
     if(functionName == "riseimaterials"):
         target = functionArgs["target"]
-        target = listInfo.estimateCategoryFromJPName(target)
-        return ChatReply(ChatType.FUNCTION,content=CalculatorManager.riseimaterials(target,True,CalculateMode.SANITY),plainText=f"{target}の周回ステージを表示します：")
+        targetEstimated = listInfo.estimateCategoryFromJPName(target)
+        return ChatReply(ChatType.FUNCTION,content=CalculatorManager.riseimaterials(targetEstimated,True,CalculateMode.SANITY),plainText=f"{target}の周回ステージを表示します：")
     elif(functionName == "riseistages"):
-        target = functionArgs["target"]
-        autoComplete = CalculatorManager.calculatorForMainland.autoCompleteMainStage(target)
+        targetEstimated = functionArgs["target"]
+        autoComplete = CalculatorManager.calculatorForMainland.autoCompleteMainStage(targetEstimated)
         if(autoComplete):
-            target = autoComplete[0][1]
-        return ChatReply(ChatType.FUNCTION,content=CalculatorManager.riseistages(target,True,CalculateMode.SANITY),plainText=f"ステージ{target}の理性効率を表示します：")
+            targetEstimated = autoComplete[0][1]
+        return ChatReply(ChatType.FUNCTION,content=CalculatorManager.riseistages(targetEstimated,True,CalculateMode.SANITY),plainText=f"ステージ{targetEstimated}の理性効率を表示します：")
     elif(functionName == "riseilists"):
-        target = functionArgs["target"]
+        targetEstimated = functionArgs["target"]
         targetDict = {
             "基準マップ":"basemaps",
             "理性価値表":"san_value_lists",
@@ -52,31 +52,31 @@ def functionCalling(functionName:str,functionArgs:dict) -> ChatReply:
             "契約賞金引換効率表": "cclist",
             "契約賞金効率表": "cclist",
         }
-        printTarget = targetDict.get(target,None)
+        printTarget = targetDict.get(targetEstimated,None)
         if(printTarget):
             toPrint = CalculatorManager.ToPrint(printTarget)
-            return ChatReply(ChatType.FUNCTION,content=CalculatorManager.riseilists(toPrint,True,CalculateMode.SANITY),plainText=f"{target}を表示します：")
+            return ChatReply(ChatType.FUNCTION,content=CalculatorManager.riseilists(toPrint,True,CalculateMode.SANITY),plainText=f"{targetEstimated}を表示します：")
         else:
-            return ChatReply(ChatType.TEXT,plainText=f"{target}の取得に失敗しました。名前が違うみたいですわ。")
+            return ChatReply(ChatType.TEXT,plainText=f"{targetEstimated}の取得に失敗しました。名前が違うみたいですわ。")
     elif(functionName == "operatorelitecost"):
-        target = functionArgs["target"]
-        autoComplete = OperatorCostsCalculator.autoCompleteForEliteCost(target)
+        targetEstimated = functionArgs["target"]
+        autoComplete = OperatorCostsCalculator.autoCompleteForEliteCost(targetEstimated)
         if(autoComplete):
-            target = autoComplete[0][1]
-        return ChatReply(ChatType.FUNCTION,content=OperatorCostsCalculator.operatorEliteCost(target),plainText=f"{target}の昇進必要素材を表示します：")
+            targetEstimated = autoComplete[0][1]
+        return ChatReply(ChatType.FUNCTION,content=OperatorCostsCalculator.operatorEliteCost(targetEstimated),plainText=f"{targetEstimated}の昇進必要素材を表示します：")
     elif(functionName == "operatormastercost"):
-        target = functionArgs["target"]
+        targetEstimated = functionArgs["target"]
         number = functionArgs["number"]
-        autoComplete = OperatorCostsCalculator.autoCompleteForMasterCost(target)
+        autoComplete = OperatorCostsCalculator.autoCompleteForMasterCost(targetEstimated)
         if(autoComplete):
-            target = autoComplete[0][1]
-        return ChatReply(ChatType.FUNCTION,content=OperatorCostsCalculator.skillMasterCost(target,number),plainText=f"{target}スキル{number}の特化に必要素材を表示します：")
+            targetEstimated = autoComplete[0][1]
+        return ChatReply(ChatType.FUNCTION,content=OperatorCostsCalculator.skillMasterCost(targetEstimated,number),plainText=f"{targetEstimated}スキル{number}の特化に必要素材を表示します：")
     elif(functionName == "operatormodulecost"):
-        target = functionArgs["target"]
-        autoComplete = OperatorCostsCalculator.autoCompleteForModuleCost(target)
+        targetEstimated = functionArgs["target"]
+        autoComplete = OperatorCostsCalculator.autoCompleteForModuleCost(targetEstimated)
         if(autoComplete):
-            target = autoComplete[0][1]
-        return ChatReply(ChatType.FUNCTION,content=OperatorCostsCalculator.operatorModuleCost(target),plainText=f"{target}のモジュール強化に必要な素材を表示します：")
+            targetEstimated = autoComplete[0][1]
+        return ChatReply(ChatType.FUNCTION,content=OperatorCostsCalculator.operatorModuleCost(targetEstimated),plainText=f"{targetEstimated}のモジュール強化に必要な素材を表示します：")
 
 def openaichat(msgList) -> ChatReply:
     OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
