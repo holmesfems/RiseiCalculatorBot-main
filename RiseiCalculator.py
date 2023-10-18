@@ -511,7 +511,7 @@ async def on_message(message:discord.Message):
                     if(item["role"] == "assistant"):
                         #botの連続したメッセージは、二通目以降を無視する
                         continue
-                    sendToAI.append(item)
+                sendToAI.append(item)
             print(f"{sendToAI=}")
             reply = chatbot.openaichat(sendToAI)
             channel = client.get_channel(OPENAI_CHANNELID)
