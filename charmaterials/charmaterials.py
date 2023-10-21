@@ -190,6 +190,9 @@ class OperatorCosts:
     def totalUniqueEQCostCNOnly(self) -> ItemCost:
         return ItemCost.sum([ItemCost.sum(value) for key,value in self.uniqeEq.items() if self.uniqeEqIsCNOnly[key]])
     
+    def totalUniqueEQCostGlobal(self) -> ItemCost:
+        return ItemCost.sum([ItemCost.sum(value) for key,value in self.uniqeEq.items() if not self.uniqeEqIsCNOnly[key]])
+    
     def hasCNOnlyUEQ(self) -> bool:
         return any(self.uniqeEqIsCNOnly.values())
     
@@ -281,6 +284,7 @@ class OperatorCostsCalculator:
     class CostListSelection(StrEnum):
         STAR5ELITE = enum.auto()
         COSTOFCNONLY = enum.auto()
+        COSTOFGLOBAL = enum.auto()
 
     operatorInfo = AllOperatorsInfo()
 
@@ -390,7 +394,29 @@ class OperatorCostsCalculator:
             return {"title":title,
                     "msgList":msgList
                     }
-            
+        
+        elif(selection is OperatorCostsCalculator.CostListSelection.COSTOFGLOBAL):
+            globalOperators = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if not value.isCNOnly()}
+            title = "実装済オペレーターの消費素材合計"
+            msgList = []
+            # toPrint = []
+            # for key,value in globalOperators.items():
+            #     toPrint.append(value.name)
+            # msgList.append("オペレーター一覧：" + CalculatorManager.dumpToPrint(toPrint) + "\n")
+
+            totalCost = ItemCost.sum([value.allCostExceptEq() for value in globalOperators.values()])
+            msgList.append("全昇進、全特化の合計消費:" + totalCost.toStrBlock() + "\n")
+            eqOperators = {key:value for key,value in globalOperators.items() if value.hasUniqeEq()}
+            eqCost = ItemCost.sum([value.totalUniqueEQCostCNOnly() for value in eqOperators.values()])
+            msgList.append("実装済モジュールの合計消費:" + eqCost.toStrBlock() + "\n")
+            msgList.append("全合計の中級素材換算:"+(totalCost+eqCost).rare3and4ToRare2().toStrBlock(sortByCount=True) + "\n")
+            totalCostValue = totalCost.toRiseiValue(glob=True) + eqCost.toRiseiValue(glob=True)
+            msgList.append(f"合計理性価値(補完チップ系抜き):{totalCostValue:.3f}\n")
+            msgList.append(f"源石換算 : {totalCostValue/135:.3f}\n")
+            msgList.append(f"日本円換算 : {totalCostValue/135/175*10000:.0f} 円")
+            return {"title":title,
+                    "msgList":msgList
+                    }
         else:
             return{
                 "title":"エラー",
