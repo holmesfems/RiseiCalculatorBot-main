@@ -12,7 +12,7 @@ def getUrlWithReq(url:str,AdditionalReq:Dict[str,str]=None) -> str:
 def get_json_aio(urlList:List[str],headers = {}) -> tuple:
     async def get_json_single(session:aiohttp.ClientSession, url:str):
         retryClient = aiohttp_retry.RetryClient(session)
-        retryOption = aiohttp_retry.ExponentialRetry(attempts=10,start_timeout=5,max_timeout=10,factor=1.1)
+        retryOption = aiohttp_retry.RetryOptionsBase(attempts=10)
         print("request:"+url)
         async with retryClient.get(url,retry_options=retryOption) as response:
             ret = await response.json(encoding="utf-8",content_type=response.content_type)
@@ -20,7 +20,7 @@ def get_json_aio(urlList:List[str],headers = {}) -> tuple:
             return ret
         
     async def mainProcess():
-        async with aiohttp.ClientSession(headers=headers) as session:
+        async with aiohttp.ClientSession(headers=headers,timeout=aiohttp.ClientTimeout(10.0)) as session:
             tasks = [asyncio.ensure_future(get_json_single(session,url)) for url in urlList]
             return await asyncio.gather(*tasks)
     loop = asyncio.get_event_loop()

@@ -123,7 +123,49 @@ class ItemCost:
         ret = ItemCost()
         ret.itemArray = self.itemArray.filterByZH(getValueTarget(False))
         return ret
+
+class EQCostItem:
+    def __init__(self, type:str, phaseCosts:List[ItemCost], isCNOnly: bool):
+        self.type = type
+        self.phaseCosts = phaseCosts
+        self.isCNOnly = isCNOnly
     
+    def totalCost(self) -> ItemCost:
+        return ItemCost.sum(self.phaseCosts)
+
+class EQCost:
+    def __init__(self):
+        self.eqCostList:List[EQCostItem] = []
+    
+    def hasUniqeEq(self)->bool:
+        return bool(self.eqCostList)
+    
+    def hasCNOnlyUEQ(self)->bool:
+        return any(item.isCNOnly for item in self.eqCostList)
+    
+    def allUEQ(self) -> List[EQCostItem]:
+        return [item for item in self.eqCostList]
+    
+    def allUEQCost(self) -> ItemCost:
+        return ItemCost.sum([item.totalCost() for item in self.allUEQ()])
+    
+    def globalUEQ(self) -> List[EQCostItem]:
+        return [item for item in self.eqCostList if not item.isCNOnly]
+    
+    def globalUEQCost(self) -> ItemCost:
+        return ItemCost.sum([item.totalCost() for item in self.globalUEQ()])
+    
+    def cnOnlyUEQ(self) -> List[EQCostItem]:
+        return [item for item in self.eqCostList if item.isCNOnly]
+
+    def cnOnlyUEQCost(self) -> ItemCost:
+        return ItemCost.sum([item.totalCost() for item in self.cnOnlyUEQ()])
+    
+    def addUEQ(self,item:EQCostItem):
+        self.eqCostList.append(item)
+        if(len(self.eqCostList) >= 2):
+            self.eqCostList.sort(key=lambda x: x.type)
+
 class OperatorCosts:
     def __init__(self,key,value):
         self.name = value["name"]
@@ -145,8 +187,7 @@ class OperatorCosts:
         #大陸版限定オペレーターか
         self.cnOnly:bool = value["cnOnly"] 
         #モジュール initInfoだけでは足りないので、別途追加
-        self.uniqeEq:Dict[str,List[ItemCost]] = {}
-        self.uniqeEqIsCNOnly:Dict[str,bool] = {}
+        self.uniqeEq:EQCost = EQCost()
         #星の数
         #大陸版では "TIER_n"のstr、日本版ではnのintになる
         rarity = value["rarity"]
@@ -163,17 +204,17 @@ class OperatorCosts:
         self.isPatch = value["isPatch"]
 
     #モジュールの素材を追加する
-    def addEq(self,uniEq):
-        eqType = uniEq["typeName2"]
+    def addEq(self,uniEqJson):
+        eqType = uniEqJson["typeName2"]
         if(not eqType):return #デフォルトのやつは追加しない
-        costDicts = uniEq["itemCost"]
+        costDicts = uniEqJson["itemCost"]
         key = eqType
         costs = [ItemCost(costValue) for costKey,costValue in costDicts.items()]
-        self.uniqeEq[key] = costs
-        self.uniqeEqIsCNOnly[key] = uniEq["cnOnly"]
+        eqCostItem = EQCostItem(key,costs,uniEqJson["cnOnly"])
+        self.uniqeEq.addUEQ(eqCostItem)
 
     def hasUniqeEq(self) -> bool:
-        return bool(self.uniqeEq)
+        return self.uniqeEq.hasUniqeEq()
 
     def totalPhaseCost(self)->ItemCost:
         return ItemCost.sum(self.phases)
@@ -185,16 +226,16 @@ class OperatorCosts:
         return ItemCost.sum(self.allSkills)
     
     def totalUniqueEQCost(self)->ItemCost:
-        return ItemCost.sum([ItemCost.sum(value) for value in self.uniqeEq.values()])
+        return self.uniqeEq.allUEQCost()
     
     def totalUniqueEQCostCNOnly(self) -> ItemCost:
-        return ItemCost.sum([ItemCost.sum(value) for key,value in self.uniqeEq.items() if self.uniqeEqIsCNOnly[key]])
+        return self.uniqeEq.cnOnlyUEQCost()
     
     def totalUniqueEQCostGlobal(self) -> ItemCost:
-        return ItemCost.sum([ItemCost.sum(value) for key,value in self.uniqeEq.items() if not self.uniqeEqIsCNOnly[key]])
+        return self.uniqeEq.globalUEQCost()
     
     def hasCNOnlyUEQ(self) -> bool:
-        return any(self.uniqeEqIsCNOnly.values())
+        return self.uniqeEq.hasCNOnlyUEQ()
     
     def allCost(self)->ItemCost:
         ret = self.totalPhaseCost()
@@ -480,7 +521,7 @@ class OperatorCostsCalculator:
             "type": "err"
         }
         eqCosts = costItem.uniqeEq
-        if(not eqCosts): return{
+        if(not eqCosts.hasUniqeEq()): return{
             "title" : title,
             "msgList":["オペレーター【"+operatorName+"】のモジュールは存在しません"],
             "type": "err"
@@ -488,18 +529,17 @@ class OperatorCostsCalculator:
 
         title = "モジュール必要素材検索: " + costItem.name
         msgList = []
-        eqCosts=dict(sorted(eqCosts.items(),key=lambda x:x[0]))
-        for key,eqCostPhases in eqCosts.items():
-            isGlobal = not costItem.uniqeEqIsCNOnly[key]
-            header = f"{key}"
+        for eqCostItem in eqCosts.allUEQ():
+            isGlobal = not eqCostItem.isCNOnly
+            header = f"{eqCostItem.type}"
             if(not isGlobal): header += "(大陸版)"
             bodyMsg = ""
             for i in range(3):
-                eqCost = eqCostPhases[i]
+                eqCost = eqCostItem.phaseCosts[i]
                 phaseMsg = f"{header} Stage.{i+1} 理性価値:{eqCost.toRiseiValue_OnlyValueTarget(isGlobal):.2f}"
                 blockMsg = eqCost.toStrBlock()
                 bodyMsg += phaseMsg + blockMsg + "\n"
-            totalCost = ItemCost.sum(eqCostPhases)
+            totalCost = eqCostItem.totalCost()
             lastMsg = f"合計 理性価値:{totalCost.toRiseiValue_OnlyValueTarget(isGlobal):.2f}"
             lastMsg += totalCost.toStrBlock() + "\n"
             lastMsg += "合計 中級換算:"
