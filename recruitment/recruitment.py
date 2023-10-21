@@ -120,10 +120,7 @@ def operatorListStarsMEThan(stars):
     return [operator for operator in operatorDB if operator.stars >= stars]
 
 def isIndependent(key,keyList):
-    for item in keyList:
-        if allAinBnotEq(item,key):
-            return False
-    return True
+    return all(not allAinBnotEq(item,key) for item in keyList)
 
 def clearSearchMap(redundantMap:dict):
     return {key:value for (key,value) in redundantMap.items() if isIndependent(key,redundantMap.keys())}
@@ -157,10 +154,7 @@ def toStrList(list):
 def allAinBnotEq(a:tuple,b:tuple):
     if(len(a) >= len(b)):
         return False
-    for item in a:
-        if item not in b:
-            return False
-    return True
+    return all(item in b for item in a)
 
 def searchMapToStringChunks(searchMap):
     if(not searchMap):
