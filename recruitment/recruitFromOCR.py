@@ -1,58 +1,71 @@
 import os
-from typing import Any,List,Set
+from typing import Any,List,Set,Dict,Optional
 from google.cloud import vision
 from google.auth import api_key
 import sys
 sys.path.append('../')
-from recruitment import recruitment
 import yaml
 
-#エリートは上級エリートの中に含まれるので、単独で処理を書く
-__eliteTagDict = {item:item for item in recruitment.eliteTags}
-
-#その他タグは、認識した文字列の中に含まれていればOK
-__otherTagDict = {item:item for item in recruitment.jobTags + recruitment.positionTags + recruitment.otherTags}
-__otherTagDict["範囲攻"] = "範囲攻撃"
+#下二つと統一、日本版認識用
+with open("recruitment/tagJaToJa.yaml","rb") as f:
+    __jaTagDict = yaml.safe_load(f)
+    #補正用データ
+    __jaExtraDict = {
+        "範囲攻" : "範囲攻撃"
+    }
 
 #英語版認識用
 with open("recruitment/tagEnToJa.yaml","rb") as f:
     __enTagDict = yaml.safe_load(f)
 
+#大陸版認識用
+with open("recruitment/tagZhToJa.yaml","rb") as f:
+    __zhTagDict = yaml.safe_load(f)
+
 def filterNotNone(_list:list) -> list:
     return list(filter(lambda x: x is not None,_list))
 
-def matchEliteTag(result:List[str]) -> Set[str]:
+def matchTagCoreProcess(result:List[str],baseDict:Dict[str,str],extraDict:Optional[Dict[str,str]]=None)->Set[str]:
+    #Google-OCRの精度がかなり良いので、基本完全一致で探してもちゃんとタグを出してくれる
     ret = set()
-    for key,value in __eliteTagDict.items():
+    for key,value in baseDict.items():
         if value in ret: continue
         if(key in result):
             ret.add(value)
-    return ret
-
-def matchOtherTag(result:List[str]) -> Set[str]:
-    ret = set()
-    for key,value in __otherTagDict.items():
-        if value in ret: continue
+    if(not extraDict): return ret
+    #一部誤字するやつがあるので、in検索で結果を補正
+    for key,value in extraDict.items():
+        if value in ret:continue
         if(any((key in text) for text in result)):
             ret.add(value)
     return ret
 
+def matchJaTag(result:List[str]) -> Set[str]:
+    return matchTagCoreProcess(result,__jaTagDict,__jaExtraDict)
+
 def matchEnTag(result:List[str]) -> Set[str]:
-    ret = set()
-    for key,value in __enTagDict.items():
-        if value in ret: continue
-        if(key in result):
-            ret.add(value)
-    return ret
+    return matchTagCoreProcess(result,__enTagDict)
+
+def matchZhTag(result:List[str]) -> Set[str]:
+    return matchTagCoreProcess(result,__zhTagDict)
 
 def matchTag(result:str) -> Set[str]:
     listResult = result.split("\n")
     listResult = [item.replace('.','') for item in listResult] #塵の影響を除去..?
-    jpMatch = matchEliteTag(listResult).union(matchOtherTag(listResult))
-    if(len(jpMatch)>=5):return jpMatch
+    #localeの判断は当てにならないので(大体undになる)、順番にマッチを試す
+    #そこまでコストの高い計算でもないので、現状これでいいでしょう
+    jpMatch = matchJaTag(listResult)
+    if(len(jpMatch)>=5): return jpMatch
+    #日本語ではない、英語マッチを試す
     enMatch = matchEnTag(listResult)
-    if(len(enMatch) >= len(jpMatch)): return enMatch
-    return jpMatch
+    if(len(enMatch)>=5): return enMatch
+    #英語でなければ中国語マッチを試す
+    zhMatch = matchZhTag(listResult)
+    if(len(zhMatch)>=5): return zhMatch
+    #万が一のマッチミス、日本語と中国語のマッチ結果を結合してみる
+    jpzhMatch = jpMatch.union(zhMatch)
+    if(len(jpzhMatch)>=len(enMatch)): return jpzhMatch
+    return enMatch
 
 #入力: 画像のURI
 #出力: 検出されたタグが含まれるリスト 画像によっては6個以上になってしまうこともある
@@ -67,7 +80,9 @@ def taglistFromImage(imageURI:str)->List[str]:
     #料金節約のために、ランダムでどちらかを使うという手もある
     #今は一旦前者のみを使う
     result = client.text_detection(image=visionImage).text_annotations
+    #print(f"{result=}")
     result = result[0].description
+    
     print("OCR result:" + result)
     tagList = matchTag(result)
     print(tagList)
