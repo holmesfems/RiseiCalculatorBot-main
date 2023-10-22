@@ -12,7 +12,7 @@ def get_json_aio(urlList:List[str],headers = {}) -> tuple:
     async def get_json_single(session:aiohttp.ClientSession, url:str):
         print("request:"+url)
         nowEpoch = 0
-        MAXRETRY = 10
+        MAXRETRY = 15
         while True:
             try:
                 nowEpoch += 1
@@ -23,6 +23,7 @@ def get_json_aio(urlList:List[str],headers = {}) -> tuple:
             except Exception as e:
                 print(f"failed:{nowEpoch=}")
                 if(nowEpoch >= MAXRETRY):
+                    print("failed for all connection, please check the network status")
                     raise e
         
     async def mainProcess():
