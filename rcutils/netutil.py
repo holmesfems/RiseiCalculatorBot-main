@@ -1,7 +1,6 @@
 from typing import Dict,List,Any
 import aiohttp
 import asyncio
-import aiohttp_retry
 import nest_asyncio
 nest_asyncio.apply()
 def getUrlWithReq(url:str,AdditionalReq:Dict[str,str]=None) -> str:
@@ -11,13 +10,20 @@ def getUrlWithReq(url:str,AdditionalReq:Dict[str,str]=None) -> str:
 
 def get_json_aio(urlList:List[str],headers = {}) -> tuple:
     async def get_json_single(session:aiohttp.ClientSession, url:str):
-        retryClient = aiohttp_retry.RetryClient(session)
-        retryOption = aiohttp_retry.RetryOptionsBase(attempts=10)
         print("request:"+url)
-        async with retryClient.get(url,retry_options=retryOption) as response:
-            ret = await response.json(encoding="utf-8",content_type=response.content_type)
-            print("recieved:"+url)
-            return ret
+        nowEpoch = 0
+        MAXRETRY = 10
+        while True:
+            try:
+                nowEpoch += 1
+                async with session.get(url) as response:
+                    ret = await response.json(encoding="utf-8",content_type=response.content_type)
+                    print("recieved:"+url)
+                    return ret
+            except Exception as e:
+                print(f"failed:{nowEpoch=}")
+                if(nowEpoch >= MAXRETRY):
+                    raise e
         
     async def mainProcess():
         async with aiohttp.ClientSession(headers=headers,timeout=aiohttp.ClientTimeout(10.0)) as session:

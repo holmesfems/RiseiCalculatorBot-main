@@ -6,5 +6,5 @@ openai
 openpyxl
 StrEnum
 google-cloud-vision
-aiohttp_retry
+aiohttp
 nest_asyncio
