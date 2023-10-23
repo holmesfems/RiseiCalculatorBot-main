@@ -790,7 +790,6 @@ class Calculator:
     #ステージ情報が古ければ更新する。期限は外部からの指定、指定しない場合は強制更新
     def tryReInit(self,timeDiff:Optional[datetime.timedelta],validBaseMinTimes:Optional[int],mode:CalculateMode = None) -> bool:
         now = getnow.getnow()
-        
         if self.initialized and timeDiff and (timeDiff<datetime.timedelta(0) or now < self.stageInfo.lastUpdated+timeDiff):
             return self.tryRecalculate(mode,validBaseMinTimes)
         if self.initialized:
@@ -959,7 +958,7 @@ class CalculatorManager:
                 "msgList":["無効なカテゴリ:" + targetCategory],
                 "type": "err"
             }
-        msgHeader = categoryValue["to_ja"]+ ": 理性価値(中級)={0:.3f}±{1:.3f}\n".format(riseiValues.getValueFromZH(categoryValue["MainItem"]),riseiValues.getStdDevFromZH(categoryValue["MainItem"]))
+        msgHeader = categoryValue["to_ja"]+ ": {2}価値(中級)={0:.3f}±{1:.3f}\n".format(riseiValues.getValueFromZH(categoryValue["MainItem"]),riseiValues.getStdDevFromZH(categoryValue["MainItem"]),str(mode))
         msgChunks = [msgHeader]
         
         #並び変え

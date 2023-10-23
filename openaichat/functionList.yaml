@@ -5,8 +5,7 @@
     properties:
       target:
         type: string
-        description: "素材の名前。
-          「源岩」は「岩」、「合成コール」は「コール」と省略されることがあります。「熾合金」は「シ合金」と呼ばれることがあります。"
+        description: "素材の名前"
         enum: 
         - 源岩
         - 装置
