@@ -9,7 +9,7 @@ with open("riseicalculator2/StageCategoryDict.json","rb") as file:
     StageCategoryDict = yaml.safe_load(file)
 
 #一部理論値と実際のクリア時間が乖離しているステージで個別修正
-with open("riseicalculator2/minClearTimeInjection.json","r") as file:
+with open("riseicalculator2/minClearTimeInjection.yaml","rb") as file:
     minClearTimeInjection = yaml.safe_load(file)
 
 Item_rarity2:List[str] = [
