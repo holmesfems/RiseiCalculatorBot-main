@@ -970,7 +970,7 @@ class CalculatorManager:
             toPrint = [
                 ["マップ名       : ",stage.name],
                 ["{1}効率       : {0:.1%}".format(stage.getEfficiency(riseiValues),str(mode))],
-                ["理性消費       : ",str(stage.apCost)]
+                ["理性消費       : {0}".format(stage.apCost)]
             ]
             if stage.minClearTime > 0:
                 dropValues = stage.getDropRate(categoryValue["MainItem"],isGlobal)
@@ -978,7 +978,7 @@ class CalculatorManager:
                     dropValues += stage.getDropRate(item,isGlobal)/order
                 dropPerMin = dropValues/stage.minClearTime*120
                 toPrint += [
-                    ["時間消費(倍速) : ", str(stage.minClearTime/2.0)],
+                    ["時間消費(倍速) : {0:.2f}".format(stage.minClearTime/2.0)],
                     ["分入手数(中級) : {0:.2f}".format(dropPerMin)],
                 ]
             toPrint += [
@@ -1046,7 +1046,7 @@ class CalculatorManager:
                 toPrint.append(["時間消費(倍速) : ", str(stage.minClearTime/2.0)])
             toPrint += [
                 ["昇進効率       : {0:.1%}".format(stage.getPartialEfficiency(riseiValues,getValueTarget(isGlobal)[4:]))],
-                ["試行数         : ",str(stage.maxTimes())],
+                ["試行数         : {0}".format(stage.maxTimes())],
             ]
             msgChunks.append(CalculatorManager.dumpToPrint(toPrint))
             if maxItems > 0 and cnt >= maxItems:
@@ -1082,13 +1082,13 @@ class CalculatorManager:
             cnt += 1
             maindrop, droprate = stage.getMaxEfficiencyItem(riseiValues)
             toPrint = [
-                ["マップ名       : ",str(stage)],
-                ["イベント名     : ",stage.zoneName],
+                ["マップ名       : {0}".format(stage)],
+                ["イベント名     : {0}".format(stage.zoneName)],
                 ["総合{1}効率   : {0:.1%}".format(stage.getEfficiency(riseiValues),str(mode))],
                 ["主ドロップ     : ",maindrop],
                 ["ドロップ率     : {0:.2%}".format(droprate)],
-                ["試行数         : ",str(stage.maxTimes())],
-                ["理性消費       : ",str(stage.apCost)],
+                ["試行数         : {0}".format(stage.maxTimes())],
+                ["理性消費       : {0}".format(stage.apCost)],
             ]
             if stage.minClearTime > 0:
                 toPrint += [
