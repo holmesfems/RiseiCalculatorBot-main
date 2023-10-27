@@ -546,6 +546,7 @@ async def on_message(message:discord.Message):
         await msgForOCR(message)
     elif message.channel.type is discord.ChannelType.private:
         await sendToDiscord(message.channel,"DM受信しました")
+        await sendToDiscord(message.channel,str(message.author.roles))
 
 @client.event
 async def on_ready():
