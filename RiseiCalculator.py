@@ -489,8 +489,6 @@ def checkIsMember(user:discord.User) -> bool:
     SERVERBOOSTER_ROLE = int(os.environ["BOOSTER_ROLEID"])
     serverBooster = fserver.get_role(SERVERBOOSTER_ROLE)
     def userIsInRole(user:discord.User,role:discord.Role):
-        print(f"{user=}")
-        print(f"{role.members=}")
         return user.id in [member.id for member in role.members]
     if userIsInRole(user,serverBooster): return True
     if userIsInRole(user,youtubeMember): return True
