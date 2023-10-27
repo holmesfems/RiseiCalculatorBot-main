@@ -525,7 +525,7 @@ async def msgForAIChat(message:discord.Message):
         print(f"{sendToAI=}")
         async with message.channel.typing():
             reply = chatbot.openaichat(sendToAI)
-            channel = client.get_channel(OPENAI_CHANNELID)
+            channel = message.channel
             if(reply.type is chatbot.ChatType.TEXT):
                 if(reply.plainText):
                     await channel.send(content = reply.plainText)
@@ -560,9 +560,9 @@ async def msgForDM(message:discord.Message):
         msg += "こちらの機能は有料限定であること、どうかご了承くださいまし:woman_bowing:"
         message.channel.send(msg)
     else:
+        print("DM Recieved from: "+str(message.author))
         await msgForAIChat(message)
         
-
 MAXLOG = 10
 MAXMSGLEN = 200
 ISINPROCESS_AICHAT = False
