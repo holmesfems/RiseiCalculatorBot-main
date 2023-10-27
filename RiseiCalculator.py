@@ -480,65 +480,72 @@ async def checkBirtyday():
         embeds = createEmbedList(msg)
         await channel.send(embeds=embeds)
 
+OPENAI_CHANNELID = int(os.environ["OPENAI_CHANNELID"])
+async def msgForAIChat(message:discord.Message):
+    global ISINPROCESS_AICHAT
+    if(ISINPROCESS_AICHAT): return
+    try:
+        ISINPROCESS_AICHAT = True
+        messageable = client.get_partial_messageable(message.channel.id)
+        messages = [message async for message in messageable.history(limit = MAXLOG, after = datetime.datetime.now(tz=JST) - datetime.timedelta(minutes = 10),oldest_first=False)]
+        toAI = [{"role": "assistant" if message.author.bot else "user", "content" : message.content} for message in messages]
+        toAI.reverse()
+        def msgFilter(msg): #空メッセージ、長すぎるメッセージを除外
+            content = msg["content"]
+            if content == "": return False
+            if len(content) > MAXMSGLEN: return False
+            return True
+        toAI = list(filter(msgFilter,toAI))
+        sendToAI = []
+        for item in toAI:
+            if(not sendToAI):
+                sendToAI.append(item)
+                continue
+            if(sendToAI[-1]["role"] == "assistant"):
+                if(item["role"] == "assistant"):
+                    #botの連続したメッセージは、二通目以降を無視する
+                    continue
+            sendToAI.append(item)
+        print(f"{sendToAI=}")
+        reply = chatbot.openaichat(sendToAI)
+        channel = client.get_channel(OPENAI_CHANNELID)
+        if(reply.type is chatbot.ChatType.TEXT):
+            if(reply.plainText):
+                await channel.send(content = reply.plainText)
+        else:
+            await channel.send(content = reply.plainText)
+            await sendToDiscord(channel,reply.content)
+    except Exception as e:
+        msg = showException()
+        print(msg)
+    finally:
+        ISINPROCESS_AICHAT = False
+
+RECRUIT_CHANNELID = int(os.environ["RECRUIT_CHANNELID"])
+async def msgForOCR(message:discord.Message):
+    attachment = message.attachments
+    if(not attachment): return
+    for file in attachment:
+        if(not file.width or not file.height): return
+        image = file.url
+        tags = recruitFromOCR.taglistFromImage(image)
+        print("タグを読みました",tags)
+        if(not tags):return
+        msg = recruitment.recruitDoProcess(tags,4)
+        await replyToDiscord(message,msg)
+
 MAXLOG = 10
 MAXMSGLEN = 200
 ISINPROCESS_AICHAT = False
 @client.event
 async def on_message(message:discord.Message):
-    OPENAI_CHANNELID = int(os.environ["OPENAI_CHANNELID"])
-    RECRUIT_CHANNELID = int(os.environ["RECRUIT_CHANNELID"])
     if(message.author.bot): return
     if message.channel.id == OPENAI_CHANNELID:
-        global ISINPROCESS_AICHAT
-        if(ISINPROCESS_AICHAT): return
-        try:
-            ISINPROCESS_AICHAT = True
-            messageable = client.get_partial_messageable(OPENAI_CHANNELID)
-            messages = [message async for message in messageable.history(limit = MAXLOG, after = datetime.datetime.now(tz=JST) - datetime.timedelta(minutes = 10),oldest_first=False)]
-            toAI = [{"role": "assistant" if message.author.bot else "user", "content" : message.content} for message in messages]
-            toAI.reverse()
-            def msgFilter(msg): #空メッセージ、長すぎるメッセージを除外
-                content = msg["content"]
-                if content == "": return False
-                if len(content) > MAXMSGLEN: return False
-                return True
-            toAI = list(filter(msgFilter,toAI))
-            sendToAI = []
-            for item in toAI:
-                if(not sendToAI):
-                    sendToAI.append(item)
-                    continue
-                if(sendToAI[-1]["role"] == "assistant"):
-                    if(item["role"] == "assistant"):
-                        #botの連続したメッセージは、二通目以降を無視する
-                        continue
-                sendToAI.append(item)
-            print(f"{sendToAI=}")
-            reply = chatbot.openaichat(sendToAI)
-            channel = client.get_channel(OPENAI_CHANNELID)
-            if(reply.type is chatbot.ChatType.TEXT):
-                if(reply.plainText):
-                    await channel.send(content = reply.plainText)
-            else:
-                await channel.send(content = reply.plainText)
-                await sendToDiscord(channel,reply.content)
-        except Exception as e:
-            msg = showException()
-            print(msg)
-        finally:
-            ISINPROCESS_AICHAT = False
-
+        await msgForAIChat(message)
     elif message.channel.id == RECRUIT_CHANNELID:
-        attachment = message.attachments
-        if(not attachment): return
-        for file in attachment:
-            if(not file.width or not file.height): return
-            image = file.url
-            tags = recruitFromOCR.taglistFromImage(image)
-            print("タグを読みました",tags)
-            if(not tags):return
-            msg = recruitment.recruitDoProcess(tags,4)
-            await replyToDiscord(message,msg)
+        await msgForOCR(message)
+    elif message.channel.type is discord.ChannelType.private:
+        await sendToDiscord(message.channel,"DM受信しました")
 
 @client.event
 async def on_ready():
