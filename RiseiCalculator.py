@@ -480,6 +480,19 @@ async def checkBirtyday():
         embeds = createEmbedList(msg)
         await channel.send(embeds=embeds)
 
+MEMBERGUILD = int(os.environ["F_GUILDID"])
+def checkIsMember(user:discord.User) -> bool:
+    fserver = client.get_guild(MEMBERGUILD)
+    YOUTUBEMEMBER_ROLE = int(os.environ["YOUTUBE_ROLEID"])
+    youtubeMember = fserver.get_role(YOUTUBEMEMBER_ROLE)
+    SERVERBOOSTER_ROLE = int(os.environ["BOOSTER_ROLEID"])
+    serverBooster = fserver.get_role(SERVERBOOSTER_ROLE)
+    def userIsInRole(user:discord.User,role:discord.Role):
+        return user.id in [member.id for member in role.members]
+    if userIsInRole(user,serverBooster): return True
+    if userIsInRole(user,youtubeMember): return True
+    return False
+
 OPENAI_CHANNELID = int(os.environ["OPENAI_CHANNELID"])
 async def msgForAIChat(message:discord.Message):
     global ISINPROCESS_AICHAT
@@ -507,14 +520,15 @@ async def msgForAIChat(message:discord.Message):
                     continue
             sendToAI.append(item)
         print(f"{sendToAI=}")
-        reply = chatbot.openaichat(sendToAI)
-        channel = client.get_channel(OPENAI_CHANNELID)
-        if(reply.type is chatbot.ChatType.TEXT):
-            if(reply.plainText):
+        async with message.channel.typing():
+            reply = chatbot.openaichat(sendToAI)
+            channel = client.get_channel(OPENAI_CHANNELID)
+            if(reply.type is chatbot.ChatType.TEXT):
+                if(reply.plainText):
+                    await channel.send(content = reply.plainText)
+            else:
                 await channel.send(content = reply.plainText)
-        else:
-            await channel.send(content = reply.plainText)
-            await sendToDiscord(channel,reply.content)
+                await sendToDiscord(channel,reply.content)
     except Exception as e:
         msg = showException()
         print(msg)
@@ -546,7 +560,7 @@ async def on_message(message:discord.Message):
         await msgForOCR(message)
     elif message.channel.type is discord.ChannelType.private:
         await sendToDiscord(message.channel,"DM受信しました")
-        await sendToDiscord(message.channel,str(message.author.roles))
+        await sendToDiscord(message.channel,"DM権限があるか:"+str(checkIsMember(message.author)))
 
 @client.event
 async def on_ready():
