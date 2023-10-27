@@ -551,6 +551,18 @@ async def msgForOCR(message:discord.Message):
         msg = recruitment.recruitDoProcess(tags,4)
         await replyToDiscord(message,msg)
 
+async def msgForDM(message:discord.Message):
+    if(not checkIsMember(message.author)):
+        msg = "【自動返信】DMありがとうございます！\n"
+        msg += "アステシアちゃんとお話をお楽しみいただくには、F鯖に加入の上、Youtubeアカウントと連携してふぉめの**Youtubeチャンネルメンバー登録**、もしくは**F鯖のサーバーブースト**をして頂く必要がございます！\n"
+        msg += "ふぉめチャンネルはこちら: https://www.youtube.com//holmesfems\n"
+        msg += "F鯖はこちら: https://discord.gg/arknightsflame"
+        msg += "こちらの機能は有料限定であること、どうかご了承くださいまし:woman_bowing:"
+        message.channel.send(msg)
+    else:
+        await msgForAIChat(message)
+        
+
 MAXLOG = 10
 MAXMSGLEN = 200
 ISINPROCESS_AICHAT = False
@@ -562,8 +574,7 @@ async def on_message(message:discord.Message):
     elif message.channel.id == RECRUIT_CHANNELID:
         await msgForOCR(message)
     elif message.channel.type is discord.ChannelType.private:
-        await sendToDiscord(message.channel,"DM受信しました")
-        await sendToDiscord(message.channel,"DM権限があるか:"+str(checkIsMember(message.author)))
+        await msgForDM(message)
 
 @client.event
 async def on_ready():
