@@ -18,6 +18,7 @@ ID = os.environ["BOT_ID"]
 url_botCommands = f"https://discord.com/api/v8/applications/{ID}/commands"
 intents=discord.Intents.default()
 intents.message_content = True
+intents.members = True
 client = discord.Client(intents=intents,command_prefix = '/')
 t_delta = datetime.timedelta(hours=9)  # 9時間
 JST = datetime.timezone(t_delta, 'JST')  # UTCから9時間差の「JST」タイムゾーン
