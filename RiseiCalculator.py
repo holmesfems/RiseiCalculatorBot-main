@@ -12,6 +12,7 @@ from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateM
 from typing import List,Dict
 import datetime
 from charmaterials.charmaterials import OperatorCostsCalculator
+from rcutils import sendReplyToDiscord
 
 TOKEN = os.environ["BOT_TOKEN"]
 ID = os.environ["BOT_ID"]
@@ -88,7 +89,7 @@ async def actionToDiscord(func,msg):
 async def followupToDiscord(inter:Interaction,msg):
     await actionToDiscord(inter.followup.send,msg)
 
-async def sendToDiscord(channel:discord.channel.TextChannel,msg):
+async def sendReplyToDiscord(channel:discord.channel.TextChannel,msg):
     await actionToDiscord(channel.send,msg)
 
 async def replyToDiscord(message:discord.Message,msg):
@@ -529,7 +530,7 @@ async def msgForAIChat(message:discord.Message):
                     await channel.send(content = reply.plainText)
             else:
                 await channel.send(content = reply.plainText)
-                await sendToDiscord(channel,reply.content)
+                await sendReplyToDiscord(channel,reply.content)
     except Exception as e:
         msg = showException()
         print(msg)
