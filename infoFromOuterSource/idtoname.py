@@ -94,9 +94,9 @@ class SkillIdToName:
             #最大特化のスキル説明
             desription:str = value["levels"][-1]["description"]
             if(desription):
-                bareplace1 = re.compile(r"<@ba\.[a-z]+>")
+                bareplace1 = re.compile(r"<@ba\.?[a-z0-9]+>")
                 desription = bareplace1.sub("",desription)
-                bareplace2 = re.compile(r"<\$ba\.[a-z]+>")
+                bareplace2 = re.compile(r"<\$ba\.?[a-z0-9]+>")
                 desription = bareplace2.sub("",desription)
                 desription = desription.replace("</>","").replace("-{-","{").replace("{-","-{").replace("\\n","\n")
                 def cleanStr(string:str)->str:
