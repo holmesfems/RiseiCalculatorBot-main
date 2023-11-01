@@ -1,6 +1,6 @@
 import yaml
 import itertools
-from typing import List
+from typing import List,Tuple,Optional
 
 class RecruitTag:
     def __init__(self,tagName):
@@ -85,7 +85,7 @@ def createTagList(tagNameList):
         if(tagClass is not None): ret.append(tagClass)
     return ret
 
-def createCombinations(tagClassList,number):
+def createCombinations(tagClassList:List[RecruitTag],number:int):
     return list(itertools.combinations(tagClassList,number))
 
 def satisfyTags(operator,tagClassList:List[RecruitTag]):
@@ -106,10 +106,13 @@ def maxStar(operatorList:List[Operator]):
     if(starList): return max(starList)
     return 0
 
-def minStar(operatorList:List[Operator],least:int = 3):
-    allstarList = list(dict.fromkeys([operator.stars for operator in operatorList]))
-    starList = [x for x in allstarList if x>=least]
-    restList = [x for x in allstarList if x not in starList]
+#オペレーターリストの一番低い星を返す
+#一番高い星が3以下であれば、一番高い星を返す
+def minStar(operatorList:List[Operator]):
+    least = 3
+    allstarSet = set([operator.stars for operator in operatorList])
+    starList = [x for x in allstarSet if x>=least]
+    restList = [x for x in allstarSet if x not in starList]
     if(starList):
         return min(starList)
     if(restList):
@@ -128,18 +131,21 @@ def clearSearchMap(redundantMap:dict):
 #星〇確定タグの組み合わせリストを出力する
 #equals: ジャスト星〇確定なのか
 #clearRedundant: 冗長タグを消すか(例： 先鋒+治療→星4なので、先鋒+治療+cost回復は要らないよね)
-def createSearchMap(tagNameList,targetOperatorList,minStarToShow,equals = False,clearRedundant = False):
+#showRobot: ロボットタグがあるときのみ、星1オペレーターを表示する
+def createSearchMap(tagNameList:List[str],targetOperatorList:List[Operator],minStarToShow:int,equals = False,clearRedundant = False,showRobot = False):
     tagClasses = createTagList(tagNameList)
-    tagCombinations = list()
+    tagCombinations:List[Tuple[RecruitTag]] = list()
     for i in range(3):
         tagCombinations += createCombinations(tagClasses,i+1)
     searchMap = {}
     for combination in tagCombinations:
         satisfies = [operator for operator in targetOperatorList if satisfyTags(operator,combination)]
-        _minStar = minStar(satisfies,3)
+        _minStar = minStar(satisfies)
         if(satisfies):
             if(not equals):
                 if(_minStar>=minStarToShow):
+                    searchMap[combination] = satisfies
+                elif(showRobot and "ロボット" in [tag.name for tag in combination] and 1 in (operator.stars for operator in satisfies)):
                     searchMap[combination] = satisfies
             elif(_minStar==minStarToShow):
                 searchMap[combination] = [x for x in satisfies if x.stars == minStarToShow]
@@ -163,10 +169,10 @@ def searchMapToStringChunks(searchMap):
     keyLenSorted = sorted(searchMap.items(),key=lambda x:len(x[0]),reverse=True)
     valueLenSorted = sorted(keyLenSorted,key=lambda x:len(x[1]))
     maxstarSorted = sorted(valueLenSorted,key=lambda x:maxStar(x[1]),reverse=True)
-    minstarSorted = sorted(maxstarSorted,key=lambda x:minStar(x[1],3),reverse=True)
+    minstarSorted = sorted(maxstarSorted,key=lambda x:minStar(x[1]),reverse=True)
     for (key,value) in minstarSorted:
         valueSortedByStar = sorted(value,key=lambda x:x.stars,reverse=True)
-        minStarValue = minStar(valueSortedByStar,3)
+        minStarValue = minStar(valueSortedByStar)
         keyStrList = toStrList(key)
         valueStrList = toStrList(valueSortedByStar)
         keyMsg = "+".join(keyStrList)
@@ -175,11 +181,14 @@ def searchMapToStringChunks(searchMap):
         chunks.append(chunk)
     return chunks
             
-def recruitDoProcess(inputTagList:List[str],minStar:int):
-    inputList = list(filter(lambda x:x is not None and x in tagNameList,inputTagList))
+def recruitDoProcess(inputTagList:List[str],minStar:Optional[int]=None):
+    inputList = set(inputTagList)
+    inputList = list(filter(lambda x:x is not None and x in tagNameList,inputList))
     inputList = sorted(inputList,key=lambda x:tagNameList.index(x))
     if(minStar is None): minStar = 1
-    searchMap = createSearchMap(inputList,operatorDB,minStar)
+    showRobot = False
+    if(minStar == 4): showRobot = True
+    searchMap = createSearchMap(inputList,operatorDB,minStar,showRobot=showRobot)
     chunks = searchMapToStringChunks(searchMap)
     if(not chunks): chunks = [f"★{minStar}以上になる組み合わせはありません"]
     return {"title":" ".join(inputList),"msgList":chunks}
