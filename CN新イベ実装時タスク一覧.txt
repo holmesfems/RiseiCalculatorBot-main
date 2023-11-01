@@ -1,0 +1,2 @@
+charmaterials/customZhToJa.yamlを更新する
+happybirthday/birthdayRev.yamlを更新する
