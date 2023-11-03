@@ -192,7 +192,9 @@ def recruitDoProcess(inputTagList:List[str],minStar:Optional[int]=None,isGlobal:
     searchMap = createSearchMap(inputList,get_operators(glob=isGlobal),minStar,showRobot=showRobot)
     chunks = searchMapToStringChunks(searchMap)
     if(not chunks): chunks = [f"★{minStar}以上になる組み合わせはありません"]
-    return {"title":" ".join(inputList),"msgList":chunks}
+    title = " ".join(inputList)
+    if(not isGlobal): title += "(大陸版)"
+    return {"title":title,"msgList":chunks}
 
 def compareTagKey(tag:str):
     return tagNameList.index(tag) if tag in tagNameList else -1
