@@ -56,8 +56,12 @@ class Operator:
         return "★{0}".format(self.stars)+self.name
 
 with open("./recruitment/recruitmentOperators.json","rb") as file:
-    operatorDB = yaml.safe_load(file)["main"]
-    operatorDB = [Operator(item) for item in operatorDB]
+    operatorDB = yaml.safe_load(file)
+    operators_JP = [Operator(item) for item in operatorDB["main"]]
+    operators_New = [Operator(item) for item in operatorDB["new"]]
+
+def get_operators(glob:bool) -> List[Operator]:
+    return operators_JP if glob else operators_JP + operators_New
 
 with open("./recruitment/tagList.json","rb") as file:
     tagList = yaml.safe_load(file)
@@ -119,9 +123,6 @@ def minStar(operatorList:List[Operator]):
         return max(restList)
     return 0
 
-def operatorListStarsMEThan(stars):
-    return [operator for operator in operatorDB if operator.stars >= stars]
-
 def isIndependent(key,keyList):
     return all(not allAinBnotEq(item,key) for item in keyList)
 
@@ -181,14 +182,14 @@ def searchMapToStringChunks(searchMap):
         chunks.append(chunk)
     return chunks
             
-def recruitDoProcess(inputTagList:List[str],minStar:Optional[int]=None):
+def recruitDoProcess(inputTagList:List[str],minStar:Optional[int]=None,isGlobal:bool=True):
     inputList = set(inputTagList)
     inputList = list(filter(lambda x:x is not None and x in tagNameList,inputList))
     inputList = sorted(inputList,key=lambda x:tagNameList.index(x))
     if(minStar is None): minStar = 1
     showRobot = False
     if(minStar == 4): showRobot = True
-    searchMap = createSearchMap(inputList,operatorDB,minStar,showRobot=showRobot)
+    searchMap = createSearchMap(inputList,get_operators(glob=isGlobal),minStar,showRobot=showRobot)
     chunks = searchMapToStringChunks(searchMap)
     if(not chunks): chunks = [f"★{minStar}以上になる組み合わせはありません"]
     return {"title":" ".join(inputList),"msgList":chunks}
@@ -218,13 +219,13 @@ def mapToMsgChunksHighStars(combineList:dict):
         chunks.append(chunk)
     return chunks
 
-def showHighStars(minStar:int = 4):
+def showHighStars(minStar:int = 4,isGlobal:bool = True):
     global starCombineListMap
     combineList = starCombineListMap.get(minStar,None)
     if(not combineList):
         #最低の星が満たすやつを探す
         searchList = jobTags + otherTags
-        allCombineList = createSearchMap(searchList,operatorDB,minStar,equals=True,clearRedundant=True)
+        allCombineList = createSearchMap(searchList,get_operators(glob=isGlobal),minStar,equals=True,clearRedundant=True)
         starCombineListMap[minStar] = allCombineList
         combineList = allCombineList
     chunks = mapToMsgChunksHighStars(combineList)

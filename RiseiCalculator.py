@@ -381,15 +381,17 @@ async def recruitsim(inter:Interaction):
     description = "アークナイツ公開求人の高レア確定タグをすべて表示"
 )
 @app_commands.describe(
-    star = "星の数"
+    star = "星の数",
+    is_global = "True:グローバル版, False:大陸版"
 )
 @app_commands.choices(
     star = [Choice(name="4",value=4), Choice(name="5",value=5)]
 )
-async def recruitlist(inter:Interaction, star:Choice[int]):
+async def recruitlist(inter:Interaction, star:Choice[int],is_global:bool = True):
     _star = safeCallChoiceVal(star)
+    is_global = safeCallChoiceVal(is_global)
     await inter.response.defer(thinking=True)
-    msg = recruitment.showHighStars(_star)
+    msg = recruitment.showHighStars(_star,is_global)
     await followupToDiscord(inter,msg)
 
 @tree.command(
@@ -544,10 +546,10 @@ async def msgForOCR(message:discord.Message):
     for file in attachment:
         if(not file.width or not file.height): return
         image = file.url
-        tags = recruitFromOCR.taglistFromImage(image)
-        print("タグを読みました",tags)
-        if(not tags):return
-        msg = recruitment.recruitDoProcess(tags,4)
+        tagMatch = recruitFromOCR.taglistFromImage(image)
+        print("タグを読みました",tagMatch)
+        if(not tagMatch):return
+        msg = recruitment.recruitDoProcess(tagMatch,4,isGlobal=tagMatch.isGlobal)
         await replyToDiscord(message,msg)
 
 async def msgForDM(message:discord.Message):

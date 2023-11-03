@@ -49,27 +49,38 @@ def matchEnTag(result:List[str]) -> Set[str]:
 def matchZhTag(result:List[str]) -> Set[str]:
     return matchTagCoreProcess(result,__zhTagDict)
 
-def matchTag(result:str) -> Set[str]:
+class MatchTagResponseData:
+    def __init__(self,matches:Set[str],isGlobal:bool):
+        self.matches = matches
+        self.isGlobal = isGlobal
+
+    def isIllegal(self):
+        return len(self.matches) != 5
+    
+    def __repr__(self) -> str:
+        return f"{self.matches=}, {self.isGlobal=}"
+
+def matchTag(result:str) -> MatchTagResponseData:
     listResult = result.split("\n")
     listResult = [item.replace('.','') for item in listResult] #塵の影響を除去..?
     #localeの判断は当てにならないので(大体undになる)、順番にマッチを試す
     #そこまでコストの高い計算でもないので、現状これでいいでしょう
     jpMatch = matchJaTag(listResult)
-    if(len(jpMatch)>=5): return jpMatch
+    if(len(jpMatch)>=5): return MatchTagResponseData(jpMatch,isGlobal=True)
     #日本語ではない、英語マッチを試す
     enMatch = matchEnTag(listResult)
-    if(len(enMatch)>=5): return enMatch
+    if(len(enMatch)>=5): return MatchTagResponseData(enMatch,isGlobal=True)
     #英語でなければ中国語マッチを試す
     zhMatch = matchZhTag(listResult)
-    if(len(zhMatch)>=5): return zhMatch
+    if(len(zhMatch)>=5): return MatchTagResponseData(zhMatch,isGlobal=False)
     #万が一のマッチミス、日本語と中国語のマッチ結果を結合してみる
     jpzhMatch = jpMatch.union(zhMatch)
-    if(len(jpzhMatch)>=len(enMatch)): return jpzhMatch
-    return enMatch
+    if(len(jpzhMatch)>=len(enMatch)): return MatchTagResponseData(jpzhMatch,isGlobal=False)
+    return MatchTagResponseData(enMatch,isGlobal=True)
 
 #入力: 画像のURI
 #出力: 検出されたタグが含まれるリスト 画像によっては6個以上になってしまうこともある
-def taglistFromImage(imageURI:str)->List[str]:
+def taglistFromImage(imageURI:str)->MatchTagResponseData:
     API_KEY = os.environ["CLOUDVISION_API_KEY"]
     client = vision.ImageAnnotatorClient(credentials=api_key.Credentials(API_KEY))
     visionImage = vision.Image()
@@ -84,8 +95,8 @@ def taglistFromImage(imageURI:str)->List[str]:
     result = result[0].description
     
     print("OCR result:" + result)
-    tagList = matchTag(result)
-    print(tagList)
-    if(len(tagList) != 5):
+    matches = matchTag(result)
+    print(matches)
+    if(matches.isIllegal()):
         print("warning:タグの数が想定と違います")
-    return list(tagList)
+    return matches
