@@ -549,7 +549,7 @@ async def msgForOCR(message:discord.Message):
         tagMatch = recruitFromOCR.taglistFromImage(image)
         print("タグを読みました",tagMatch)
         if(not tagMatch):return
-        msg = recruitment.recruitDoProcess(tagMatch,4,isGlobal=tagMatch.isGlobal)
+        msg = recruitment.recruitDoProcess(tagMatch.matches,4,isGlobal=tagMatch.isGlobal)
         await replyToDiscord(message,msg)
 
 async def msgForDM(message:discord.Message):
