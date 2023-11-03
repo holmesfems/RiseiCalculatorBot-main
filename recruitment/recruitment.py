@@ -222,7 +222,7 @@ def mapToMsgChunksHighStars(combineList:dict):
 
 def showHighStars(minStar:int = 4,isGlobal:bool = True):
     #最低の星が満たすやつを探す
-    searchList = jobTags + otherTags
+    searchList = positionTags + jobTags + otherTags
     allCombineList = createSearchMap(searchList,get_operators(glob=isGlobal),minStar,equals=True,clearRedundant=True)
     chunks = mapToMsgChunksHighStars(allCombineList)
     if(not chunks): chunks = [f"★{minStar}の確定タグはありません"]
