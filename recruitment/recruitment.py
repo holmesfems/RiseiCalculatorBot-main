@@ -194,7 +194,6 @@ def recruitDoProcess(inputTagList:List[str],minStar:Optional[int]=None,isGlobal:
     if(not chunks): chunks = [f"★{minStar}以上になる組み合わせはありません"]
     return {"title":" ".join(inputList),"msgList":chunks}
 
-starCombineListMap = {}
 def compareTagKey(tag:str):
     return tagNameList.index(tag) if tag in tagNameList else -1
 
@@ -220,15 +219,10 @@ def mapToMsgChunksHighStars(combineList:dict):
     return chunks
 
 def showHighStars(minStar:int = 4,isGlobal:bool = True):
-    global starCombineListMap
-    combineList = starCombineListMap.get(minStar,None)
-    if(not combineList):
-        #最低の星が満たすやつを探す
-        searchList = jobTags + otherTags
-        allCombineList = createSearchMap(searchList,get_operators(glob=isGlobal),minStar,equals=True,clearRedundant=True)
-        starCombineListMap[minStar] = allCombineList
-        combineList = allCombineList
-    chunks = mapToMsgChunksHighStars(combineList)
+    #最低の星が満たすやつを探す
+    searchList = jobTags + otherTags
+    allCombineList = createSearchMap(searchList,get_operators(glob=isGlobal),minStar,equals=True,clearRedundant=True)
+    chunks = mapToMsgChunksHighStars(allCombineList)
     if(not chunks): chunks = [f"★{minStar}の確定タグはありません"]
     return {
         "title":"★{0}確定タグ一覧".format(minStar),
