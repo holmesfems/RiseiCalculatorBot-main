@@ -89,7 +89,7 @@ async def actionToDiscord(func,msg):
 async def followupToDiscord(inter:Interaction,msg):
     await actionToDiscord(inter.followup.send,msg)
 
-async def sendReplyToDiscord(channel:discord.channel.TextChannel,msg):
+async def sendToDiscord(channel:discord.channel.TextChannel,msg):
     await actionToDiscord(channel.send,msg)
 
 async def replyToDiscord(message:discord.Message,msg):
@@ -532,7 +532,7 @@ async def msgForAIChat(message:discord.Message):
                     await channel.send(content = reply.plainText)
             else:
                 await channel.send(content = reply.plainText)
-                await sendReplyToDiscord(channel,reply.content)
+                await sendToDiscord(channel,reply.content)
     except Exception as e:
         msg = showException()
         print(msg)

@@ -4,7 +4,7 @@ sys.path.append('../')
 from rcutils.rcReply import RCReply
 
 async def actionToDiscord(func,msg:RCReply):
-    embeds = msg.embbeds()
+    embeds = msg.getEmbbeds()
     if(embeds):
         await func(embeds = embeds)
     if(msg.plainText or msg.files()):

@@ -1,11 +1,8 @@
-from typing import List
+from typing import List,Any
 from enum import StrEnum
 from discord import Embed,Colour,File
 import enum
-
-class RCFile:
-    def __init__(self,filePath:str):
-        self.path = filePath
+from os import PathLike
 
 class RCMsgType(StrEnum):
     OK = enum.auto()
@@ -36,7 +33,7 @@ def arrangementChunks(msgList:List[str], maxLength:int):
 #アステシアちゃんbotの出力に使うデータクラス
 #スパゲッティ化防止のため、いままでDictで応答を出力していたものを全てこれに置き換える
 class RCReply:
-    def __init__(self,plainText:str = "",embbedTitle:str = "",embbedContents:List[str] = [],responseForAI:str = "",attatchments:List[RCFile] = [],msgType:RCMsgType = RCMsgType.OK):
+    def __init__(self,plainText:str = "",embbedTitle:str = "",embbedContents:List[str] = [],responseForAI:str = "",attatchments:List[PathLike[Any]] = [],msgType:RCMsgType = RCMsgType.OK):
 
         #plainText: 普通に表示するメッセージ
         self.plainText = plainText
@@ -69,7 +66,7 @@ class RCReply:
     def attatchmentsPath(self):
         return [file.path for file in self.attatchments]
     
-    def embbeds(self)->List[Embed]:
+    def getEmbbeds(self)->List[Embed]:
         if(not self.embbedContents):
             return []
         title = self.embbedTitle
@@ -85,4 +82,4 @@ class RCReply:
         ) for item in chunks]
     
     def files(self) -> List[File]:
-        return [File(item.path) for item in self.attatchments]
+        return [File(item) for item in self.attatchments]

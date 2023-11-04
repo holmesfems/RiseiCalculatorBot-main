@@ -5,7 +5,7 @@ import sys
 sys.path.append('../')
 from infoFromOuterSource.idtoname import ItemIdToName,ZoneIdToName
 from infoFromOuterSource.formulation import Formula
-from rcutils import netutil,getnow,hasduplicates,itemArray
+from rcutils import netutil,getnow,hasduplicates,itemArray,rcReply
 import pandas as pd
 import datetime
 import random
