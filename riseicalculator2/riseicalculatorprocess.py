@@ -15,6 +15,7 @@ from typing import Dict,List,Optional,Tuple
 from enum import StrEnum
 import enum
 from riseicalculator2.listInfo import *
+import re
 
 PENGUIN_URL = 'https://penguin-stats.io/PenguinStats/api/v2/'
 EPSILON = 1e-6
@@ -350,6 +351,9 @@ class StageItem:
         return (ItemIdToName.getStr(maxKey),dropRate)
 
     def __repr__(self) -> str:
+        return self.nameWithReplicate()
+    
+    def nameWithReplicate(self) -> str:
         ret = self.name
         if "re_" in self.zoneId:
             ret += "(Re)"
@@ -1074,6 +1078,7 @@ class CalculatorManager:
                 "type": "err"
             }
         msgHeader = "検索内容 = " + targetStage
+
         #名前順でソート
         stagesToShow.sort(key = lambda x:x.name)
         msgChunks = [msgHeader]
@@ -1082,7 +1087,7 @@ class CalculatorManager:
             cnt += 1
             maindrop, droprate = stage.getMaxEfficiencyItem(riseiValues)
             toPrint = [
-                ["マップ名       : {0}".format(stage)],
+                ["マップ名       : {0}".format(stage.nameWithReplicate())],
                 ["イベント名     : {0}".format(stage.zoneName)],
                 ["総合{1}効率   : {0:.1%}".format(stage.getEfficiency(riseiValues),str(mode))],
                 ["主ドロップ     : ",maindrop],
