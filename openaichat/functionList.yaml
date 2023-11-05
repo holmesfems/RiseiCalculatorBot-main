@@ -63,7 +63,7 @@
     required:
     - target
 - name: operatormastercost
-  description: Specify an operator and the skill number, and get the item cost list to specialize this
+  description: Specify an operator, then specify the skill from the skill number, and get the item cost list to specialize this
   parameters:
     type: object
     properties:
