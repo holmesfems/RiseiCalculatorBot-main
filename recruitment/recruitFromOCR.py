@@ -29,10 +29,11 @@ def matchTagCoreProcess(result:List[str],baseDict:Dict[str,str],extraDict:Option
     #Google-OCRの精度がかなり良いので、基本完全一致で探してもちゃんとタグを出してくれる
     #一回タグを分離できなかった事例があったので、in検索に切り替えてみる
     #https://discord.com/channels/915241738174627910/1141408003308925059/1170769419346133093
+    #追記: in検索では「エリート」を「上級エリート」に含まれてしまうので、空欄split or 完全一致のハイブリッドに
     ret = set()
     for key,value in baseDict.items():
         if value in ret: continue
-        if(any((key in text) for text in result)):
+        if(any((key == text or key in text.split(" ")) for text in result)):
             ret.add(value)
     if(not extraDict): return ret
     #一部誤字するやつがあるので、in検索で結果を補正
