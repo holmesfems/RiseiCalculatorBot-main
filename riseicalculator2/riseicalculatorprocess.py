@@ -5,7 +5,8 @@ import sys
 sys.path.append('../')
 from infoFromOuterSource.idtoname import ItemIdToName,ZoneIdToName
 from infoFromOuterSource.formulation import Formula
-from rcutils import netutil,getnow,hasduplicates,itemArray,rcReply
+from rcutils import netutil,getnow,hasduplicates,itemArray
+from rcutils.rcReply import RCReply,RCMsgType
 import pandas as pd
 import datetime
 import random
@@ -15,6 +16,7 @@ from typing import Dict,List,Optional,Tuple
 from enum import StrEnum
 import enum
 from riseicalculator2.listInfo import *
+from deprecated import deprecated
 import re
 
 PENGUIN_URL = 'https://penguin-stats.io/PenguinStats/api/v2/'
@@ -64,7 +66,7 @@ def idInValueTarget(id:str,glob:bool) -> bool:
     zhStr = ItemIdToName.getZH(id)
     return zhStr in valueTarget
 
-def categoryZHToJA(zhStr:str,glob:bool) -> bool:
+def categoryZHToJA(zhStr:str,glob:bool) -> str:
     categoryDict = getStageCategoryDict(glob)
     return categoryDict[zhStr]["to_ja"]
 
@@ -676,8 +678,11 @@ class Calculator:
         def getStdDevMatrix(self):
             return np.array([x.stageItem.toStdDevArray(self.isGlobal) for x in self.baseStageItemDict.values()])
         
-        def __repr__(self) -> str:
+        def toString(self) -> str:
             return str({categoryZHToJA(key,self.isGlobal):value.stageItem.name for key,value in self.baseStageItemDict.items()})
+
+        def __repr__(self) -> str:
+            return self.toString()
         
         def update(self,values:RiseiOrTimeValues) -> bool:
             maxEfficiencyItem = self.stageInfo.getCategoryMaxEfficiency(values,self.validBaseMinTimes)
@@ -906,7 +911,7 @@ class CalculatorManager:
         df:pd.DataFrame = pd.concat(objs=allDFs)
         df.to_excel(filename)
     
-    def execStagesToExcelFile(mode:CalculateMode,isGlobal:bool,stageList:List[StageItem],filename:str,exec:bool)->str:
+    def execStagesToExcelFile(mode:CalculateMode,isGlobal:bool,stageList:List[StageItem],filename:str,exec:bool = True)->str:
         if(exec):
             CalculatorManager.stagesToExcelFile(mode,isGlobal,stageList,filename)
             return filename
@@ -915,6 +920,7 @@ class CalculatorManager:
 
     def sortStagesByEfficiency(stageList:List[StageItem],riseiValues:RiseiOrTimeValues):
         return sorted(stageList,key = lambda x: x.getEfficiency(riseiValues),reverse=True)
+    
     
     def riseicalculatorMaster(toPrint:str,targetItem:str,targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15, toCsv = False):
         if toPrint == "items":
@@ -940,10 +946,10 @@ class CalculatorManager:
                     "msgList": ["event_codeにマップ名を入れてください"],
                     "type": "err"
                 }
-            return CalculatorManager.riseievents(targetStage,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems,toCsv)
+            return CalculatorManager.riseievents_v2(targetStage,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems,toCsv)
         else:
             toPrintTarget = CalculatorManager.ToPrint(toPrint)
-            return CalculatorManager.riseilists(toPrintTarget,isGlobal,mode,baseMinTimes,cache_minutes,toCsv)
+            return CalculatorManager.riseilists_v2(toPrintTarget,isGlobal,mode,baseMinTimes,cache_minutes,toCsv)
 
 
     def riseimaterials(targetCategory:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15, toCsv = False):
@@ -1065,6 +1071,7 @@ class CalculatorManager:
             "fileMsg":calculator.getUpdatedTimeStr()
         }
     
+    @deprecated(reason="Please use the method which returns RCReply class:riseievents_v2")
     def riseievents(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 20,toCsv = False):
         riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         calculator = CalculatorManager.selectCalculator(isGlobal)
@@ -1113,6 +1120,65 @@ class CalculatorManager:
             "fileMsg":calculator.getUpdatedTimeStr()
         }
     
+    def riseievents_v2(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 20,toCsv = False) -> RCReply:
+        riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
+        calculator = CalculatorManager.selectCalculator(isGlobal)
+        stagesToShow = calculator.searchEventStage(targetStage,showMinTimes)
+        #print(stages)
+        title = "イベントステージ検索"
+        if(not stagesToShow):
+            return RCReply(
+                embbedTitle=title,
+                embbedContents=["無効なステージ指定"+targetStage],
+                msgType=RCMsgType.ERR,
+                responseForAI=f"Error: Invalid stage: {targetStage}"
+            )
+        msgHeader = "検索内容 = " + targetStage
+
+        #名前順でソート
+        stagesToShow.sort(key = lambda x:x.name)
+        msgChunks = [msgHeader]
+        cnt = 0
+        jsonForAI = []
+        reply = RCReply()
+        for stage in stagesToShow:
+            cnt += 1
+            maindrop, droprate = stage.getMaxEfficiencyItem(riseiValues)
+            toPrint = [
+                ["マップ名       : {0}".format(stage.nameWithReplicate())],
+                ["イベント名     : {0}".format(stage.zoneName)],
+                ["総合{1}効率   : {0:.1%}".format(stage.getEfficiency(riseiValues),str(mode))],
+                ["主ドロップ     : ",maindrop],
+                ["ドロップ率     : {0:.2%}".format(droprate)],
+                ["試行数         : {0}".format(stage.maxTimes())],
+                ["理性消費       : {0}".format(stage.apCost)],
+            ]
+            if stage.minClearTime > 0:
+                toPrint += [
+                    ["時間消費(倍速) : ", str(stage.minClearTime/2.0)],
+                    ["分間入手数     : {0:.2f}".format(droprate/stage.minClearTime*120)],
+                ]
+            msgChunks.append(CalculatorManager.dumpToPrint(toPrint))
+            jsonForAI.append({
+                "stageName":stage.nameWithReplicate(),
+                "eventName":stage.zoneName,
+                "mainDrop":maindrop,
+                "sanityCost":stage.apCost,
+                "efficiency":round(stage.getEfficiency(riseiValues),3),
+                "dropRate":round(droprate,4)
+            })
+            if maxItems > 0 and cnt >= maxItems:
+                break
+        #ステージドロップをExcelに整理
+        EVENT_CSV_NAME = "EventDrop.xlsx"
+        reply.embbedTitle = title,
+        reply.embbedContents = msgChunks,
+        reply.plainText = calculator.getUpdatedTimeStr()
+        if(toCsv):
+            reply.attatchments = CalculatorManager.execStagesToExcelFile(mode,isGlobal,stagesToShow,EVENT_CSV_NAME)
+        return reply
+    
+    @deprecated(reason="Please use the method which returns RCReply class:riseilists_v2")
     def riseilists(toPrintTarget:ToPrint,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,toCsv = False):
         riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         calculator = CalculatorManager.selectCalculator(isGlobal)
@@ -1200,6 +1266,100 @@ class CalculatorManager:
             "type": "err"
         }
     
+    def riseilists_v2(toPrintTarget:ToPrint,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,toCsv = False) -> RCReply:
+        riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
+        calculator = CalculatorManager.selectCalculator(isGlobal)
+        reply = RCReply()
+        if toPrintTarget is CalculatorManager.ToPrint.BASEMAPS:
+            baseMapStr = calculator.getBaseStageMatrix(mode).toString()
+            reply.embbedTitle = "基準ステージ表示"
+            reply.embbedContents = [f"`{baseMapStr}`"]
+            reply.responseForAI = f"baseMaps:{baseMapStr}"
+            
+        elif toPrintTarget is CalculatorManager.ToPrint.SAN_VALUE_LISTS:
+            title = "{0}価値一覧".format(str(mode))
+            toPrint = []
+            jsonForAI = {}
+            for key in getValueTarget(isGlobal):
+                value = riseiValues.getValueFromZH(key)
+                stdDev = riseiValues.getStdDevFromZH(key)
+                toPrint.append([
+                    "{0}: {1:.3f} ± {2:.3f}".format(CalculatorManager.left(15,valueTargetZHToJA(key)),value,stdDev*2)
+                ])
+                jsonForAI[valueTargetZHToJA(key)] = value
+            reply.embbedTitle = title
+            reply.embbedContents = [CalculatorManager.dumpToPrint(toPrint)]
+            reply.responseForAI = str({"values":jsonForAI})
+
+        elif toPrintTarget is CalculatorManager.ToPrint.TE2LIST:
+            title = "初級資格証効率"
+            ticket_efficiency2 = {ItemIdToName.zhToJa(x):(riseiValues.getValueFromZH(x)/Price[x],riseiValues.getStdDevFromZH(x)/Price[x]) for x in getItemRarity2(isGlobal) if x in Price.keys()}
+            ticket_efficiency2_sorted = sorted(ticket_efficiency2.items(),key = lambda x:x[1][0],reverse=True)
+            toPrint = [["{0}:\t{1:.3f} ± {2:.3f}".format(CalculatorManager.left(15,key),value[0],value[1]*2)] for key,value in ticket_efficiency2_sorted]
+            jsonForAI = {key:round(value[0],3) for key,value in ticket_efficiency2_sorted}
+
+            reply.embbedTitle = title
+            reply.embbedContents = [CalculatorManager.dumpToPrint(toPrint)]
+            reply.responseForAI = str({"efficiencies":jsonForAI})
+ 
+        elif toPrintTarget is CalculatorManager.ToPrint.TE3LIST:
+            title = "上級資格証効率"
+            ticket_efficiency3 = {ItemIdToName.zhToJa(x):(riseiValues.getValueFromZH(x)/Price[x],riseiValues.getStdDevFromZH(x)/Price[x]) for x in getItemRarity3(isGlobal) if x in Price.keys()}
+            ticket_efficiency3_sorted = sorted(ticket_efficiency3.items(),key = lambda x:x[1][0],reverse=True)
+            toPrint = [["{0}:\t{1:.3f} ± {2:.3f}".format(CalculatorManager.left(15,key),value[0],value[1]*2)] for key,value in ticket_efficiency3_sorted]
+            jsonForAI = {key:round(value[0],3) for key,value in ticket_efficiency3_sorted}
+
+            reply.embbedTitle = title
+            reply.embbedContents = [CalculatorManager.dumpToPrint(toPrint)]
+            reply.responseForAI = str({"efficiencies":jsonForAI})
+
+        elif toPrintTarget is CalculatorManager.ToPrint.SPECIAL_LIST:
+            title = "特別引換証効率"
+            ticket_efficiency_special = {ItemIdToName.zhToJa(x):(riseiValues.getValueFromZH(x)/Price_Special[x],riseiValues.getStdDevFromZH(x)/Price_Special[x]) for x in getItemRarity2(isGlobal)+getItemRarity3(isGlobal) if x in Price_Special.keys()}
+            ticket_efficiency_special_sorted = sorted(ticket_efficiency_special.items(),key = lambda x:x[1][0],reverse=True)
+            toPrint = [["{0}:\t{1:.3f} ± {2:.3f}".format(CalculatorManager.left(15,key),value[0],value[1]*2)] for key,value in ticket_efficiency_special_sorted]
+            jsonForAI = {key:round(value[0],3) for key,value in ticket_efficiency_special_sorted}
+
+            reply.embbedTitle = title
+            reply.embbedContents = [CalculatorManager.dumpToPrint(toPrint)]
+            reply.responseForAI = str({"efficiencies":jsonForAI})
+
+        elif toPrintTarget is CalculatorManager.ToPrint.CCLIST:
+            #契約賞金引換証
+            CCLIST_FILENAME = "CCList.xlsx"
+            Price_CC = getCCList()
+            title = f"契約賞金引換効率(CC#{CalculatorManager.CC_NUMBER})"
+            def efficiency(x:CCExchangeItem):
+                return riseiValues.getValueFromZH(x.name)/x.value
+            sorted_PriceCC = sorted(Price_CC,key = efficiency,reverse=True)
+            ticket_efficiency_CC_sorted = [(x.fullname(),(efficiency(x),riseiValues.getStdDevFromZH(x.name)/x.value)) for x in sorted_PriceCC]
+            toPrint = [["{0}: {1:.3f} ± {2:.3f}".format(CalculatorManager.left(18,name),value[0],value[1]*2)] for name,value in ticket_efficiency_CC_sorted]
+            jsonForAI = {key:round(value[0],3) for key,value in ticket_efficiency_CC_sorted}
+
+            reply.embbedTitle = title
+            reply.embbedContents = [CalculatorManager.dumpToPrint(toPrint)]
+            reply.responseForAI = str({"efficiencies":jsonForAI})
+
+            if toCsv:
+                columns = ["素材名","値段","在庫","交換効率"]
+                rows = [[ItemIdToName.zhToJa(x.name),x.value,x.quantity,efficiency(x)]for x in sorted_PriceCC]
+                df = pd.DataFrame(rows,columns=columns)
+                df.to_excel(CCLIST_FILENAME)
+                reply.attatchments = [CCLIST_FILENAME]
+                
+        if(reply.embbedContents):
+            if toCsv and not reply.attatchments:
+                calculator.dumpToFile(mode)
+                reply.attatchments = [EXCEL_FILENAME]
+            reply.plainText = calculator.getUpdatedTimeStr()
+            return reply
+        return RCReply(
+            embbedTitle="エラー",
+            embbedContents=["未知のコマンド："+str(toPrintTarget)],
+            msgType=RCMsgType.ERR,
+            responseForAI=f"Error: command not found: {toPrintTarget}"
+        )
+
     #課金パック効率モジュール
     #課金パック情報
     class KakinPack:
@@ -1252,6 +1412,15 @@ class CalculatorManager:
                     self.price,self.totalValue,
                     self.totalOriginium,self.totalRealMoney,
                     self.gachaCount]
+        
+        def toJsonForAI(self):
+            return {
+                "name":self.name,
+                "totalEfficiency":self.totalEfficiency,
+                "gachaEfficiency":self.gachaEfficiency,
+                "price":f"{self.price} yen" if self.isGlobal else f"{self.price} RMB",
+                "contents":self.array.toNameCountDict()
+            }
     
     def autoCompletion_riseikakin(current:str,limit:int=25)->List[Tuple[str,str]]:
         totalCommandList = [("全体比較(グローバル)","Total_Global"),("全体比較(大陸版)","Total_Mainland")]
@@ -1263,7 +1432,8 @@ class CalculatorManager:
             [(name,name) for name,value in getKakinList(False).items() if value["isConstant"]]
         ret = [item for item in constantNameList if current in item[0]][:limit]
         return ret
-
+    
+    @deprecated(reason="Please use the method which returns RCReply class")
     def riseikakin(toPrintTarget:str,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME, toCsv:bool = False):
         #グローバル状態を計算
         KAKIN_FILENAME = "kakinList.xlsx"
@@ -1339,4 +1509,85 @@ class CalculatorManager:
             "fileMsg":calculator.getUpdatedTimeStr()
         }
         
+    def riseikakin_v2(toPrintTarget:str,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME, toCsv:bool = False) -> RCReply:
+        #グローバル状態を計算
+        KAKIN_FILENAME = "kakinList.xlsx"
+        isGlobal:bool = ...
+        totalJATuple = ("全体比較(グローバル)","Total_Global")
+        totalCNTuple = ("全体比較(大陸版)","Total_Mainland")
+        if(toPrintTarget in totalJATuple):
+            isGlobal = True
+        elif(toPrintTarget in totalCNTuple):
+            isGlobal = False
+        elif(toPrintTarget in getKakinList(True).keys()):
+            isGlobal = True
+        elif(toPrintTarget in getKakinList(False).keys()):
+            isGlobal = False
+        else:
+            return RCReply(
+                embbedTitle="エラー",
+                embbedContents=["存在しない課金パック："+toPrintTarget],
+                msgType=RCMsgType.ERR,
+                responseForAI=f"Error: The purchase pack is not found: {toPrintTarget}"
+            )
+
+        riseiValues = CalculatorManager.getValues(isGlobal,CalculateMode.SANITY,baseMinTimes,cache_minutes)
+        calculator = CalculatorManager.selectCalculator(isGlobal)
+        kakinList = getKakinList(isGlobal)
+        #比較用
+        constantList = [CalculatorManager.KakinPack(key,value,riseiValues) for key,value in kakinList.items() if value["isConstant"]]
+        constantStrBlock = "参考用課金効率:```\n" +\
+            "\n".join([f"{pack.name}: {pack.totalEfficiency:.2%}" for pack in constantList]) +\
+            "```"
+        msgList = []
+        title:str = ...
+        file:str = None
+        def getMaterialSet(packList:List[CalculatorManager.KakinPack])->List[str]:
+            materialSet = []
+            for item in packList:
+                materialSet += list(item.array.toNameCountDict().keys())
+                materialSet = list(set(materialSet))
+            return materialSet
         
+        def listToCSV(packList:List[CalculatorManager.KakinPack]):
+            materialSet = getMaterialSet(packList)
+            columns = materialSet + packList[0].targetNameList()
+            index = [item.name for item in packList] + ["理性価値"]
+            data = np.array([item.array.getByJaList(materialSet) for item in packList] + [riseiValues.getValueFromJaList(materialSet)])
+            valueData = np.array([item.targetValueList() for item in packList]+[[None for _ in packList[0].targetNameList()]])
+            data = np.concatenate([data,valueData],1)
+            df = pd.DataFrame(data,index=index,columns=columns)
+            df.to_excel(KAKIN_FILENAME)
+            return KAKIN_FILENAME
+
+        jsonForAI:List|Dict = ...
+        if toPrintTarget in totalJATuple or toPrintTarget in totalCNTuple:
+            title = "課金パック比較"
+            #限定パックの情報表示
+            limitedList = [CalculatorManager.KakinPack(key,value,riseiValues) for key,value in kakinList.items() if not value["isConstant"]]
+            sortedList = list(sorted(limitedList,key=lambda x: x.totalEfficiency,reverse=True))
+            for item in sortedList:
+                msgList.append(f"{item.name}:{item.strBlock()}")
+            msgList.append(constantStrBlock)
+            jsonForAI = [item.toJsonForAI() for item in sortedList]
+            if toCsv:
+                #CSV出力をする
+                file = listToCSV(sortedList + constantList)
+        else:
+            kakinPack = CalculatorManager.KakinPack(toPrintTarget,kakinList[toPrintTarget],riseiValues)
+            title = kakinPack.name
+            msgList.append(f"内容物:" + kakinPack.contentsStrBlock())
+            msgList.append(f"理性価値情報:" + kakinPack.strBlock())
+            msgList.append(constantStrBlock)
+            jsonForAI = kakinPack.toJsonForAI()
+            if toCsv:
+                file = listToCSV([kakinPack] + constantList)
+        attatchments = [file] if file is not None else []
+
+        return RCReply(
+            plainText=calculator.getUpdatedTimeStr(),
+            embbedTitle=title,
+            embbedContents=msgList,
+            attatchments=attatchments,
+            responseForAI=str(jsonForAI)
+        )

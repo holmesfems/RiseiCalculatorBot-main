@@ -7,6 +7,8 @@ from charmaterials.charmaterials import OperatorCostsCalculator
 from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode
 import yaml
 from riseicalculator2 import listInfo
+from typing import Union
+from rcutils.rcReply import RCReply
 
 with open("openaichat/functionList.yaml","rb") as f:
     functionList = yaml.safe_load(f)
@@ -17,7 +19,7 @@ class ChatType(StrEnum):
     FUNCTION = enum.auto()
 
 class ChatReply:
-    def __init__(self,type:ChatType, content:dict = {}, plainText:str = ""):
+    def __init__(self,type:ChatType, content:Union[dict,RCReply] = {}, plainText:str = ""):
         self.type = type
         self.content = content
         self.plainText = plainText
@@ -55,7 +57,7 @@ def functionCalling(functionName:str,functionArgs:dict) -> ChatReply:
         printTarget = targetDict.get(targetEstimated,None)
         if(printTarget):
             toPrint = CalculatorManager.ToPrint(printTarget)
-            return ChatReply(ChatType.FUNCTION,content=CalculatorManager.riseilists(toPrint,True,CalculateMode.SANITY),plainText=f"{targetEstimated}を表示します：")
+            return ChatReply(ChatType.FUNCTION,content=CalculatorManager.riseilists_v2(toPrint,True,CalculateMode.SANITY),plainText=f"{targetEstimated}を表示します：")
         else:
             return ChatReply(ChatType.TEXT,plainText=f"{targetEstimated}の取得に失敗しました。名前が違うみたいですわ。")
     elif(functionName == "operatorelitecost"):

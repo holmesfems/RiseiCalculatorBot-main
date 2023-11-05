@@ -13,6 +13,7 @@ from typing import List,Dict
 import datetime
 from charmaterials.charmaterials import OperatorCostsCalculator
 from rcutils import sendReplyToDiscord
+from rcutils.rcReply import RCReply
 
 TOKEN = os.environ["BOT_TOKEN"]
 ID = os.environ["BOT_ID"]
@@ -130,7 +131,11 @@ async def riseicalculatorMaster(inter:Interaction,target:str,target_item:str=Non
         mode = CalculateMode(mode)
         await inter.response.defer(thinking=True)
         msg = CalculatorManager.riseicalculatorMaster(target,target_item,event_code,is_global,mode,min_basetimes,cache_time,min_times,max_items,csv_file)
-        await followupToDiscord(inter,msg)
+        #TODO: RCReplyで全て置き換えた後、ifを消す
+        if(type(msg) is RCReply):
+            await sendReplyToDiscord.followupToDiscord(inter,msg)
+        else:
+            followupToDiscord(inter,msg)
 
     except Exception as e:
         msg = showException()
@@ -248,8 +253,8 @@ async def riseievents(inter:Interaction,stage:str,mode:Choice[str]="sanity",is_g
     stage = safeCallChoiceVal(stage)
     mode = CalculateMode(_mode)
     await inter.response.defer(thinking=True)
-    reply = CalculatorManager.riseievents(stage,is_global,mode,toCsv=csv_file)
-    await followupToDiscord(inter,reply)
+    reply = CalculatorManager.riseievents_v2(stage,is_global,mode,toCsv=csv_file)
+    await sendReplyToDiscord.followupToDiscord(inter,reply)
 
 @riseievents.autocomplete("stage")
 async def eventstage_autocomplete(inter:Interaction,current:str)->List[app_commands.Choice[str]]:
@@ -283,8 +288,8 @@ async def riseilists(inter:Interaction,target:Choice[str],mode:Choice[str]="sani
     mode = CalculateMode(_mode)
     target = CalculatorManager.ToPrint(_target)
     await inter.response.defer(thinking=True)
-    reply = CalculatorManager.riseilists(target,is_global,mode,toCsv=csv_file)
-    await followupToDiscord(inter,reply)
+    reply = CalculatorManager.riseilists_v2(target,is_global,mode,toCsv=csv_file)
+    await sendReplyToDiscord.followupToDiscord(inter,reply)
 
 @tree.command(
     name="riseikakin",
@@ -298,8 +303,9 @@ async def riseikakin(inter:Interaction,target:str,csv_file:bool = False):
     target = safeCallChoiceVal(target)
     csv_file = safeCallChoiceVal(csv_file)
     await inter.response.defer(thinking=True)
-    reply = CalculatorManager.riseikakin(target,toCsv=csv_file)
-    await followupToDiscord(inter,reply)
+    reply = CalculatorManager.riseikakin_v2(target,toCsv=csv_file)
+    await sendReplyToDiscord.followupToDiscord(inter,msg=reply)
+
 @riseikakin.autocomplete("target")
 async def riseikakin_autoCompleteName(inter:Interaction,current:str)->List[app_commands.Choice[str]]:
     return [app_commands.Choice(name = name, value = value) for (name,value) in CalculatorManager.autoCompletion_riseikakin(current)]
@@ -532,7 +538,10 @@ async def msgForAIChat(message:discord.Message):
                     await channel.send(content = reply.plainText)
             else:
                 await channel.send(content = reply.plainText)
-                await sendToDiscord(channel,reply.content)
+                if(type(reply.content) is RCReply):
+                    await sendReplyToDiscord.sendToDiscord(channel,reply.content)
+                else:
+                    await sendToDiscord(channel,reply.content)
     except Exception as e:
         msg = showException()
         print(msg)
