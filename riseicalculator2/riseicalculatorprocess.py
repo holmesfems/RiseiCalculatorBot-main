@@ -930,7 +930,7 @@ class CalculatorManager:
                     embbedContents=["target_itemに素材カテゴリを入れてください"],
                     msgType=RCMsgType.ERR
                 )
-            return CalculatorManager.riseimaterials_v2(targetItem,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems,toCsv)
+            return CalculatorManager.riseimaterials(targetItem,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems,toCsv)
         elif toPrint == "zone":
             if(not targetStage):
                 return RCReply(
@@ -938,7 +938,7 @@ class CalculatorManager:
                     embbedContents=["event_codeにマップ名を入れてください"],
                     msgType=RCMsgType.ERR
                 )
-            return CalculatorManager.riseistages_v2(targetStage,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems,toCsv)
+            return CalculatorManager.riseistages(targetStage,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems,toCsv)
         elif toPrint == "events":
             if(not targetStage):
                 return RCReply(
@@ -946,12 +946,12 @@ class CalculatorManager:
                     embbedContents=["event_codeにマップ名を入れてください"],
                     msgType=RCMsgType.ERR
                 )
-            return CalculatorManager.riseievents_v2(targetStage,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems,toCsv)
+            return CalculatorManager.riseievents(targetStage,isGlobal,mode,baseMinTimes,cache_minutes,showMinTimes,maxItems,toCsv)
         else:
             toPrintTarget = CalculatorManager.ToPrint(toPrint)
-            return CalculatorManager.riseilists_v2(toPrintTarget,isGlobal,mode,baseMinTimes,cache_minutes,toCsv)
+            return CalculatorManager.riseilists(toPrintTarget,isGlobal,mode,baseMinTimes,cache_minutes,toCsv)
 
-    def riseimaterials_v2(targetCategory:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15, toCsv = False) -> RCReply:
+    def riseimaterials(targetCategory:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15, toCsv = False) -> RCReply:
         #大陸版先行素材を選ぶ場合、isGlobal指定にかかわらず、自動で大陸版計算とする
         if(targetCategory in StageCategoryDict["new"].keys()): isGlobal = False
         riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
@@ -1023,7 +1023,7 @@ class CalculatorManager:
             reply.attatchments = CalculatorManager.execStagesToExcelFile(mode,isGlobal,stagesToShow,MATERIAL_CSV_NAME)
         return reply
 
-    def riseistages_v2(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15,toCsv = False) -> RCReply:
+    def riseistages(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15,toCsv = False) -> RCReply:
         riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         calculator = CalculatorManager.selectCalculator(isGlobal)
         stagesToShow = calculator.searchMainStage(targetStage,showMinTimes)
@@ -1094,7 +1094,7 @@ class CalculatorManager:
             reply.attatchments = CalculatorManager.execStagesToExcelFile(mode,isGlobal,stagesToShow,STAGE_CSV_NAME)
         return reply
 
-    def riseievents_v2(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 20,toCsv = False) -> RCReply:
+    def riseievents(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 20,toCsv = False) -> RCReply:
         riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         calculator = CalculatorManager.selectCalculator(isGlobal)
         stagesToShow = calculator.searchEventStage(targetStage,showMinTimes)
@@ -1154,7 +1154,7 @@ class CalculatorManager:
             reply.attatchments = CalculatorManager.execStagesToExcelFile(mode,isGlobal,stagesToShow,EVENT_CSV_NAME)
         return reply
       
-    def riseilists_v2(toPrintTarget:ToPrint,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,toCsv = False) -> RCReply:
+    def riseilists(toPrintTarget:ToPrint,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,toCsv = False) -> RCReply:
         riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         calculator = CalculatorManager.selectCalculator(isGlobal)
         reply = RCReply()
@@ -1321,7 +1321,7 @@ class CalculatorManager:
         ret = [item for item in constantNameList if current in item[0]][:limit]
         return ret
     
-    def riseikakin_v2(toPrintTarget:str,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME, toCsv:bool = False) -> RCReply:
+    def riseikakin(toPrintTarget:str,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME, toCsv:bool = False) -> RCReply:
         #グローバル状態を計算
         KAKIN_FILENAME = "kakinList.xlsx"
         isGlobal:bool = ...

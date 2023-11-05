@@ -9,7 +9,7 @@ from recruitment import recruitment,recruitFromOCR
 import happybirthday.happybirthday as birthday
 import openaichat.openaichat as chatbot
 from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode,getStageCategoryDict,DEFAULT_CACHE_TIME,DEFAULT_SHOW_MIN_TIMES
-from typing import List,Dict
+from typing import List,Dict,Literal
 import datetime
 from charmaterials.charmaterials import OperatorCostsCalculator
 from rcutils import sendReplyToDiscord
@@ -125,7 +125,7 @@ def safeCallChoiceVal(choice):
 tree = app_commands.CommandTree(client)
 
 async def riseicalculatorMaster(inter:Interaction,target:str,target_item:str=None,
-                          event_code:str = None, mode:str="sanity",min_times:int=DEFAULT_SHOW_MIN_TIMES,min_basetimes:int=3000,max_items:int=15,csv_file:bool = False,is_global:bool=True,cache_time:int = DEFAULT_CACHE_TIME):
+                          event_code:str = None, mode:Literal["sanity","time"] = "sanity",min_times:int=DEFAULT_SHOW_MIN_TIMES,min_basetimes:int=3000,max_items:int=15,csv_file:bool = False,is_global:bool=True,cache_time:int = DEFAULT_CACHE_TIME):
     msg = ""
     try:
         mode = CalculateMode(mode)
@@ -175,10 +175,10 @@ modeChoice = [Choice(name="Sanity",value ="sanity"),Choice(name="Time",value ="t
 )
 async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choice[str]=None,
                           event_code:str = None, mode:Choice[str]="sanity",min_times:int=DEFAULT_SHOW_MIN_TIMES,min_basetimes:int=3000,max_items:int=15,csv_file:bool = False,is_global:bool=True,cache_time:int = DEFAULT_CACHE_TIME):
-    _target = safeCallChoiceVal(target)
-    _target_item = safeCallChoiceVal(target_item)
-    _mode = safeCallChoiceVal(mode)
-    await riseicalculatorMaster(inter,_target,_target_item,event_code,_mode,min_times,min_basetimes,max_items,csv_file,is_global,cache_time)
+    target = safeCallChoiceVal(target)
+    target_item = safeCallChoiceVal(target_item)
+    mode = safeCallChoiceVal(mode)
+    await riseicalculatorMaster(inter,target,target_item,event_code,mode,min_times,min_basetimes,max_items,csv_file,is_global,cache_time)
 
     #print(rc.convert_rules)
 
@@ -201,7 +201,7 @@ async def riseimaterials(inter:Interaction,target_item:Choice[str],mode:Choice[s
     mode = safeCallChoiceVal(mode)
     mode = CalculateMode(mode)
     await inter.response.defer(thinking=True)
-    reply = CalculatorManager.riseimaterials_v2(target_item,is_global,mode,toCsv=csv_file)
+    reply = CalculatorManager.riseimaterials(target_item,is_global,mode,toCsv=csv_file)
     await sendReplyToDiscord.followupToDiscord(inter,reply)
 
 @tree.command(
@@ -222,7 +222,7 @@ async def riseistages(inter:Interaction,stage:str,mode:Choice[str]="sanity",is_g
     stage = safeCallChoiceVal(stage)
     mode = CalculateMode(_mode)
     await inter.response.defer(thinking=True)
-    reply = CalculatorManager.riseistages_v2(stage,is_global,mode,toCsv=csv_file)
+    reply = CalculatorManager.riseistages(stage,is_global,mode,toCsv=csv_file)
     await sendReplyToDiscord.followupToDiscord(inter,reply)
 
 @riseistages.autocomplete("stage")
@@ -248,7 +248,7 @@ async def riseievents(inter:Interaction,stage:str,mode:Choice[str]="sanity",is_g
     stage = safeCallChoiceVal(stage)
     mode = CalculateMode(_mode)
     await inter.response.defer(thinking=True)
-    reply = CalculatorManager.riseievents_v2(stage,is_global,mode,toCsv=csv_file)
+    reply = CalculatorManager.riseievents(stage,is_global,mode,toCsv=csv_file)
     await sendReplyToDiscord.followupToDiscord(inter,reply)
 
 @riseievents.autocomplete("stage")
@@ -283,7 +283,7 @@ async def riseilists(inter:Interaction,target:Choice[str],mode:Choice[str]="sani
     mode = CalculateMode(_mode)
     target = CalculatorManager.ToPrint(_target)
     await inter.response.defer(thinking=True)
-    reply = CalculatorManager.riseilists_v2(target,is_global,mode,toCsv=csv_file)
+    reply = CalculatorManager.riseilists(target,is_global,mode,toCsv=csv_file)
     await sendReplyToDiscord.followupToDiscord(inter,reply)
 
 @tree.command(
@@ -298,7 +298,7 @@ async def riseikakin(inter:Interaction,target:str,csv_file:bool = False):
     target = safeCallChoiceVal(target)
     csv_file = safeCallChoiceVal(csv_file)
     await inter.response.defer(thinking=True)
-    reply = CalculatorManager.riseikakin_v2(target,toCsv=csv_file)
+    reply = CalculatorManager.riseikakin(target,toCsv=csv_file)
     await sendReplyToDiscord.followupToDiscord(inter,msg=reply)
 
 @riseikakin.autocomplete("target")
