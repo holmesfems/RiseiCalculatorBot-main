@@ -27,10 +27,12 @@ def filterNotNone(_list:list) -> list:
 
 def matchTagCoreProcess(result:List[str],baseDict:Dict[str,str],extraDict:Optional[Dict[str,str]]=None)->Set[str]:
     #Google-OCRの精度がかなり良いので、基本完全一致で探してもちゃんとタグを出してくれる
+    #一回タグを分離できなかった事例があったので、in検索に切り替えてみる
+    #https://discord.com/channels/915241738174627910/1141408003308925059/1170769419346133093
     ret = set()
     for key,value in baseDict.items():
         if value in ret: continue
-        if(key in result):
+        if(any((key in text) for text in result)):
             ret.add(value)
     if(not extraDict): return ret
     #一部誤字するやつがあるので、in検索で結果を補正
@@ -75,7 +77,7 @@ def matchTag(result:str) -> MatchTagResponseData:
     if(len(zhMatch)>=5): return MatchTagResponseData(zhMatch,isGlobal=False)
     #万が一のマッチミス、日本語と中国語のマッチ結果を結合してみる
     jpzhMatch = jpMatch.union(zhMatch)
-    if(len(jpzhMatch)>=len(enMatch)): return MatchTagResponseData(jpzhMatch,isGlobal=False)
+    if(len(jpzhMatch)>=len(enMatch)): return MatchTagResponseData(jpzhMatch,isGlobal=True)
     return MatchTagResponseData(enMatch,isGlobal=True)
 
 #入力: 画像のURI
