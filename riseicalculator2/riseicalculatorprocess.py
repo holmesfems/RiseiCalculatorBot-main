@@ -1171,9 +1171,10 @@ class CalculatorManager:
                 break
         #ステージドロップをExcelに整理
         EVENT_CSV_NAME = "EventDrop.xlsx"
-        reply.embbedTitle = title,
-        reply.embbedContents = msgChunks,
+        reply.embbedTitle = title
+        reply.embbedContents = msgChunks
         reply.plainText = calculator.getUpdatedTimeStr()
+        reply.responseForAI = str({"stageInfo":jsonForAI})
         if(toCsv):
             reply.attatchments = CalculatorManager.execStagesToExcelFile(mode,isGlobal,stagesToShow,EVENT_CSV_NAME)
         return reply
