@@ -72,7 +72,7 @@
         description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
       skillnum:
         type: number
-        description: The skill code
+        description: The skill code in 1 to 3
     required:
     - target
     - skillnum

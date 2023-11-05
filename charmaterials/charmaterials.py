@@ -374,6 +374,7 @@ class OperatorCostsCalculator:
         description = SkillIdToName.getDescription(skillId)
         jsonForAI = {
             "skillName": skillName,
+            "skillNumber": skillNum,
             "masterCosts":[]
         }
         if(description):
