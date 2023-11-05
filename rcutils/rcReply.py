@@ -33,7 +33,7 @@ def arrangementChunks(msgList:List[str], maxLength:int):
 #アステシアちゃんbotの出力に使うデータクラス
 #スパゲッティ化防止のため、いままでDictで応答を出力していたものを全てこれに置き換える
 class RCReply:
-    def __init__(self,plainText:str = "",embbedTitle:str = "",embbedContents:List[str] = [],responseForAI:str = "",attatchments:List[PathLike[Any]] = [],msgType:RCMsgType = RCMsgType.OK):
+    def __init__(self,plainText:str = "",embbedTitle:str = "",embbedContents:List[str] = [],responseForAI:str = "",attatchments:List[PathLike[Any]] | PathLike[Any] = None,msgType:RCMsgType = RCMsgType.OK):
 
         #plainText: 普通に表示するメッセージ
         self.plainText = plainText
@@ -62,9 +62,6 @@ class RCReply:
         ret += f"{self.attatchments=}\n"
         ret += f"{self.msgType=}"
         return ret
-
-    def attatchmentsPath(self):
-        return [file.path for file in self.attatchments]
     
     def getEmbbeds(self)->List[Embed]:
         if(not self.embbedContents):
@@ -82,4 +79,8 @@ class RCReply:
         ) for item in chunks]
     
     def files(self) -> List[File]:
-        return [File(item) for item in self.attatchments]
+        if not self.attatchments:
+            return []
+        if(type(self.attatchments) is list):
+            return [File(item) for item in self.attatchments]
+        else: return [File(self.attatchments)]

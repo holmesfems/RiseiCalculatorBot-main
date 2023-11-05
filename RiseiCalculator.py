@@ -131,11 +131,7 @@ async def riseicalculatorMaster(inter:Interaction,target:str,target_item:str=Non
         mode = CalculateMode(mode)
         await inter.response.defer(thinking=True)
         msg = CalculatorManager.riseicalculatorMaster(target,target_item,event_code,is_global,mode,min_basetimes,cache_time,min_times,max_items,csv_file)
-        #TODO: RCReplyで全て置き換えた後、ifを消す
-        if(type(msg) is RCReply):
-            await sendReplyToDiscord.followupToDiscord(inter,msg)
-        else:
-            followupToDiscord(inter,msg)
+        await sendReplyToDiscord.followupToDiscord(inter,msg)
 
     except Exception as e:
         msg = showException()
@@ -201,13 +197,12 @@ async def riseicalculator(inter:Interaction,target:Choice[str],target_item:Choic
     mode = modeChoice
 )
 async def riseimaterials(inter:Interaction,target_item:Choice[str],mode:Choice[str]="sanity",is_global:bool=True,csv_file:bool=False):
-    _target_item = safeCallChoiceVal(target_item)
-    _mode = safeCallChoiceVal(mode)
-    mode = CalculateMode(_mode)
+    target_item = safeCallChoiceVal(target_item)
+    mode = safeCallChoiceVal(mode)
+    mode = CalculateMode(mode)
     await inter.response.defer(thinking=True)
-    reply = CalculatorManager.riseimaterials(_target_item,is_global,mode,toCsv=csv_file)
-    await followupToDiscord(inter,reply)
-
+    reply = CalculatorManager.riseimaterials_v2(target_item,is_global,mode,toCsv=csv_file)
+    await sendReplyToDiscord.followupToDiscord(inter,reply)
 
 @tree.command(
     name="riseistages",
@@ -227,8 +222,8 @@ async def riseistages(inter:Interaction,stage:str,mode:Choice[str]="sanity",is_g
     stage = safeCallChoiceVal(stage)
     mode = CalculateMode(_mode)
     await inter.response.defer(thinking=True)
-    reply = CalculatorManager.riseistages(stage,is_global,mode,toCsv=csv_file)
-    await followupToDiscord(inter,reply)
+    reply = CalculatorManager.riseistages_v2(stage,is_global,mode,toCsv=csv_file)
+    await sendReplyToDiscord.followupToDiscord(inter,reply)
 
 @riseistages.autocomplete("stage")
 async def mainstage_autocomplete(inter:Interaction,current:str)->List[app_commands.Choice[str]]:
