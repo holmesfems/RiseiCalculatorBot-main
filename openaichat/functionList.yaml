@@ -63,7 +63,7 @@
     required:
     - target
 - name: operatormastercost
-  description: Specify an operator and the number of the skill, and get the item cost list to specialize this
+  description: Specify an operator and the skill number, and get the item cost list to specialize this
   parameters:
     type: object
     properties:
@@ -72,7 +72,7 @@
         description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
       skillnum:
         type: number
-        description: The number of the skill
+        description: The skill number
     required:
     - target
     - skillnum

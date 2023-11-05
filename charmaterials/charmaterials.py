@@ -384,7 +384,7 @@ class OperatorCostsCalculator:
             headerMsg = "特化{0} 理性価値:{1:.2f}".format(i,riseiValue)
             blockMsg = masterCost.toStrBlock()
             msgList.append(headerMsg + blockMsg + "\n")
-            jsonForAI["costItem"].append({
+            jsonForAI["masterCosts"].append({
                 "phase":i,
                 "sanityValue":riseiValue,
                 "costItem":masterCost.itemArray.toNameCountDict()
