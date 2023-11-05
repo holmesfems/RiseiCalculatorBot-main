@@ -11,6 +11,7 @@ from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateM
 from enum import StrEnum
 import enum
 import yaml
+from rcutils.rcReply import RCMsgType,RCReply
 
 CHAR_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/character_table.json"
 CHAR_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData_YoStar/main/ja_JP/gamedata/excel/character_table.json"
@@ -324,6 +325,7 @@ class AllOperatorsInfo:
 class OperatorCostsCalculator:
     class CostListSelection(StrEnum):
         STAR5ELITE = enum.auto()
+        STAR6ELITE = enum.auto()
         COSTOFCNONLY = enum.auto()
         COSTOFGLOBAL = enum.auto()
 
@@ -335,33 +337,45 @@ class OperatorCostsCalculator:
     def autoCompleteForMasterCost(name:str,limit:int = 25) -> List[Tuple[str,str]]:
         return [(value.name,value.name) for value in OperatorCostsCalculator.operatorInfo.operatorDict.values() if name in value.name and value.stars>=4][:limit]
     
-    def skillMasterCost(operatorName:str,skillNum:int) -> Dict:
+    def skillMasterCost(operatorName:str,skillNum:int) -> RCReply:
         costItem = OperatorCostsCalculator.operatorInfo.getOperatorCostFromName(operatorName)
-        title = "スキル特化素材検索"
-        if(not costItem): return {
-            "title" : title,
-            "msgList":["オペレーター【"+operatorName+"】は存在しません"],
-            "type": "err"
-        }
+        title = "スキル特化検索"
+        if(not costItem): return RCReply(
+            embbedTitle=title,
+            embbedContents=["オペレーター【"+operatorName+"】は存在しません"],
+            msgType=RCMsgType.ERR,
+            responseForAI=f"Error: Invalid operator name: {operatorName}"
+        )
         skillCostList = costItem.skills
-        if(skillNum > len(skillCostList)):return{
-            "title" : title,
-            "msgList":["オペレーター【"+operatorName+"】のスキル"+str(skillNum)+"は存在しません"],
-            "type": "err"
-        }
+        if(not skillCostList): return RCReply(
+            embbedTitle=title,
+            embbedContents=["オペレーター【"+operatorName+"】はスキルが存在しません"],
+            msgType=RCMsgType.ERR,
+            responseForAI=f"Error: Operator {operatorName} has no skill"
+        )
+        if(skillNum is not None and skillNum > len(skillCostList)):return RCReply(
+            embbedTitle=title,
+            embbedContents=["オペレーター【"+operatorName+"】のスキル"+str(skillNum)+"は存在しません"],
+            msgType=RCMsgType.ERR,
+            responseForAI=f"Error: Operator {operatorName} does not have skill {skillNum}"
+        )
+        if(costItem.stars <= 3):return RCReply(
+            embbedTitle=title,
+            embbedContents=[f"オペレーター【{operatorName}】はスキルの特化は存在しません"],
+            msgType=RCMsgType.ERR,
+            responseForAI=f"Error: The skill of operator {operatorName} can not be mastered"
+        )
         skillName,skillCost = skillCostList[skillNum-1]
-        if(not skillCost):return{
-            "title" : title,
-            "msgList":["オペレーター【"+operatorName+"】のスキル"+str(skillNum)+"の特化は存在しません"],
-            "type": "err"
-        }
-        
         isGlobal = not costItem.isCNOnly()
         allCost = ItemCost.sum(skillCost)
         msgList = []
         title = "スキル特化検索: " + skillName
         skillId = costItem.skillIds[skillNum-1]
         description = SkillIdToName.getDescription(skillId)
+        jsonForAI = {
+            "skillName": skillName,
+            "masterCosts":[]
+        }
         if(description):
             msgList.append(description + "\n\n")
         for i in range(1,4):
@@ -370,6 +384,11 @@ class OperatorCostsCalculator:
             headerMsg = "特化{0} 理性価値:{1:.2f}".format(i,riseiValue)
             blockMsg = masterCost.toStrBlock()
             msgList.append(headerMsg + blockMsg + "\n")
+            jsonForAI["costItem"].append({
+                "phase":i,
+                "sanityValue":riseiValue,
+                "costItem":masterCost.itemArray.toNameCountDict()
+            })
         
         #合計素材
         riseiValue = allCost.toRiseiValue(isGlobal)
@@ -382,13 +401,16 @@ class OperatorCostsCalculator:
         headerMsg = "合計  中級換算"
         blockMsg = r2Cost.toStrBlock()
         msgList.append(headerMsg + blockMsg)
+        jsonForAI["totalIntermediateConvertion"] = r2Cost.itemArray.toNameCountDict()
 
-        return{
-            "title" : title,
-            "msgList":msgList
-        }
+        return RCReply(
+            embbedTitle=title,
+            embbedContents=msgList,
+            responseForAI=str(jsonForAI)
+        )
 
-    def operatorCostList(selection:CostListSelection) -> Dict:
+    def operatorCostList(selection:CostListSelection) -> RCReply:
+        #OpenAIから呼び出す予定は現状なし、responceForAIは空欄にする
         if(selection is OperatorCostsCalculator.CostListSelection.STAR5ELITE):
             star5Operators = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if value.stars == 5 and not value.isPatch}
             riseiValueDict = {key:value.totalPhaseCost().toRiseiValue_OnlyValueTarget(not value.isCNOnly()) for key,value in star5Operators.items()}
@@ -409,9 +431,34 @@ class OperatorCostsCalculator:
                     toPrint = []
             if(toPrint):
                 msgList.append(CalculatorManager.dumpToPrint(toPrint))
-            return {"title":title,
-                    "msgList":msgList
-                    }
+
+            return RCReply(
+                embbedTitle=title,
+                embbedContents=msgList
+            )
+        elif(selection is OperatorCostsCalculator.CostListSelection.STAR6ELITE):
+            star6Operators = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if value.stars == 6 and not value.isPatch}
+            riseiValueDict = {key:value.totalPhaseCost().toRiseiValue_OnlyValueTarget(not value.isCNOnly()) for key,value in star6Operators.items()}
+            sortedValueDict = {key:value for key,value in sorted(riseiValueDict.items(),key=lambda x:x[1],reverse=True)}
+            title = "★6昇進素材価値表"
+            headerMsg = "SoCは以下の計算に含まれません:"
+            msgList = [headerMsg]
+            toPrint = []
+            for index,(key,value) in enumerate(sortedValueDict.items()):
+                name = star6Operators[key].name
+                #print(name,star5Operators[key].totalPhaseCost())
+                riseiValue = value
+                #phaseCost = star5Operators[key].totalPhaseCost()
+                toPrint.append(f"{index+1}. {name} : {riseiValue:.3f}")
+                if((index + 1)% 50 == 0):
+                    msgList.append(CalculatorManager.dumpToPrint(toPrint))
+                    toPrint = []
+            if(toPrint):
+                msgList.append(CalculatorManager.dumpToPrint(toPrint))
+            return RCReply(
+                embbedTitle=title,
+                embbedContents=msgList
+            )
         
         elif(selection is OperatorCostsCalculator.CostListSelection.COSTOFCNONLY):
             cnOnlyOperators = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if value.isCNOnly()}
@@ -432,9 +479,10 @@ class OperatorCostsCalculator:
             msgList.append(f"合計理性価値(補完チップ系抜き):{totalCostValue:.3f}\n")
             msgList.append(f"源石換算 : {totalCostValue/135:.3f}\n")
             msgList.append(f"日本円換算 : {totalCostValue/135/175*10000:.0f} 円")
-            return {"title":title,
-                    "msgList":msgList
-                    }
+            return RCReply(
+                embbedTitle=title,
+                embbedContents=msgList
+            )
         
         elif(selection is OperatorCostsCalculator.CostListSelection.COSTOFGLOBAL):
             globalOperators = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if not value.isCNOnly()}
@@ -455,42 +503,55 @@ class OperatorCostsCalculator:
             msgList.append(f"合計理性価値(補完チップ系抜き):{totalCostValue:.3f}\n")
             msgList.append(f"源石換算 : {totalCostValue/135:.3f}\n")
             msgList.append(f"日本円換算 : {totalCostValue/135/175*10000:.0f} 円")
-            return {"title":title,
-                    "msgList":msgList
-                    }
+            return RCReply(
+                embbedTitle=title,
+                embbedContents=msgList
+            )
         else:
-            return{
-                "title":"エラー",
-                "msgList":"未知のコマンド:" + str(selection)
-            }
+            return RCReply(
+                embbedTitle="エラー",
+                embbedContents=["未知のコマンド:" + str(selection)]
+            )
+
     def autoCompleteForEliteCost(name:str,limit:int = 25) -> List[Tuple[str,str]]:
         return [(value.name,value.name) for value in OperatorCostsCalculator.operatorInfo.operatorDict.values() if name in value.name and value.stars>=4 and not value.isPatch][:limit]
     
-    def operatorEliteCost(operatorName:str):
+    def operatorEliteCost(operatorName:str) -> RCReply:
         costItem = OperatorCostsCalculator.operatorInfo.getOperatorCostFromName(operatorName)
         title = "昇進必要素材検索"
-        if(not costItem): return {
-            "title" : title,
-            "msgList":["オペレーター【"+operatorName+"】は存在しません"],
-            "type": "err"
-        }
-        eliteCostList = costItem.phases
-        if(not eliteCostList): return{
-            "title" : title,
-            "msgList":["オペレーター【"+operatorName+"】の昇進は存在しません"],
-            "type": "err"
-        }
-        isGlobal = not costItem.isCNOnly()
+        if(not costItem): return RCReply(
+            embbedTitle=title,
+            embbedContents=["オペレーター【"+operatorName+"】は存在しません"],
+            msgType=RCMsgType.ERR,
+            responseForAI=f"Error: Invalid operator name: {operatorName}"
+        )
 
+        eliteCostList = costItem.phases
+        if(not eliteCostList): return RCReply(
+            embbedTitle=title,
+            embbedContents=["オペレーター【"+operatorName+"】の昇進は存在しません"],
+            msgType=RCMsgType.ERR,
+            responseForAI=f"Error: {operatorName} can not be promoted"
+        )
+
+        isGlobal = not costItem.isCNOnly()
         totalCost = ItemCost.sum(eliteCostList)
         title = "昇進必要素材検索: " + costItem.name
         msgList = []
+        jsonForAI = {
+            "eliteCost":[]
+        }
         for i in range(1,3):
             eliteCost = eliteCostList[i-1]
             riseiValue = eliteCost.toRiseiValue(isGlobal)
             headerMsg = "昇進{0} 理性価値:{1:.2f}".format(i,riseiValue)
             blockMsg = eliteCost.toStrBlock()
             msgList.append(headerMsg + blockMsg + "\n")
+            jsonForAI["eliteCost"].append({
+                "phase":i,
+                "sanityValue":riseiValue,
+                "costItem":eliteCost.itemArray.toNameCountDict()
+            })
         
         #合計素材
         riseiValue = totalCost.toRiseiValue(isGlobal)
@@ -503,49 +564,67 @@ class OperatorCostsCalculator:
         headerMsg = "合計  中級換算"
         blockMsg = r2Cost.toStrBlock()
         msgList.append(headerMsg + blockMsg)
+        jsonForAI["totalIntermediateConvertion"] = r2Cost.itemArray.toNameCountDict()
+        return RCReply(
+            embbedTitle=title,
+            embbedContents=msgList,
+            responseForAI=str(jsonForAI)
+        )
 
-        return{
-            "title" : title,
-            "msgList":msgList
-        }
-    
     def autoCompleteForModuleCost(name:str,limit:int = 25) -> List[Tuple(str,str)]:
         return [(value.name,value.name) for value in OperatorCostsCalculator.operatorInfo.operatorDict.values() if name in value.name and value.hasUniqeEq()][:limit]
 
-    def operatorModuleCost(operatorName:str):
+    def operatorModuleCost(operatorName:str) -> RCReply:
         costItem = OperatorCostsCalculator.operatorInfo.getOperatorCostFromName(operatorName)
         title = "モジュール必要素材検索"
-        if(not costItem): return {
-            "title" : title,
-            "msgList":["オペレーター【"+operatorName+"】は存在しません"],
-            "type": "err"
-        }
+        if(not costItem): return RCReply(
+            embbedTitle=title,
+            embbedContents=["オペレーター【"+operatorName+"】は存在しません"],
+            msgType=RCMsgType.ERR,
+            responseForAI=f"Error: Invalid operator name: {operatorName}"
+        )
+
         eqCosts = costItem.uniqeEq
-        if(not eqCosts.hasUniqeEq()): return{
-            "title" : title,
-            "msgList":["オペレーター【"+operatorName+"】のモジュールは存在しません"],
-            "type": "err"
-        }
+        if(not eqCosts.hasUniqeEq()): return RCReply(
+            embbedTitle=title,
+            embbedContents=["オペレーター【"+operatorName+"】のモジュールは存在しません"],
+            msgType=RCMsgType.ERR,
+            responseForAI=f"Error: Operator {operatorName} does not have module"
+        )
 
         title = "モジュール必要素材検索: " + costItem.name
         msgList = []
+        jsonForAI = []
         for eqCostItem in eqCosts.allUEQ():
             isGlobal = not eqCostItem.isCNOnly
             header = f"{eqCostItem.type}"
             if(not isGlobal): header += "(大陸版)"
             bodyMsg = ""
+            jsonItem = {
+                "typeName" : f"{eqCostItem.type}",
+                "stageCost": []
+            }
             for i in range(3):
                 eqCost = eqCostItem.phaseCosts[i]
                 phaseMsg = f"{header} Stage.{i+1} 理性価値:{eqCost.toRiseiValue_OnlyValueTarget(isGlobal):.2f}"
                 blockMsg = eqCost.toStrBlock()
                 bodyMsg += phaseMsg + blockMsg + "\n"
+                jsonItem["stageCost"].append({
+                    "phase": "Unlock" if i == 0 else f"Modify Stage {i}",
+                    "sanityValue" : round(eqCost.toRiseiValue_OnlyValueTarget(isGlobal),2),
+                    "costItem": eqCost.itemArray.toNameCountDict()
+                })
             totalCost = eqCostItem.totalCost()
             lastMsg = f"合計 理性価値:{totalCost.toRiseiValue_OnlyValueTarget(isGlobal):.2f}"
             lastMsg += totalCost.toStrBlock() + "\n"
             lastMsg += "合計 中級換算:"
             lastMsg += totalCost.rare3and4ToRare2().toStrBlock()
             msgList.append(bodyMsg + lastMsg + "\n")
-        return{
-            "title" : title,
-            "msgList":msgList
-        }
+            jsonItem["totalIntermediateConvertion"] = totalCost.rare3and4ToRare2().itemArray.toNameCountDict()
+            jsonForAI.append(jsonItem)
+        
+        return RCReply(
+            embbedTitle=title,
+            embbedContents=msgList,
+            responseForAI=str({"moduleCost":jsonForAI})
+        )

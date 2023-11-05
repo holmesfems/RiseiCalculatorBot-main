@@ -1,4 +1,5 @@
 import yaml,datetime
+from rcutils.rcReply import RCReply
 
 with open("happybirthday/birthdayRev.yaml","rb") as f:
     birthdayRevDict = yaml.safe_load(f)
@@ -26,11 +27,11 @@ def mentionStr(reflectList):
     else:
         return "、".join(reflectList[:-1]) + "と" + reflectList[-1]
 
-def checkBirthday(now:datetime.datetime):
+def checkBirthday(now:datetime.datetime) -> RCReply | None:
     nowstr = "{0}月{1}日".format(now.month,now.day)
     birthoperator = birthdayRevDict.get(nowstr,[])
-    if(len(birthoperator) == 0): return
+    if(len(birthoperator) == 0): return None
     else:
         title = ":birthday:お誕生日:birthday:おめでとう:tada:！！"
         msg = "今日は" + mentionStr([reflectName(x) for x in birthoperator]) + "の誕生日よ！みんなでお祝い:tada:しましょ！"
-        return {"title":title,"msgList":[msg]}
+        return RCReply(embbedTitle=title,embbedContents=[msg])

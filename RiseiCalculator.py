@@ -411,7 +411,7 @@ async def operatormastercost(inter:Interaction,operator_name:str,skill_num:Choic
     skill_num = safeCallChoiceVal(skill_num)
     await inter.response.defer(thinking=True)
     msg = OperatorCostsCalculator.skillMasterCost(operator_name,skill_num)
-    await followupToDiscord(inter,msg)
+    await sendReplyToDiscord.followupToDiscord(inter,msg)
 
 @operatormastercost.autocomplete("operator_name")
 async def operator_name_autocomplete(inter:Interaction,current:str)->List[app_commands.Choice[str]]:
@@ -429,7 +429,7 @@ async def operatorelitecost(inter:Interaction,operator_name:str):
     operator_name = safeCallChoiceVal(operator_name)
     await inter.response.defer(thinking=True)
     msg = OperatorCostsCalculator.operatorEliteCost(operator_name)
-    await followupToDiscord(inter,msg)
+    await sendReplyToDiscord.followupToDiscord(inter,msg)
 @operatorelitecost.autocomplete("operator_name")
 async def operator_name_autocomplete_forelite(inter:Interaction,current:str)->List[app_commands.Choice[str]]:
     strList = OperatorCostsCalculator.autoCompleteForEliteCost(current)
@@ -446,7 +446,7 @@ async def operatormodulecost(inter:Interaction,operator_name:str):
     operator_name = safeCallChoiceVal(operator_name)
     await inter.response.defer(thinking=True)
     msg = OperatorCostsCalculator.operatorModuleCost(operator_name)
-    await followupToDiscord(inter,msg)
+    await sendReplyToDiscord.followupToDiscord(inter,msg)
 @operatormodulecost.autocomplete("operator_name")
 async def operator_name_autocomplete_formodule(inter:Interaction,current:str)->List[app_commands.Choice[str]]:
     strList = OperatorCostsCalculator.autoCompleteForModuleCost(current)
@@ -471,7 +471,7 @@ async def operatorcostlist(inter:Interaction,selection:Choice[str]):
     selection = OperatorCostsCalculator.CostListSelection(selection)
     await inter.response.defer(thinking=True)
     msg = OperatorCostsCalculator.operatorCostList(selection)
-    await followupToDiscord(inter,msg)
+    await sendReplyToDiscord.followupToDiscord(inter,msg)
 
 CHANNEL_ID_HAPPYBIRTHDAY = int(os.environ["CHANNEL_ID_HAPPYBIRTHDAY"])
 
@@ -480,10 +480,9 @@ async def checkBirtyday():
     if(not CHANNEL_ID_HAPPYBIRTHDAY): return
     now=datetime.datetime.now(tz=JST)
     msg = birthday.checkBirthday(now)
-    if(msg):
+    if(msg is not None):
         channel = client.get_channel(CHANNEL_ID_HAPPYBIRTHDAY)
-        embeds = createEmbedList(msg)
-        await channel.send(embeds=embeds)
+        await sendReplyToDiscord.sendToDiscord(channel,msg)
 
 MEMBERGUILD = int(os.environ["F_GUILDID"])
 def checkIsMember(user:discord.User) -> bool:
