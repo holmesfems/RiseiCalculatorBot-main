@@ -25,77 +25,6 @@ client = discord.Client(intents=intents,command_prefix = '/')
 t_delta = datetime.timedelta(hours=9)  # 9時間
 JST = datetime.timezone(t_delta, 'JST')  # UTCから9時間差の「JST」タイムゾーン
 
-def arrangementChunks(msgList, maxLength:int):
-    chunks = []
-    for item in msgList:
-        if len(chunks) == 0:
-            chunks.append(item)
-        else:
-            if(len(chunks[-1])+len(item)) <= maxLength:
-                chunks[-1] += item
-            else:
-                chunks.append(item)
-    return chunks
-
-embedColourDict:Dict[str,discord.Colour] = {
-    "err" : discord.Colour.magenta(),
-    "ok" : discord.Colour.from_str("0x8be02b")
-}
-
-#ディスコード返信用のEmbedを作る関数
-def createEmbedList(msg):
-    maxLength = 1900
-    title = "reply"
-    colour = embedColourDict["ok"]
-    if type(msg) is str:
-        chunks = [msg[i:i+maxLength] for i in range(0, len(msg), maxLength)]
-    elif type(msg) is list:
-        chunks = arrangementChunks(msg,maxLength)
-    elif type(msg) is dict:
-        #タイトル設定
-        title = msg.get("title",title)
-        #メッセージ本文、改ページされたくないブロックをまとめる
-        msgList = msg.get("msgList",[])
-        chunks = arrangementChunks(msgList,maxLength)
-        #左のバーの色を指定
-        colourType = msg.get("type","ok")
-        colour = embedColourDict.get(colourType,colour)
-    embeds = [discord.Embed(
-            title = title,
-            description = item,
-            colour = colour
-        ) for item in chunks]
-    return embeds
-
-def extractFileAndMsg(msg):
-    #ファイルの受け取り
-    file = MISSING
-    msgStr = ""
-    if type(msg) is dict:
-        openFile = msg.get("file",None)
-        if(openFile):
-            file = discord.File(openFile)
-        sendMsg = msg.get("fileMsg",None)
-        if(sendMsg):
-            msgStr = sendMsg
-    return (msgStr,file)
-
-async def actionToDiscord(func,msg):
-    embeds = createEmbedList(msg)
-    await func(embeds = embeds)
-    msgStr,file = extractFileAndMsg(msg)
-    if(msgStr):
-        await func(content=msgStr,file=file)
-
-async def followupToDiscord(inter:Interaction,msg):
-    await actionToDiscord(inter.followup.send,msg)
-
-async def sendToDiscord(channel:discord.channel.TextChannel,msg):
-    await actionToDiscord(channel.send,msg)
-
-async def replyToDiscord(message:discord.Message,msg):
-    await actionToDiscord(message.reply,msg)
-
 def showException():
     ex_type, ex_value, ex_traceback = sys.exc_info()
     # Extract unformatter stack traces as tuples
@@ -121,7 +50,6 @@ def safeCallChoiceVal(choice):
         return choice.value
     return choice
     
-
 tree = app_commands.CommandTree(client)
 
 async def riseicalculatorMaster(inter:Interaction,target:str,target_item:str=None,
@@ -364,7 +292,7 @@ class RecruitView(discord.ui.View):
         if(selectedList):
             await inter.response.defer(thinking=True)
             msg = recruitment.recruitDoProcess(selectedList,minstar)
-            await followupToDiscord(inter,msg)
+            await sendReplyToDiscord.followupToDiscord(inter,msg)
         else:
             await inter.response.defer()
 
@@ -393,7 +321,7 @@ async def recruitlist(inter:Interaction, star:Choice[int],is_global:bool = True)
     is_global = safeCallChoiceVal(is_global)
     await inter.response.defer(thinking=True)
     msg = recruitment.showHighStars(_star,is_global)
-    await followupToDiscord(inter,msg)
+    await sendReplyToDiscord.followupToDiscord(inter,msg)
 
 @tree.command(
     name = "operatormastercost",
@@ -532,10 +460,9 @@ async def msgForAIChat(message:discord.Message):
                     await channel.send(content = reply.plainText)
             else:
                 await channel.send(content = reply.plainText)
-                if(type(reply.content) is RCReply):
+                if(reply.content is not None):
                     await sendReplyToDiscord.sendToDiscord(channel,reply.content)
-                else:
-                    await sendToDiscord(channel,reply.content)
+                
     except Exception as e:
         msg = showException()
         print(msg)
@@ -553,7 +480,7 @@ async def msgForOCR(message:discord.Message):
         print("タグを読みました",tagMatch)
         if(not tagMatch):return
         msg = recruitment.recruitDoProcess(tagMatch.matches,4,isGlobal=tagMatch.isGlobal)
-        await replyToDiscord(message,msg)
+        await sendReplyToDiscord.replyToDiscord(message,msg)
 
 async def msgForDM(message:discord.Message):
     if(not checkIsMember(message.author)):

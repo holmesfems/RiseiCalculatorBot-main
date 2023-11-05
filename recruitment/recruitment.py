@@ -1,6 +1,7 @@
 import yaml
 import itertools
 from typing import List,Tuple,Optional
+from rcutils.rcReply import RCMsgType,RCReply
 
 class RecruitTag:
     def __init__(self,tagName):
@@ -182,7 +183,8 @@ def searchMapToStringChunks(searchMap):
         chunks.append(chunk)
     return chunks
             
-def recruitDoProcess(inputTagList:List[str],minStar:Optional[int]=None,isGlobal:bool=True):
+def recruitDoProcess(inputTagList:List[str],minStar:Optional[int]=None,isGlobal:bool=True) -> RCReply:
+    #OpenAIから呼び出す予定なし
     inputList = set(inputTagList)
     inputList = list(filter(lambda x:x is not None and x in tagNameList,inputList))
     inputList = sorted(inputList,key=lambda x:tagNameList.index(x))
@@ -194,7 +196,7 @@ def recruitDoProcess(inputTagList:List[str],minStar:Optional[int]=None,isGlobal:
     if(not chunks): chunks = [f"★{minStar}以上になる組み合わせはありません"]
     title = " ".join(inputList)
     if(not isGlobal): title += "(大陸版)"
-    return {"title":title,"msgList":chunks}
+    return RCReply(embbedTitle=title,embbedContents=chunks)
 
 def compareTagKey(tag:str):
     return tagNameList.index(tag) if tag in tagNameList else -1
@@ -220,15 +222,15 @@ def mapToMsgChunksHighStars(combineList:dict):
         chunks.append(chunk)
     return chunks
 
-def showHighStars(minStar:int = 4,isGlobal:bool = True):
+def showHighStars(minStar:int = 4,isGlobal:bool = True) -> RCReply:
     #最低の星が満たすやつを探す
     searchList = positionTags + jobTags + otherTags
     allCombineList = createSearchMap(searchList,get_operators(glob=isGlobal),minStar,equals=True,clearRedundant=True)
     chunks = mapToMsgChunksHighStars(allCombineList)
     if(not chunks): chunks = [f"★{minStar}の確定タグはありません"]
-    return {
-        "title":"★{0}確定タグ一覧".format(minStar),
-        "msgList":chunks
-    }
+    return RCReply(
+        embbedTitle="★{0}確定タグ一覧".format(minStar),
+        embbedContents=chunks
+    )
 
     

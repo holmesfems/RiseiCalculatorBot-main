@@ -7,7 +7,7 @@ from charmaterials.charmaterials import OperatorCostsCalculator
 from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode
 import yaml
 from riseicalculator2 import listInfo
-from typing import Union
+from typing import Union,Optional
 from rcutils.rcReply import RCReply
 
 with open("openaichat/functionList.yaml","rb") as f:
@@ -19,7 +19,7 @@ class ChatType(StrEnum):
     FUNCTION = enum.auto()
 
 class ChatReply:
-    def __init__(self,type:ChatType, content:Union[dict,RCReply] = {}, plainText:str = ""):
+    def __init__(self,type:ChatType, content:Optional[RCReply] = None, plainText:str = ""):
         self.type = type
         self.content = content
         self.plainText = plainText
