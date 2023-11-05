@@ -1,11 +1,11 @@
 - name: riseimaterials
-  description: 特定素材の周回ステージ、理性効率を取得します
+  description: Specify a material, and get the information (e.g. sanity efficiency, sanity cost, time efficiency, time cost, etc.) of stages to farm this 
   parameters:
     type: object
     properties:
       target:
         type: string
-        description: 素材の名前
+        description: Category of the specified material
         enum: 
         - 源岩
         - 装置
@@ -26,23 +26,23 @@
     required:
     - target
 - name: riseistages
-  description: 特定ステージの周回効率、理性効率を取得します
+  description: Get the information (e.g. efficiency, sanity cost, time cost, main drop, etc.) of specified constant stages
   parameters:
     type: object
     properties:
       target:
         type: string
-        description: "ステージのコード名。e.g. 1-7 8-3 GA-8 JT8-2"
+        description: "The code name of the stage. e.g. 1-7 8-3 GA-8 JT8-2"
     required:
     - target
 - name: riseilists
-  description: 指定された理性効率表を取得します
+  description: Get the content of the specified list
   parameters:
     type: object
     properties:
       target:
         type: string
-        description: 効率表の種類
+        description: Name of the list
         enum:
         - 基準マップ
         - 理性価値表
@@ -53,36 +53,36 @@
     required:
     - target
 - name: operatorelitecost
-  description: オペレーターの昇進消費素材を取得します
+  description: Specify an operator, and get the item cost list to promote him
   parameters:
     type: object
     properties:
       target:
         type: string
-        description: オペレーターの名前。e.g. アーミヤ アステシア エイヤフィヤトラ ホルン
+        description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
     required:
     - target
 - name: operatormastercost
-  description: オペレーターのスキル特化の消費素材を取得します
+  description: Specify an operator and the number of the skill, and get the item cost list to specialize this
   parameters:
     type: object
     properties:
       target:
         type: string
-        description: オペレーターの名前。e.g. アーミヤ アステシア エイヤフィヤトラ ホルン
+        description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
       skillnum:
         type: number
-        description: スキルの番号
+        description: The number of the skill
     required:
     - target
     - skillnum
 - name: operatormodulecost
-  description: オペレーターのモジュールの消費素材を取得します
+  description: Specify an operator, and get the item cost list to unlock or modify the module of him
   parameters:
     type: object
     properties:
       target:
         type: string
-        description: オペレーターの名前。e.g. アーミヤ アステシア エイヤフィヤトラ ホルン
+        description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
     required:
     - target
