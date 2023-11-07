@@ -487,7 +487,7 @@ async def msgForDM(message:discord.Message):
         msg = "【自動返信】DMありがとうございます！\n"
         msg += "アステシアちゃんとお話をお楽しみいただくには、F鯖に加入の上、Youtubeアカウントと連携してふぉめの**Youtubeチャンネルメンバー登録**、もしくは**F鯖のサーバーブースト**をして頂く必要がございます！\n"
         msg += "ふぉめチャンネルはこちら: https://www.youtube.com//holmesfems\n"
-        msg += "F鯖はこちら: https://discord.gg/arknightsflame"
+        msg += "F鯖はこちら: https://discord.gg/arknightsflame\n"
         msg += "こちらの機能は有料限定であること、どうかご了承くださいまし:woman_bowing:"
         message.channel.send(msg)
     else:
