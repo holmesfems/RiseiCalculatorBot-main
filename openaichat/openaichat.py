@@ -86,7 +86,7 @@ def openaichat(msgList) -> ChatReply:
     with open("openaichat/systemPrompt.txt","r",encoding="utf-8_sig") as f:
         SYSTEM_PROMPT = f.read()
     response = openai.ChatCompletion.create(
-        model="gpt-4",
+        model="gpt-4-1106-preview",
         messages=[
             {"role": "system", "content" : SYSTEM_PROMPT},
         ] + msgList,
