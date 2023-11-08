@@ -65,7 +65,8 @@ class MatchTagResponseData:
 
 def matchTag(result:str) -> MatchTagResponseData:
     listResult = result.split("\n")
-    listResult = [item.replace('.','') for item in listResult] #塵の影響を除去..?
+    listResult = [item.replace('.','').replace('ブ',"プ") for item in listResult] #塵の影響を除去..?
+
     #localeの判断は当てにならないので(大体undになる)、順番にマッチを試す
     #そこまでコストの高い計算でもないので、現状これでいいでしょう
     jpMatch = matchJaTag(listResult)

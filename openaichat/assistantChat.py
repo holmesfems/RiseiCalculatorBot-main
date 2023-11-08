@@ -36,6 +36,7 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
         return CalculatorManager.riseistages(targetEstimated,True,CalculateMode.SANITY,maxItems=5)
     elif(functionName == "riseilists"):
         targetEstimated = functionArgs["target"]
+        targetEstimated = targetEstimated.replace("賃格証","資格証")
         targetDict = {
             "基準マップ":"basemaps",
             "理性価値表":"san_value_lists",
