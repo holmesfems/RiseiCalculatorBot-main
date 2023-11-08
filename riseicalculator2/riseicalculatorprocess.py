@@ -405,7 +405,7 @@ class StageInfo:
         
         #カテゴリ辞書の作成
         categoryDict = getStageCategoryDict(self.isGlobal)
-        self.categoryDict ={}
+        self.categoryDict:Dict[str,dict] ={}
         for key,value in categoryDict.items():
             #print(value)
             self.categoryDict[key] = {
@@ -957,17 +957,17 @@ class CalculatorManager:
         riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         #print(riseiValue)
         calculator = CalculatorManager.selectCalculator(isGlobal)
-        categoryValue = calculator.stageInfo.categoryDict.get(targetCategory)
-        title = "昇進素材検索"
-        stages = categoryValue.get("Stages",[])
-        stagesToShow = CalculatorManager.filterStagesByShowMinTimes(stages,showMinTimes,isGlobal)
-        if not stagesToShow:
+        if not (categoryValue := calculator.stageInfo.categoryDict.get(targetCategory)):
             return RCReply(
                 embbedTitle=title,
                 embbedContents=["無効なカテゴリ:" + targetCategory],
                 msgType=RCMsgType.ERR,
                 responseForAI=f"Error: Invalid Category: {targetCategory}"
             )
+        title = "昇進素材検索"
+        stages = categoryValue.get("Stages",[])
+        stagesToShow = CalculatorManager.filterStagesByShowMinTimes(stages,showMinTimes,isGlobal)
+        
 
         msgHeader = categoryValue["to_ja"]+ ": {2}価値(中級)={0:.3f}±{1:.3f}\n".format(riseiValues.getValueFromZH(categoryValue["MainItem"]),riseiValues.getStdDevFromZH(categoryValue["MainItem"]),str(mode))
         msgChunks = [msgHeader]

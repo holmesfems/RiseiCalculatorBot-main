@@ -130,7 +130,7 @@ def getItemRarity4(glob:bool) -> List[str]:
 def getValueTarget(glob:bool) -> List[str]:
     return getGlobalOrMainland("ValueTarget",glob)
 
-def getStageCategoryDict(glob:bool):
+def getStageCategoryDict(glob:bool) -> Dict[str,dict]:
     if glob:
         return StageCategoryDict["main"]
     else:
