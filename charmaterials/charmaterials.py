@@ -375,7 +375,7 @@ class OperatorCostsCalculator:
         jsonForAI = {
             "skillName": skillName,
             "skillNumber": skillNum,
-            "masterCosts":[]
+            "itemCosts":[]
         }
         if(description):
             msgList.append(description + "\n\n")
@@ -385,8 +385,8 @@ class OperatorCostsCalculator:
             headerMsg = "特化{0} 理性価値:{1:.2f}".format(i,riseiValue)
             blockMsg = masterCost.toStrBlock()
             msgList.append(headerMsg + blockMsg + "\n")
-            jsonForAI["masterCosts"].append({
-                "phase":i,
+            jsonForAI["itemCosts"].append({
+                "phase": f"特化{i}",
                 "sanityValue":riseiValue,
                 "costItem":masterCost.itemArray.toNameCountDict()
             })
@@ -540,7 +540,7 @@ class OperatorCostsCalculator:
         title = "昇進必要素材検索: " + costItem.name
         msgList = []
         jsonForAI = {
-            "eliteCost":[]
+            "itemCosts":[]
         }
         for i in range(1,3):
             eliteCost = eliteCostList[i-1]
@@ -549,7 +549,7 @@ class OperatorCostsCalculator:
             blockMsg = eliteCost.toStrBlock()
             msgList.append(headerMsg + blockMsg + "\n")
             jsonForAI["eliteCost"].append({
-                "phase":i,
+                "phase":f"昇進{i}",
                 "sanityValue":riseiValue,
                 "costItem":eliteCost.itemArray.toNameCountDict()
             })
