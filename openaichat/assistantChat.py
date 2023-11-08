@@ -127,7 +127,7 @@ class ChatSession:
             thread_id=thread.id,
             assistant_id=self.assistantSession.id
         )
-        rcReplies = await ChatSession.__completeRun(run)
+        rcReplies = await ChatSession.__completeRun(run,thread)
         if(run.status != "completed"):
             print(f"status is not completed: {run=}")
             return ["failed"]
@@ -163,10 +163,10 @@ class ChatSession:
         return ret
         
     @staticmethod
-    async def __waitRun(run:Run):
+    async def __waitRun(run:Run,thread:Thread):
         i = 0
         while True:
-            run = ChatSession.__client.beta.threads.runs.retrieve(run.id,thread_id=run.thread_id)
+            run = ChatSession.__client.beta.threads.runs.retrieve(run.id,thread_id=thread.id)
             print(f"waiting, now = {i} seconds")
             if(run.status not in ["queued", "in_progress"]):
                 return
