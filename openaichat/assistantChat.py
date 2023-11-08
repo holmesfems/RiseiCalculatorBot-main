@@ -90,7 +90,7 @@ class ChatSession:
         assistantList = ChatSession.__client.beta.assistants.list(order="desc")
         assistant = next(filter(lambda x: x.name == self.name,assistantList),None)
 
-        with open("toolList_forAssistant.yaml","rb") as f:
+        with open("openaichat/toolList.yaml","rb") as f:
             toolList = yaml.safe_load(f)
 
         if assistant is None:
