@@ -170,6 +170,7 @@ class ChatSession:
             print(f"waiting, now = {i} seconds")
             if(run.status not in ["queued", "in_progress"]):
                 return
+            i += 1
             await asyncio.sleep(1)
 
     @staticmethod
