@@ -174,10 +174,10 @@ class ChatSession:
             await asyncio.sleep(1)
 
     @staticmethod
-    async def __completeRun(run:Run) -> List[RCReply]:
+    async def __completeRun(run:Run,thread:Thread) -> List[RCReply]:
         ret = []
         while True:
-            await ChatSession.__waitRun(run)
+            await ChatSession.__waitRun(run,thread)
             if(run.status in ["completed","failed","cancelled","expired"]): return ret
             if(run.status == "requires_action"):
                 actions = run.required_action.submit_tool_outputs.tool_calls
