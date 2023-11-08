@@ -84,3 +84,6 @@ class RCReply:
         if(type(self.attatchments) is list):
             return [File(item) for item in self.attatchments]
         else: return [File(self.attatchments)]
+
+    def isMSGEmpty(self) -> bool:
+        return not self.plainText and not self.embbedContents and not self.attatchments

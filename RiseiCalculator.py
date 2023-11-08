@@ -7,7 +7,7 @@ from discord.ext import tasks
 import traceback
 from recruitment import recruitment,recruitFromOCR
 import happybirthday.happybirthday as birthday
-import openaichat.openaichat as chatbot
+from openaichat.assistantChat import ChatSessionManager as chatbot
 from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode,getStageCategoryDict,DEFAULT_CACHE_TIME,DEFAULT_SHOW_MIN_TIMES
 from typing import List,Dict,Literal
 import datetime
@@ -426,48 +426,16 @@ def checkIsMember(user:discord.User) -> bool:
     return False
 
 OPENAI_CHANNELID = int(os.environ["OPENAI_CHANNELID"])
-async def msgForAIChat(message:discord.Message):
-    global ISINPROCESS_AICHAT
-    if(ISINPROCESS_AICHAT): return
-    try:
-        ISINPROCESS_AICHAT = True
-        messageable = client.get_partial_messageable(message.channel.id)
-        messages = [message async for message in messageable.history(limit = MAXLOG, after = datetime.datetime.now(tz=JST) - datetime.timedelta(minutes = 10),oldest_first=False)]
-        toAI = [{"role": "assistant" if message.author.bot else "user", "content" : message.content} for message in messages]
-        toAI.reverse()
-        def msgFilter(msg): #空メッセージ、長すぎるメッセージを除外
-            content = msg["content"]
-            if content == "": return False
-            if len(content) > MAXMSGLEN: return False
-            return True
-        toAI = list(filter(msgFilter,toAI))
-        sendToAI = []
-        for item in toAI:
-            if(not sendToAI):
-                sendToAI.append(item)
-                continue
-            if(sendToAI[-1]["role"] == "assistant"):
-                if(item["role"] == "assistant"):
-                    #botの連続したメッセージは、二通目以降を無視する
-                    continue
-            sendToAI.append(item)
-        print(f"{sendToAI=}")
-        async with message.channel.typing():
-            reply = chatbot.openaichat(sendToAI)
-            channel = message.channel
-            if(reply.type is chatbot.ChatType.TEXT):
-                if(reply.plainText):
-                    await channel.send(content = reply.plainText)
-            else:
-                await channel.send(content = reply.plainText)
-                if(reply.content is not None):
-                    await sendReplyToDiscord.sendToDiscord(channel,reply.content)
-                
-    except Exception as e:
-        msg = showException()
-        print(msg)
-    finally:
-        ISINPROCESS_AICHAT = False
+async def msgForAIChat(message:discord.Message,threadName:str):
+    messageText = message.content
+    print(f"{messageText=}")
+    async with message.channel.typing():
+        replies,functionOutputs = await chatbot.doChat(threadName,messageText)
+        channel = message.channel
+        retMsg = "\n".join(replies)
+        await channel.send(content = retMsg)
+        for item in functionOutputs:
+            await sendReplyToDiscord.sendToDiscord(channel,item)
 
 RECRUIT_CHANNELID = int(os.environ["RECRUIT_CHANNELID"])
 async def msgForOCR(message:discord.Message):
@@ -492,16 +460,15 @@ async def msgForDM(message:discord.Message):
         message.channel.send(msg)
     else:
         print("DM Recieved from: "+str(message.author))
-        await msgForAIChat(message)
+        await msgForAIChat(message,str(message.author.id))
         
-MAXLOG = 10
 MAXMSGLEN = 200
-ISINPROCESS_AICHAT = False
+
 @client.event
 async def on_message(message:discord.Message):
     if(message.author.bot): return
     if message.channel.id == OPENAI_CHANNELID:
-        await msgForAIChat(message)
+        await msgForAIChat(message,"public")
     elif message.channel.id == RECRUIT_CHANNELID:
         await msgForOCR(message)
     elif message.channel.type is discord.ChannelType.private:

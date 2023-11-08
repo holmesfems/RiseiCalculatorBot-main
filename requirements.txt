@@ -2,7 +2,7 @@ discord.py
 pandas
 scipy
 pyyaml
-openai
+openai==1.1.1
 openpyxl
 StrEnum
 google-cloud-vision
