@@ -165,7 +165,7 @@ class ChatSession:
     @staticmethod
     async def __waitRun(run:Run):
         while True:
-            run = ChatSession.__client.beta.threads.runs.retrieve(run.id,thread_id=thread.id)
+            run = ChatSession.__client.beta.threads.runs.retrieve(run.id,thread_id=run.thread_id)
             if(run.status not in ["queued", "in_progress"]):
                 return
             await asyncio.sleep(1)
