@@ -127,7 +127,7 @@ class ChatSession:
             thread_id=thread.id,
             assistant_id=self.assistantSession.id
         )
-        rcReplies = await ChatSession.__completeRun(run,thread)
+        run,rcReplies = await ChatSession.__completeRun(run,thread)
         if(run.status != "completed"):
             print(f"status is not completed: {run=}")
             return ["failed"]
@@ -172,13 +172,14 @@ class ChatSession:
                 break
             i += 1
             await asyncio.sleep(1)
+        return run
 
     @staticmethod
-    async def __completeRun(run:Run,thread:Thread) -> List[RCReply]:
+    async def __completeRun(run:Run,thread:Thread):
         ret = []
         while True:
-            await ChatSession.__waitRun(run,thread)
-            if(run.status in ["completed","failed","cancelled","expired"]): return ret
+            run = await ChatSession.__waitRun(run,thread)
+            if(run.status in ["completed","failed","cancelled","expired"]): break
             if(run.status == "requires_action"):
                 actions = run.required_action.submit_tool_outputs.tool_calls
                 tool_outputs = []
@@ -196,6 +197,7 @@ class ChatSession:
                     thread_id=run.thread_id,
                     tool_outputs=tool_outputs
                 )
+        return (run,ret)
 
     @staticmethod
     def newThread() -> Thread:
