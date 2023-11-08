@@ -548,7 +548,7 @@ class OperatorCostsCalculator:
             headerMsg = "昇進{0} 理性価値:{1:.2f}".format(i,riseiValue)
             blockMsg = eliteCost.toStrBlock()
             msgList.append(headerMsg + blockMsg + "\n")
-            jsonForAI["eliteCost"].append({
+            jsonForAI["itemCosts"].append({
                 "phase":f"昇進{i}",
                 "sanityValue":riseiValue,
                 "costItem":eliteCost.itemArray.toNameCountDict()
@@ -603,14 +603,14 @@ class OperatorCostsCalculator:
             bodyMsg = ""
             jsonItem = {
                 "typeName" : f"{eqCostItem.type}",
-                "stageCost": []
+                "itemCosts": []
             }
             for i in range(3):
                 eqCost = eqCostItem.phaseCosts[i]
                 phaseMsg = f"{header} Stage.{i+1} 理性価値:{eqCost.toRiseiValue_OnlyValueTarget(isGlobal):.2f}"
                 blockMsg = eqCost.toStrBlock()
                 bodyMsg += phaseMsg + blockMsg + "\n"
-                jsonItem["stageCost"].append({
+                jsonItem["itemCosts"].append({
                     "phase": "Unlock" if i == 0 else f"Modify Stage {i}",
                     "sanityValue" : round(eqCost.toRiseiValue_OnlyValueTarget(isGlobal),2),
                     "costItem": eqCost.itemArray.toNameCountDict()
