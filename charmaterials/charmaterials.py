@@ -402,7 +402,7 @@ class OperatorCostsCalculator:
         headerMsg = "合計  中級換算"
         blockMsg = r2Cost.toStrBlock()
         msgList.append(headerMsg + blockMsg)
-        jsonForAI["totalIntermediateConvertion"] = r2Cost.itemArray.toNameCountDict()
+        #jsonForAI["totalIntermediateConvertion"] = r2Cost.itemArray.toNameCountDict()
 
         return RCReply(
             embbedTitle=title,
@@ -565,7 +565,7 @@ class OperatorCostsCalculator:
         headerMsg = "合計  中級換算"
         blockMsg = r2Cost.toStrBlock()
         msgList.append(headerMsg + blockMsg)
-        jsonForAI["totalIntermediateConvertion"] = r2Cost.itemArray.toNameCountDict()
+        #jsonForAI["totalIntermediateConvertion"] = r2Cost.itemArray.toNameCountDict()
         return RCReply(
             embbedTitle=title,
             embbedContents=msgList,
@@ -621,7 +621,7 @@ class OperatorCostsCalculator:
             lastMsg += "合計 中級換算:"
             lastMsg += totalCost.rare3and4ToRare2().toStrBlock()
             msgList.append(bodyMsg + lastMsg + "\n")
-            jsonItem["totalIntermediateConvertion"] = totalCost.rare3and4ToRare2().itemArray.toNameCountDict()
+            #jsonItem["totalIntermediateConvertion"] = totalCost.rare3and4ToRare2().itemArray.toNameCountDict()
             jsonForAI.append(jsonItem)
         
         return RCReply(

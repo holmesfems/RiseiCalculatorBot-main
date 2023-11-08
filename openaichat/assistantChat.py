@@ -186,6 +186,7 @@ class ChatSession:
                 for action in actions:
                     functionName = action.function.name
                     functionArgs = json.loads(action.function.arguments)
+                    print(f"function detected: {functionName=}, {functionArgs=}")
                     functionRes = toolCalling(functionName,functionArgs)
                     if(not functionRes.isMSGEmpty()):ret.append(functionRes)
                     tool_outputs.append({
