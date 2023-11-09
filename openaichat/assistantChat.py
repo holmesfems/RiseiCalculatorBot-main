@@ -38,16 +38,12 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
         targetEstimated = functionArgs["target"]
         targetEstimated = targetEstimated.replace("賃格証","資格証")
         targetDict = {
-            "基準マップ":"basemaps",
-            "理性価値表":"san_value_lists",
-            "初級資格証効率表":"te2list",
-            "初級効率表":"te2list",
-            "上級資格証効率表":"te3list",
-            "上級効率表":"te3list",
-            "特別引換証効率表":"special_list",
-            "特別効率表":"special_list",
-            "契約賞金引換効率表": "cclist",
-            "契約賞金効率表": "cclist",
+            "Base stage table":"basemaps",
+            "Sanity-Value table":"san_value_lists",
+            "Commendation Certificate Efficiency table":"te2list",
+            "Distinction Certificate Efficiency table":"te3list",
+            "Parametric Model Efficiency table":"special_list",
+            "Contract Bounty Efficiency table": "cclist",
         }
         printTarget = targetDict.get(targetEstimated,None)
         if(printTarget):

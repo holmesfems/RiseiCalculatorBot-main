@@ -10,6 +10,7 @@
           type: string
           description: Category of the material
           enum:
+          #日本語の場合、AIが誤字する場合があったので英語に書き換える
           - Orirock
           - Device
           - Polyester
@@ -44,20 +45,20 @@
 - type: function
   function:
     name: riseilists
-    description: Get the content of the specified list
+    description: Get the contents of a table about sanity efficiency
     parameters:
       type: object
       properties:
         target:
           type: string
-          description: Name of the list
+          description: Name of the table
           enum:
-          - 基準マップ
-          - 理性価値表
-          - 初級資格証効率表
-          - 上級資格証効率表
-          - 特別引換証効率表
-          - 契約賞金効率表
+          - Base stage table
+          - Sanity-Value table
+          - Commendation Certificate Efficiency table
+          - Distinction Certificate Efficiency table
+          - Parametric Model Efficiency table
+          - Contract Bounty Efficiency table
       required:
       - target
 - type: function
