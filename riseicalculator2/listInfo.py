@@ -137,7 +137,7 @@ def getStageCategoryDict(glob:bool) -> Dict[str,dict]:
         return {**StageCategoryDict["main"],**StageCategoryDict["new"]}
     
 def estimateCategoryFromJPName(current:str):
-    with open("riseicalculator2/categoryEnToZh.yaml","rb"):
+    with open("riseicalculator2/categoryEnToZh.yaml","rb") as f:
         categoryEnToZh:Dict[str,str] = yaml.safe_load(f)
     if zh := categoryEnToZh.get(current,None):
         return zh
