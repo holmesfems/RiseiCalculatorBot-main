@@ -195,7 +195,7 @@ class ChatSession:
                 elif (file_path := getattr(annotation, 'file_path', None)):
                     cited_file = ChatSession.__client.files.retrieve(file_path.file_id)
                     file = ChatSession.__client.files.with_raw_response.retrieve_content(cited_file.id)
-                    msgValue = msgValue.replace(annotation.text, f'')
+                    msgValue = msgValue.replace(annotation.text, f'{file.url}')
                     files.append(ChatFile(file.content,pathlib.Path(cited_file.filename).name))
             ret.append(msgValue + "\n" + "\n".join(citations))
         return ChatReply(msg = "\n".join(ret), fileList=files)
