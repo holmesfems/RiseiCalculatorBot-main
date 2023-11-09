@@ -107,14 +107,25 @@ class ChatSession:
         )
         return assistant
     
+    def deleteThread(self,threadName:str):
+        if(self.threads.get(threadName)):
+            del self.threads[threadName]
+        if(self.lastRepliedTime.get(threadName)):
+            del self.lastRepliedTime
+    
+    __CLEARCOMMANDS = ["reset","clear"]
+
     async def doChat(self, msg:str, threadName:str) -> Tuple[List[str],List[RCReply]]:
-        thread = self.threads.get(threadName,ChatSession.newThread())
+        if(msg in ChatSession.__CLEARCOMMANDS):
+            self.deleteThread(threadName)
+            return (["会話履歴をリセットしたわ。"],[])
+        thread = self.threads.get(threadName,ChatSession.__newThread())
         now = getnow()
         lastReplied = self.lastRepliedTime.get(threadName,now)
 
         if(now - lastReplied > self.timeout):
             # 10分過ぎたら記憶をクリアして新しいセッションを始める
-            thread = self.newThread()
+            thread = self.__newThread()
         message = ChatSession.__client.beta.threads.messages.create(
             thread_id=thread.id,
             role = "user",
@@ -198,7 +209,7 @@ class ChatSession:
         return (run,ret)
 
     @staticmethod
-    def newThread() -> Thread:
+    def __newThread() -> Thread:
         return ChatSession.__client.beta.threads.create()
     
 class ChatSessionManager:
