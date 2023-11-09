@@ -42,7 +42,7 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
             "Sanity-Value table":"san_value_lists",
             "Commendation Certificate Efficiency table":"te2list",
             "Distinction Certificate Efficiency table":"te3list",
-            "Parametric Model Efficiency table":"special_list",
+            "Special Exchange Order Efficiency table":"special_list",
             "Contract Bounty Efficiency table": "cclist",
         }
         printTarget = targetDict.get(targetEstimated,None)
