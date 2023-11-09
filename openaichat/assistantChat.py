@@ -12,7 +12,7 @@ import json
 import os
 from typing import Dict,List,Tuple
 import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass,field
 from discord import Attachment
 import requests,pathlib
 from charmaterials.charmaterials import OperatorCostsCalculator
@@ -31,8 +31,8 @@ class ChatFile:
 @dataclass
 class ChatReply:
     msg:str = ""
-    fileList:List[ChatFile] = []
-    rcReplies:List[RCReply] = []
+    fileList:List[ChatFile] = field(default_factory=list)
+    rcReplies:List[RCReply] = field(default_factory=list)
 
 def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
     if(functionName == "riseimaterials"):
