@@ -122,7 +122,7 @@ class ChatSession:
         if(self.threads.get(threadName)):
             del self.threads[threadName]
         if(self.lastRepliedTime.get(threadName)):
-            del self.lastRepliedTime
+            del self.lastRepliedTime[threadName]
     
     __CLEARCOMMANDS = ["reset","clear"]
 
@@ -205,7 +205,7 @@ class ChatSession:
         i = 0
         while True:
             run = ChatSession.__client.beta.threads.runs.retrieve(run.id,thread_id=thread.id)
-            print(f"waiting, now = {i} seconds")
+            print(f"\rwaiting, now = {i} seconds",end="")
             if(run.status not in ["queued", "in_progress"]):
                 break
             i += 1
