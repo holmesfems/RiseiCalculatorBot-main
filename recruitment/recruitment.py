@@ -1,3 +1,4 @@
+from __future__ import annotations
 import yaml
 import itertools
 from typing import List,Tuple,Optional
@@ -8,7 +9,7 @@ class RecruitTag:
         self.name = tagName
         self.type = ...
 
-    def containedIn(operator):...
+    def containedIn(operator:Operator):...
 
     def __repr__(self):
         return self.name
@@ -18,7 +19,7 @@ class EliteTag(RecruitTag):
         RecruitTag.__init__(self,tagName)
         self.type = "elite"
 
-    def containedIn(self,operator):
+    def containedIn(self,operator:Operator):
         stars = operator.stars
         if(stars == 5 and self.name == "エリート"):
             return True
@@ -31,7 +32,7 @@ class JobTag(RecruitTag):
         RecruitTag.__init__(self,tagName)
         self.type = "job"
     
-    def containedIn(self,operator):
+    def containedIn(self,operator:Operator):
         if(operator.job == self.name):
             return True
         return False
@@ -41,7 +42,7 @@ class PositionAndOtherTag(RecruitTag):
         RecruitTag.__init__(self,tagName)
         self.type = "other"
     
-    def containedIn(self,operator):
+    def containedIn(self,operator:Operator):
         if(self.name in operator.tags):
             return True
         return False
@@ -93,7 +94,7 @@ def createTagList(tagNameList):
 def createCombinations(tagClassList:List[RecruitTag],number:int):
     return list(itertools.combinations(tagClassList,number))
 
-def satisfyTags(operator,tagClassList:List[RecruitTag]):
+def satisfyTags(operator:Operator,tagClassList:List[RecruitTag]):
     #星6は上級エリート必須
     needElite = (int(operator.stars) == 6)
     hasElite = False
@@ -124,7 +125,7 @@ def minStar(operatorList:List[Operator]):
         return max(restList)
     return 0
 
-def isIndependent(key,keyList):
+def isIndependent(key:tuple,keyList:List[tuple]):
     return all(not allAinBnotEq(item,key) for item in keyList)
 
 def clearSearchMap(redundantMap:dict):

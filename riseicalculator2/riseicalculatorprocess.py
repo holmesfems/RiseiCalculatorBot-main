@@ -16,7 +16,7 @@ from typing import Dict,List,Optional,Tuple
 from enum import StrEnum
 import enum
 from riseicalculator2.listInfo import *
-import re
+from dataclasses import dataclass
 
 PENGUIN_URL = 'https://penguin-stats.io/PenguinStats/api/v2/'
 EPSILON = 1e-6
@@ -78,13 +78,10 @@ class CalculateMode(StrEnum):
         else:
             return "時間"
 
+@dataclass
 class DropItem:
-    def __init__(self,dropRate:float,times:int):
-        self.dropRate = dropRate
-        self.times = times
-    
-    def __repr__(self) -> str:
-        return str(self.dropRate)
+    dropRate:float
+    times:int
 
 class DropList:
     ##SampleJson: {"stageId":"act18d0_08_perm","itemId":"30073","times":19118,"quantity":308,"stdDev":0.1259,"start":1620244800000,"end":null},
