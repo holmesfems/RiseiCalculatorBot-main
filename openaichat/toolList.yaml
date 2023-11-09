@@ -10,22 +10,22 @@
           type: string
           description: Category of the material
           enum:
-          - 源岩
-          - 装置
-          - エステル
-          - 糖
-          - 異鉄
-          - アケトン
-          - 合成コール
-          - マンガン
-          - 砥石
+          - Orirock
+          - Device
+          - Polyester
+          - Sugar
+          - Ori-iron
+          - Aketon
+          - Kohl
+          - Manganese
+          - Grindstone
           - RMA
-          - ゲル
-          - 熾合金
-          - 素子結晶
-          - 溶剤
-          - 切削液
-          - 転化塩
+          - Gel
+          - Incandescent Alloy
+          - Crystalline
+          - Solvent
+          - Cutting Fluid
+          - Transmuted Salt
       required:
       - target
 - type: function

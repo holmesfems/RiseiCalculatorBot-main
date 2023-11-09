@@ -137,12 +137,12 @@ def getStageCategoryDict(glob:bool) -> Dict[str,dict]:
         return {**StageCategoryDict["main"],**StageCategoryDict["new"]}
     
 def estimateCategoryFromJPName(current:str):
+    with open("riseicalculator2/categoryEnToZh.yaml","rb"):
+        categoryEnToZh:Dict[str,str] = yaml.safe_load(f)
+    if zh := categoryEnToZh.get(current,None):
+        return zh
     categoryDict = getStageCategoryDict(glob=False)
-    estimatedValue = next(filter(lambda x: current in x[1]["to_ja"] or x[1]["to_ja"] in current,categoryDict.items()),None)
-    if(estimatedValue): return estimatedValue[0]
+    if(estimatedValue:=next(filter(lambda x: current in x[1]["to_ja"] or x[1]["to_ja"] in current,categoryDict.items()),None)):
+        return estimatedValue[0]
     return current
-
-def getCategoryFromId(idStr:str):
-    zhName = ItemIdToName.getZH(idStr)
-    categoryDict = getStageCategoryDict(glob=False)
     
