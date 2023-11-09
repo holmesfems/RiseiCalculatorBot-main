@@ -103,4 +103,3 @@
       required:
       - target
 - type: code_interpreter
-- type: retrieval
