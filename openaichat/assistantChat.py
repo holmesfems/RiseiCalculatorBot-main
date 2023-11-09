@@ -205,7 +205,8 @@ class ChatSession:
         i = 0
         while True:
             run = ChatSession.__client.beta.threads.runs.retrieve(run.id,thread_id=thread.id)
-            print(f"\rwaiting, now = {i} seconds",end="")
+            if(i%5 == 0):
+                print(f"waiting, now = {i} seconds")
             if(run.status not in ["queued", "in_progress"]):
                 break
             i += 1
