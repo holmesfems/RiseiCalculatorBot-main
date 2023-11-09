@@ -12,7 +12,9 @@ import json
 import os
 from typing import Dict,List,Tuple
 import datetime
-
+from dataclasses import dataclass
+from discord import Attachment
+import requests,pathlib
 from charmaterials.charmaterials import OperatorCostsCalculator
 from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode
 from riseicalculator2 import listInfo
@@ -21,7 +23,16 @@ from rcutils.rcReply import RCReply
 with open("openaichat/systemPrompt.txt","r",encoding="utf-8_sig") as f:
     SYSTEM_PROMPT = f.read()
 
+@dataclass
+class ChatFile:
+    bytesData:bytes
+    filename:str = ""
 
+@dataclass
+class ChatReply:
+    msg:str = ""
+    fileList:List[ChatFile] = []
+    rcReplies:List[RCReply] = []
 
 def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
     if(functionName == "riseimaterials"):
@@ -115,21 +126,23 @@ class ChatSession:
     
     __CLEARCOMMANDS = ["reset","clear"]
 
-    async def doChat(self, msg:str, threadName:str) -> Tuple[List[str],List[RCReply]]:
+    async def doChat(self, msg:str, threadName:str, attachments:List[Attachment]) -> ChatReply:
         if(msg in ChatSession.__CLEARCOMMANDS):
             self.deleteThread(threadName)
-            return (["会話履歴をリセットしたわ。"],[])
+            return ChatReply(msg="会話履歴をリセットしたわ。")
         thread = self.threads.get(threadName,ChatSession.__newThread())
         now = getnow()
         lastReplied = self.lastRepliedTime.get(threadName,now)
-
+        # 10分過ぎたら記憶をクリアして新しいセッションを始める
         if(now - lastReplied > self.timeout):
-            # 10分過ぎたら記憶をクリアして新しいセッションを始める
             thread = self.__newThread()
+        
+        #添付ファイルがある場合はそれを載せる
         message = ChatSession.__client.beta.threads.messages.create(
             thread_id=thread.id,
             role = "user",
-            content=msg
+            content=msg,
+            file_ids=ChatSession.__uploadFile(attachments)
         )
         run = ChatSession.__client.beta.threads.runs.create(
             thread_id=thread.id,
@@ -138,13 +151,23 @@ class ChatSession:
         run,rcReplies = await ChatSession.__completeRun(run,thread)
         if(run.status != "completed"):
             print(f"status is not completed: {run=}")
-            return ["failed"]
+            return ChatReply(msg="failed")
         
         ret = await ChatSession.__extractMsg(thread)
         self.threads[threadName] = thread
         self.lastRepliedTime[threadName] = getnow()
-        return (ret,rcReplies)
-        
+        ret.rcReplies = rcReplies
+        return ret
+    
+    @staticmethod
+    def __uploadFile(attachments:List[Attachment]):
+        if not attachments: return []
+        print(f"detected attatchments: {attachments=}")
+        return [ChatSession.__client.files.create(
+            file=requests.get(item.url).content,
+            purpose="assistants",
+        ).id for item in attachments]
+
     @staticmethod
     async def __extractMsg(thread:Thread):
         msgList = ChatSession.__client.beta.threads.messages.list(thread_id=thread.id)
@@ -154,21 +177,28 @@ class ChatSession:
             if(item.role == "user"): break
             new_messages.append(item)
         ret:List[str] = []
+        files:List[ChatFile] = []
         for item in new_messages:
-            msgValue = item.content[0].text.value
+            msgContent = item.content[0]
+            if(msgContent.type == "image_file"):
+                image = ChatSession.__client.files.with_raw_response.retrieve_content(msgContent.image_file.file_id)
+                files.append(ChatFile(image.content,"image.png"))
+                continue
+            msgValue = msgContent.text.value
             annotations = item.content[0].text.annotations
             citations = []
             for index, annotation in enumerate(annotations):
-                msgValue = msgValue.replace(annotation.text, f' [{index}]')
-
                 if (file_citation := getattr(annotation, 'file_citation', None)):
+                    msgValue = msgValue.replace(annotation.text, f' [{index}]')
                     cited_file = ChatSession.__client.files.retrieve(file_citation.file_id)
                     citations.append(f'[{index}] {file_citation.quote} from {cited_file.filename}')
                 elif (file_path := getattr(annotation, 'file_path', None)):
                     cited_file = ChatSession.__client.files.retrieve(file_path.file_id)
-                    citations.append(f'[{index}] Click <here> to download {cited_file.filename}')
+                    file = ChatSession.__client.files.with_raw_response.retrieve_content(cited_file.id)
+                    msgValue = msgValue.replace(annotation.text, f'')
+                    files.append(ChatFile(file.content,pathlib.Path(cited_file.filename).name))
             ret.append(msgValue + "\n" + "\n".join(citations))
-        return ret
+        return ChatReply(msg = "\n".join(ret), fileList=files)
         
     @staticmethod
     async def __waitRun(run:Run,thread:Thread):
@@ -214,6 +244,6 @@ class ChatSession:
     
 class ChatSessionManager:
     __process = ChatSession("astesia_assistant")
-    async def doChat(threadName:str,msg:str):
-        reply = await ChatSessionManager.__process.doChat(msg,threadName)
+    async def doChat(threadName:str,msg:str,attachments:List[Attachment]):
+        reply = await ChatSessionManager.__process.doChat(msg,threadName,attachments)
         return reply

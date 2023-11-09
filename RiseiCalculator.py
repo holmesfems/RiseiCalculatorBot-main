@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, io
 import discord
 from discord import app_commands,Interaction
 from discord.app_commands import Choice
@@ -430,11 +430,11 @@ async def msgForAIChat(message:discord.Message,threadName:str):
     messageText = message.content
     print(f"{messageText=}")
     async with message.channel.typing():
-        replies,functionOutputs = await chatbot.doChat(threadName,messageText)
+        chatReply = await chatbot.doChat(threadName,messageText,message.attachments)
         channel = message.channel
-        retMsg = "\n".join(replies)
-        await channel.send(content = retMsg)
-        for item in functionOutputs:
+        files = [discord.File(io.BytesIO(file.bytesData),filename=file.filename) for file in chatReply.fileList]
+        await channel.send(content = chatReply.msg,files=files)
+        for item in chatReply.rcReplies:
             await sendReplyToDiscord.sendToDiscord(channel,item)
 
 RECRUIT_CHANNELID = int(os.environ["RECRUIT_CHANNELID"])
