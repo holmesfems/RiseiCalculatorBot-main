@@ -12,7 +12,8 @@ with open("recruitment/tagJaToJa.yaml","rb") as f:
     #補正用データ
     __jaExtraDict = {
         "範囲攻" : "範囲攻撃",
-        "範圍攻擊": "範囲攻撃"
+        "範圍攻擊": "範囲攻撃",
+        "一下" : "エリート"
     }
 
 #英語版認識用
@@ -39,6 +40,7 @@ def matchTagCoreProcess(result:List[str],baseDict:Dict[str,str],extraDict:Option
     if(not extraDict): return ret
     #一部誤字するやつがあるので、in検索で結果を補正
     for key,value in extraDict.items():
+        if len(ret)>=5: break
         if value in ret:continue
         if(any((key in text) for text in result)):
             ret.add(value)
@@ -80,7 +82,7 @@ def matchTag(result:str) -> MatchTagResponseData:
     if(len(zhMatch)>=5): return MatchTagResponseData(zhMatch,isGlobal=False)
     #万が一のマッチミス、日本語と中国語のマッチ結果を結合してみる
     jpzhMatch = jpMatch.union(zhMatch)
-    if(len(jpzhMatch)>=len(enMatch)): return MatchTagResponseData(jpzhMatch,isGlobal=True)
+    if(len(jpzhMatch)>=len(enMatch)): return MatchTagResponseData(jpzhMatch,isGlobal=len(jpMatch)>=len(zhMatch))
     return MatchTagResponseData(enMatch,isGlobal=True)
 
 #入力: 画像のURI
