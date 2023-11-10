@@ -34,7 +34,15 @@ class ChatReply:
     fileList:List[ChatFile] = field(default_factory=list)
     rcReplies:List[RCReply] = field(default_factory=list)
 
+
+
 def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
+    operator_typo_correction_dict = {
+        "メラニート":"メラナイト"
+    }
+    def operator_typo_correction(operatorName:str):
+        return operator_typo_correction_dict.get(operatorName,operatorName)
+
     if(functionName == "riseimaterials"):
         target = functionArgs["target"]
         targetEstimated = listInfo.estimateCategoryFromJPName(target)
@@ -67,6 +75,7 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
         autoComplete = OperatorCostsCalculator.autoCompleteForEliteCost(targetEstimated)
         if(autoComplete):
             targetEstimated = autoComplete[0][1]
+        targetEstimated = operator_typo_correction(targetEstimated)
         return OperatorCostsCalculator.operatorEliteCost(targetEstimated)
     elif(functionName == "operatormastercost"):
         targetEstimated = functionArgs["target"]
@@ -74,12 +83,14 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
         autoComplete = OperatorCostsCalculator.autoCompleteForMasterCost(targetEstimated)
         if(autoComplete):
             targetEstimated = autoComplete[0][1]
+        targetEstimated = operator_typo_correction(targetEstimated)
         return OperatorCostsCalculator.skillMasterCost(targetEstimated,number)
     elif(functionName == "operatormodulecost"):
         targetEstimated = functionArgs["target"]
         autoComplete = OperatorCostsCalculator.autoCompleteForModuleCost(targetEstimated)
         if(autoComplete):
             targetEstimated = autoComplete[0][1]
+        targetEstimated = operator_typo_correction(targetEstimated)
         return OperatorCostsCalculator.operatorModuleCost(targetEstimated)
     return RCReply(responseForAI=f"Error: function is not implemented: {functionName}")
 
