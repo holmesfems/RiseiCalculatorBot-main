@@ -477,6 +477,8 @@ async def msgForOCRReply(message:discord.Message,referencedMessage:discord.Messa
         "上エリ": "上級エリート",
         "エリ": "エリート",
         "COST": "COST回復",
+        "コスト": "COST回復",
+        "コスト回復": "COST回復",
     }
     def formatToTags(command:str):
         command.replace("タイプ","")
@@ -507,6 +509,7 @@ async def msgForOCRReply(message:discord.Message,referencedMessage:discord.Messa
             new = commandTags[1]
             resultTags = [new if item == old else item for item in resultTags]
     resultTags = remove_blank_strings(resultTags)
+    resultTags = set(resultTags)
     if(len(resultTags) > recruitment.MAX_TAGCOUNT+2):
         await sendReplyToDiscord.replyToDiscord(message,RCReply(
             plainText=f"タグが多すぎるわ。5件ぐらいまでにしてちょうだい。"
