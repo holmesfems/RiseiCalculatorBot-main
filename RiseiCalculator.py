@@ -479,13 +479,18 @@ async def msgForOCRReply(message:discord.Message,referencedMessage:discord.Messa
     def formatToTags(command:str):
         command.replace("タイプ","")
         return abbreviations.get(command,command)
+    def isNullOrEmpty(tag:str):
+        return not tag or tag.isspace()
     def isIlligal(tag:str):
         return tag not in recruitment.tagNameList
+    def remove_blank_strings(string_list:List[str]):
+        # Remove strings that are either empty or contain only whitespace
+        return [string for string in string_list if string and not string.isspace()]
     for command in addingCommands:
         commandTags = re.split(r"(?:->)|→",command)
         commandTags = [formatToTags(tag) for tag in commandTags]
         #Check Illigal
-        illigalTags = [tag for tag in commandTags if isIlligal(tag)]
+        illigalTags = [tag for tag in commandTags if isIlligal(tag) and not isNullOrEmpty(tag)]
         if(illigalTags):
             await sendReplyToDiscord.replyToDiscord(message,RCReply(
                 plainText=f"{illigalTags}のタグが違いますわ。もう一度入力してちょうだい。"
@@ -499,7 +504,7 @@ async def msgForOCRReply(message:discord.Message,referencedMessage:discord.Messa
             old = commandTags[0]
             new = commandTags[1]
             resultTags = [new if item == old else item for item in resultTags]
-    
+    resultTags = remove_blank_strings(resultTags)
     if(len(resultTags) > recruitment.MAX_TAGCOUNT+2):
         await sendReplyToDiscord.replyToDiscord(message,RCReply(
             plainText=f"タグが多すぎるわ。5件ぐらいまでにしてちょうだい。"
