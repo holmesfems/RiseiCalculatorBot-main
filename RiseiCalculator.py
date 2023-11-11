@@ -490,6 +490,9 @@ async def msgForOCRReply(message:discord.Message,referencedMessage:discord.Messa
     def remove_blank_strings(string_list:List[str]):
         # Remove strings that are either empty or contain only whitespace
         return [string for string in string_list if string and not string.isspace()]
+    #返信先のEmbedsのタイトルに問題があるとき
+    if any(isIlligal(tag) for tag in existingTags):
+        return
     for command in addingCommands:
         commandTags = re.split(r"(?:->)|→",command)
         commandTags = [formatToTags(tag) for tag in commandTags]
