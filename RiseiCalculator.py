@@ -460,7 +460,9 @@ async def msgForOCRReply(message:discord.Message,referencedMessage:discord.Messa
             plainText="返信メッセージが違うわ。計算結果の方にリプしてちょうだい。"
         ))
         return
-    addingCommands = re.split(r"\s|\n",message.content)
+    def splitBySpacestrings(string:str):
+        return re.split(r"(?:\s|\n|　)+",string)
+    addingCommands = splitBySpacestrings(message.content)
     if not addingCommands:
         return
     if (embedsTitle:= embeds[0].title) is None: return
@@ -469,7 +471,7 @@ async def msgForOCRReply(message:discord.Message,referencedMessage:discord.Messa
     if(mainlandMark in embedsTitle):
         isGlobal = False
         embedsTitle = embedsTitle.replace(mainlandMark,"")
-    existingTags = re.split(r"\s|\n",embedsTitle)
+    existingTags = splitBySpacestrings(embedsTitle)
     resultTags = existingTags
     abbreviations = {
         "上エリ": "上級エリート",
