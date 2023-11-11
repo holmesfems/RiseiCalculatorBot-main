@@ -482,7 +482,7 @@ async def msgForOCRReply(message:discord.Message,referencedMessage:discord.Messa
     def isIlligal(tag:str):
         return tag not in recruitment.tagNameList
     for command in addingCommands:
-        commandTags = re.split(r"(->)|→",command)
+        commandTags = re.split(r"(?:->)|→",command)
         commandTags = [formatToTags(tag) for tag in commandTags]
         #Check Illigal
         illigalTags = [tag for tag in commandTags if isIlligal(tag)]
