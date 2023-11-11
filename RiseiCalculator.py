@@ -451,7 +451,7 @@ async def msgForOCR(message:discord.Message):
         await sendReplyToDiscord.replyToDiscord(message,msg)
         if(tagMatch.isIllegal()):
             await sendReplyToDiscord.replyToDiscord(message,RCReply(
-                plainText="タグが欠けているようね。上に足りないタグを日本語でリプすれば、再計算させていただきますわ。"
+                plainText="タグが欠けているようね。上に足りないタグを日本語でリプすれば、再計算させていただきますわ。詳しくはチャンネル概要見てね。"
             ))
 
 async def msgForOCRReply(message:discord.Message,referencedMessage:discord.Message):
