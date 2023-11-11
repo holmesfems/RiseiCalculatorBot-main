@@ -1,7 +1,7 @@
 from __future__ import annotations
 import yaml
 import itertools
-from typing import List,Tuple,Optional
+from typing import List,Tuple,Optional,Iterable
 from rcutils.rcReply import RCMsgType,RCReply
 
 class RecruitTag:
@@ -74,6 +74,8 @@ eliteTags = tagList["eliteTags"]
 otherTags = tagList["otherTags"]
 
 tagNameList:List[str] =  jobTags + positionTags + eliteTags + otherTags
+
+MAX_TAGCOUNT = 5
 
 def createTag(tagName):
     if tagName in tagList["eliteTags"]:
@@ -184,7 +186,7 @@ def searchMapToStringChunks(searchMap):
         chunks.append(chunk)
     return chunks
             
-def recruitDoProcess(inputTagList:List[str],minStar:Optional[int]=None,isGlobal:bool=True) -> RCReply:
+def recruitDoProcess(inputTagList:Iterable[str],minStar:Optional[int]=None,isGlobal:bool=True) -> RCReply:
     #OpenAIから呼び出す予定なし
     inputList = set(inputTagList)
     inputList = list(filter(lambda x:x is not None and x in tagNameList,inputList))

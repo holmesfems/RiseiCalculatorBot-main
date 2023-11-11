@@ -1,4 +1,4 @@
-import os, sys, io
+import os, sys, io, re
 import discord
 from discord import app_commands,Interaction
 from discord.app_commands import Choice
@@ -449,6 +449,64 @@ async def msgForOCR(message:discord.Message):
         if(not tagMatch):return
         msg = recruitment.recruitDoProcess(tagMatch.matches,4,isGlobal=tagMatch.isGlobal)
         await sendReplyToDiscord.replyToDiscord(message,msg)
+        if(tagMatch.isIllegal()):
+            await sendReplyToDiscord.replyToDiscord(message,RCReply(
+                plainText="タグが欠けているようね。上に足りないタグを日本語でリプすれば、再計算させていただきますわ。"
+            ))
+
+async def msgForOCRReply(message:discord.Message,referencedMessage:discord.Message):
+    if(not (embeds := referencedMessage.embeds)):
+        await sendReplyToDiscord.replyToDiscord(message,RCReply(
+            plainText="返信メッセージが違うわ。計算結果の方にリプしてちょうだい。"
+        ))
+        return
+    addingCommands = re.split(r"\s|\n",message.content)
+    if not addingCommands:
+        return
+    if (embedsTitle:= embeds[0].title) is None: return
+    isGlobal = True
+    mainlandMark = "(大陸版)"
+    if(mainlandMark in embedsTitle):
+        isGlobal = False
+        embedsTitle = embedsTitle.replace(mainlandMark,"")
+    existingTags = re.split(r"\s|\n",embedsTitle)
+    resultTags = existingTags
+    abbreviations = {
+        "上エリ": "上級エリート",
+        "エリ": "エリート",
+        "COST": "COST回復",
+    }
+    def formatToTags(command:str):
+        command.replace("タイプ","")
+        return abbreviations.get(command,command)
+    def isIlligal(tag:str):
+        return tag not in recruitment.tagNameList
+    for command in addingCommands:
+        commandTags = re.split(r"(->)|→",command)
+        commandTags = [formatToTags(tag) for tag in commandTags]
+        #Check Illigal
+        illigalTags = [tag for tag in commandTags if isIlligal(tag)]
+        if(illigalTags):
+            await sendReplyToDiscord.replyToDiscord(message,RCReply(
+                plainText=f"{illigalTags}のタグが違いますわ。もう一度入力してちょうだい。"
+            ))
+            return
+        if(len(commandTags) == 1):
+            #直接追加
+            resultTags.append(commandTags[0])
+        elif(len(commandTags) == 2):
+            #書き換え
+            old = commandTags[0]
+            new = commandTags[1]
+            resultTags = [new if item == old else item for item in resultTags]
+    
+    if(len(resultTags) > recruitment.MAX_TAGCOUNT+2):
+        await sendReplyToDiscord.replyToDiscord(message,RCReply(
+            plainText=f"タグが多すぎるわ。5件ぐらいまでにしてちょうだい。"
+        ))
+        return
+    msg = recruitment.recruitDoProcess(resultTags,4,isGlobal=isGlobal)
+    await sendReplyToDiscord.replyToDiscord(message,msg)
 
 async def msgForDM(message:discord.Message):
     if(not checkIsMember(message.author)):
@@ -470,6 +528,11 @@ async def on_message(message:discord.Message):
     if message.channel.id == OPENAI_CHANNELID:
         await msgForAIChat(message,"public")
     elif message.channel.id == RECRUIT_CHANNELID:
+        if message.reference is not None:
+            referenced_message = await message.channel.fetch_message(message.reference.message_id)
+            if(referenced_message.author != client.user):
+                return
+            await msgForOCRReply(message,referenced_message)
         await msgForOCR(message)
     elif message.channel.type is discord.ChannelType.private:
         await msgForDM(message)
