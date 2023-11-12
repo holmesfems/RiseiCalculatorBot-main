@@ -101,9 +101,11 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
 #OpenAIスレッドの管理を行うクラス。値が変更されるたびに内容を随時ファイルに保存する。
 #再起動や、再deployした時に、前の情報を読み込めるようにこれを作った。
 class ThreadManager:
+    DIRECTORY = "threadInfo"
     def __init__(self, threadName):
-        self.filepath = f"threadInfo/{threadName}.yaml"
+        self.filepath = f"{ThreadManager.DIRECTORY}/{threadName}.yaml"
         self._data:Thread = None
+        os.makedirs(ThreadManager.DIRECTORY,exist_ok=True)
 
     @property
     def data(self):
