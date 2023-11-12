@@ -44,16 +44,21 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
         return operator_typo_correction_dict.get(operatorName,operatorName)
 
     if(functionName == "riseimaterials"):
+        #素材の理性効率を求める
         target = functionArgs["target"]
         targetEstimated = listInfo.estimateCategoryFromJPName(target)
         return CalculatorManager.riseimaterials(targetEstimated,True,CalculateMode.SANITY,maxItems=5)
+    
     elif(functionName == "riseistages"):
+        #恒常ステージの理性効率を求める
         targetEstimated = functionArgs["target"]
         autoComplete = CalculatorManager.calculatorForMainland.autoCompleteMainStage(targetEstimated)
         if(autoComplete):
             targetEstimated = autoComplete[0][1]
         return CalculatorManager.riseistages(targetEstimated,True,CalculateMode.SANITY,maxItems=5)
+    
     elif(functionName == "riseilists"):
+        #理性価値表等
         targetEstimated = functionArgs["target"]
         targetDict = {
             "Base stage table":"basemaps",
@@ -69,14 +74,18 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
             return CalculatorManager.riseilists(toPrint,True,CalculateMode.SANITY)
         else:
             return RCReply(responseForAI=f"Error: list not found: {targetEstimated}")
+        
     elif(functionName == "operatorelitecost"):
+        #オペレーター昇進コスト
         targetEstimated = functionArgs["target"]
         autoComplete = OperatorCostsCalculator.autoCompleteForEliteCost(targetEstimated)
         if(autoComplete):
             targetEstimated = autoComplete[0][1]
         targetEstimated = operator_typo_correction(targetEstimated)
         return OperatorCostsCalculator.operatorEliteCost(targetEstimated)
+
     elif(functionName == "operatormastercost"):
+        #スキル特化コスト
         targetEstimated = functionArgs["target"]
         number = functionArgs["skillnum"]
         autoComplete = OperatorCostsCalculator.autoCompleteForMasterCost(targetEstimated)
@@ -84,13 +93,17 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
             targetEstimated = autoComplete[0][1]
         targetEstimated = operator_typo_correction(targetEstimated)
         return OperatorCostsCalculator.skillMasterCost(targetEstimated,number)
+
     elif(functionName == "operatormodulecost"):
+        #モジュールコスト
         targetEstimated = functionArgs["target"]
         autoComplete = OperatorCostsCalculator.autoCompleteForModuleCost(targetEstimated)
         if(autoComplete):
             targetEstimated = autoComplete[0][1]
         targetEstimated = operator_typo_correction(targetEstimated)
         return OperatorCostsCalculator.operatorModuleCost(targetEstimated)
+    
+    #全部ヒットしない場合、メソッド未実装である
     return RCReply(responseForAI=f"Error: function is not implemented: {functionName}")
 
 class ChatSession:
