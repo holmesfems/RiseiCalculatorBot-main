@@ -209,7 +209,7 @@ class ChatSession:
             print(f"status is not completed: {run=}")
             return ChatReply(msg="failed")
         
-        ret = await ChatSession.__extractMsg(threadManager)
+        ret = await ChatSession.__extractMsg(threadManager.data)
         self.lastRepliedTime[threadName] = getnow()
         ret.rcReplies = rcReplies
         return ret
