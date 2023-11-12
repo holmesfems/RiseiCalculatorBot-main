@@ -34,8 +34,6 @@ class ChatReply:
     fileList:List[ChatFile] = field(default_factory=list)
     rcReplies:List[RCReply] = field(default_factory=list)
 
-
-
 def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
     operator_typo_correction_dict = {
         "メラニート":"メラナイト"
@@ -47,15 +45,17 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
         target = functionArgs["target"]
         targetEstimated = listInfo.estimateCategoryFromJPName(target)
         return CalculatorManager.riseimaterials(targetEstimated,True,CalculateMode.SANITY,maxItems=5)
+    
     elif(functionName == "riseistages"):
         targetEstimated = functionArgs["target"]
         autoComplete = CalculatorManager.calculatorForMainland.autoCompleteMainStage(targetEstimated)
         if(autoComplete):
             targetEstimated = autoComplete[0][1]
         return CalculatorManager.riseistages(targetEstimated,True,CalculateMode.SANITY,maxItems=5)
+    
     elif(functionName == "riseilists"):
         targetEstimated = functionArgs["target"]
-        targetEstimated = targetEstimated.replace("賃格証","資格証")
+        #日本語は誤字する場合があるので英語にした
         targetDict = {
             "Base stage table":"basemaps",
             "Sanity-Value table":"san_value_lists",
@@ -70,6 +70,7 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
             return CalculatorManager.riseilists(toPrint,True,CalculateMode.SANITY)
         else:
             return RCReply(responseForAI=f"Error: list not found: {targetEstimated}")
+        
     elif(functionName == "operatorelitecost"):
         targetEstimated = functionArgs["target"]
         autoComplete = OperatorCostsCalculator.autoCompleteForEliteCost(targetEstimated)
@@ -77,6 +78,7 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
             targetEstimated = autoComplete[0][1]
         targetEstimated = operator_typo_correction(targetEstimated)
         return OperatorCostsCalculator.operatorEliteCost(targetEstimated)
+    
     elif(functionName == "operatormastercost"):
         targetEstimated = functionArgs["target"]
         number = functionArgs["skillnum"]
@@ -85,6 +87,7 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
             targetEstimated = autoComplete[0][1]
         targetEstimated = operator_typo_correction(targetEstimated)
         return OperatorCostsCalculator.skillMasterCost(targetEstimated,number)
+    
     elif(functionName == "operatormodulecost"):
         targetEstimated = functionArgs["target"]
         autoComplete = OperatorCostsCalculator.autoCompleteForModuleCost(targetEstimated)
@@ -92,8 +95,46 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
             targetEstimated = autoComplete[0][1]
         targetEstimated = operator_typo_correction(targetEstimated)
         return OperatorCostsCalculator.operatorModuleCost(targetEstimated)
+    
     return RCReply(responseForAI=f"Error: function is not implemented: {functionName}")
 
+#OpenAIスレッドの管理を行うクラス。値が変更されるたびに内容を随時ファイルに保存する。
+#再起動や、再deployした時に、前の情報を読み込めるようにこれを作った。
+class ThreadManager:
+    def __init__(self, threadName):
+        self.filepath = f"threadInfo/{threadName}.yaml"
+        self._data:Thread = None
+
+    @property
+    def data(self):
+        if(self._data): return self._data
+        if os.path.isfile(self.filepath):
+            with open(self.filepath,"rb") as f:
+                threadData = yaml.safe_load(f)
+                threadData = Thread(
+                    id=threadData["id"],
+                    created_at=threadData["created_at"],
+                    metadata=threadData,
+                    object="thread"
+                )
+            if(threadData):
+                self._data = threadData
+                return threadData
+        return None
+    
+    @data.setter
+    def data(self,value:Thread):
+        self._data = value
+        if(value):
+            with open(self.filepath,"wb") as f:
+                yaml.safe_dump(self._data.model_dump(),f,allow_unicode=True,encoding="utf-8")
+
+    @data.deleter
+    def data(self):
+        self._data = None
+        if os.path.isfile(self.filepath):
+            os.remove(self.filepath)
+        
 class ChatSession:
     MODEL = "gpt-4-1106-preview"
     __client = openai.Client(api_key=os.environ["OPENAI_API_KEY"])
@@ -101,7 +142,7 @@ class ChatSession:
         self.timeout = timeout
         self.name = name
         self.assistantSession = self.loadSession()
-        self.threads:Dict[str,Thread] = {}
+        self.threads:Dict[str,ThreadManager] = {}
         self.lastRepliedTime:Dict[str,datetime.datetime] = {}
     
     #セッションを復元
@@ -131,7 +172,7 @@ class ChatSession:
     
     def deleteThread(self,threadName:str):
         if(self.threads.get(threadName)):
-            del self.threads[threadName]
+            del self.threads[threadName].data
         if(self.lastRepliedTime.get(threadName)):
             del self.lastRepliedTime[threadName]
     
@@ -141,31 +182,32 @@ class ChatSession:
         if(msg in ChatSession.__CLEARCOMMANDS):
             self.deleteThread(threadName)
             return ChatReply(msg="会話履歴をリセットしたわ。")
-        thread = self.threads.get(threadName,ChatSession.__newThread())
+        if(threadManager := self.threads.get(threadName,None)) is None:
+            threadManager = ThreadManager(threadName)
+            self.threads[threadName] = threadManager
         now = getnow()
         lastReplied = self.lastRepliedTime.get(threadName,now)
         # 10分過ぎたら記憶をクリアして新しいセッションを始める
-        if(now - lastReplied > self.timeout):
-            thread = self.__newThread()
+        if(now - lastReplied > self.timeout or threadManager.data is None):
+            threadManager.data = self.__newThread()
         
         #添付ファイルがある場合はそれを載せる
         message = ChatSession.__client.beta.threads.messages.create(
-            thread_id=thread.id,
+            thread_id=threadManager.data.id,
             role = "user",
             content=msg,
             file_ids=ChatSession.__uploadFile(attachments)
         )
         run = ChatSession.__client.beta.threads.runs.create(
-            thread_id=thread.id,
+            thread_id=threadManager.data.id,
             assistant_id=self.assistantSession.id
         )
-        run,rcReplies = await ChatSession.__completeRun(run,thread)
+        run,rcReplies = await ChatSession.__completeRun(run)
         if(run.status != "completed"):
             print(f"status is not completed: {run=}")
             return ChatReply(msg="failed")
         
-        ret = await ChatSession.__extractMsg(thread)
-        self.threads[threadName] = thread
+        ret = await ChatSession.__extractMsg(threadManager)
         self.lastRepliedTime[threadName] = getnow()
         ret.rcReplies = rcReplies
         return ret
@@ -212,10 +254,10 @@ class ChatSession:
         return ChatReply(msg = "\n".join(ret), fileList=files)
         
     @staticmethod
-    async def __waitRun(run:Run,thread:Thread):
+    async def __waitRun(run:Run):
         i = 0
         while True:
-            run = ChatSession.__client.beta.threads.runs.retrieve(run.id,thread_id=thread.id)
+            run = ChatSession.__client.beta.threads.runs.retrieve(run.id,thread_id=run.thread_id)
             if(i%5 == 0):
                 print(f"waiting, now = {i} seconds")
             if(run.status not in ["queued", "in_progress"]):
@@ -225,10 +267,10 @@ class ChatSession:
         return run
 
     @staticmethod
-    async def __completeRun(run:Run,thread:Thread):
+    async def __completeRun(run:Run):
         ret = []
         while True:
-            run = await ChatSession.__waitRun(run,thread)
+            run = await ChatSession.__waitRun(run)
             if(run.status in ["completed","failed","cancelled","expired"]): break
             if(run.status == "requires_action"):
                 actions = run.required_action.submit_tool_outputs.tool_calls
@@ -238,6 +280,7 @@ class ChatSession:
                     functionArgs = json.loads(action.function.arguments)
                     print(f"function detected: {functionName=}, {functionArgs=}")
                     functionRes = toolCalling(functionName,functionArgs)
+                    print(f"function response: {functionRes}")
                     if(not functionRes.isMSGEmpty()):ret.append(functionRes)
                     tool_outputs.append({
                         "tool_call_id": action.id,
