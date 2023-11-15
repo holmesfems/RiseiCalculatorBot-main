@@ -159,7 +159,6 @@ class ChatSession:
         # 10分過ぎたら記憶をクリアして新しいセッションを始める
         if(now - lastReplied > self.timeout):
             thread = self.__newThread()
-            self.threads[threadName] = thread
         
         #添付ファイルがある場合はそれを載せる
         message = ChatSession.__client.beta.threads.messages.create(
@@ -178,6 +177,7 @@ class ChatSession:
             return ChatReply(msg="failed")
         
         ret = await ChatSession.__extractMsg(thread)
+        self.threads[threadName] = thread
         self.lastRepliedTime[threadName] = getnow()
         ret.rcReplies = rcReplies
         return ret
