@@ -1,8 +1,7 @@
-import os
-from typing import Any,List,Set,Dict,Optional
+import os,sys,re
+from typing import List,Set,Dict,Optional
 from google.cloud import vision
 from google.auth import api_key
-import sys
 sys.path.append('../')
 import yaml
 
@@ -67,8 +66,9 @@ class MatchTagResponseData:
         return f"{self.matches=}, {self.isGlobal=}"
 
 def matchTag(result:str) -> MatchTagResponseData:
+    clearRegex = r"[.,]"
     listResult = result.split("\n")
-    listResult = [item.replace('.','').replace('ブ',"プ") for item in listResult] #塵の影響を除去..?
+    listResult = [re.sub(clearRegex,"",item).replace('ブ',"プ").split() for item in listResult] #塵の影響を除去..?
 
     #localeの判断は当てにならないので(大体undになる)、順番にマッチを試す
     #そこまでコストの高い計算でもないので、現状これでいいでしょう
