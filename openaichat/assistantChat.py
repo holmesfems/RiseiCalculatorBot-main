@@ -112,12 +112,12 @@ class ChatSession:
     def __init__(self,name:str, timeout = datetime.timedelta(minutes=10)):
         self.timeout = timeout
         self.name = name
-        self.assistantSession = self.loadSession()
+        self.assistantSession = self.__loadSession()
         self.threads:Dict[str,Thread] = {}
         self.lastRepliedTime:Dict[str,datetime.datetime] = {}
     
     #セッションを復元
-    def loadSession(self) -> Assistant:
+    def __loadSession(self) -> Assistant:
         assistantList = ChatSession.__client.beta.assistants.list(order="desc")
         assistant = next(filter(lambda x: x.name == self.name,assistantList),None)
 
@@ -141,7 +141,7 @@ class ChatSession:
         )
         return assistant
     
-    def deleteThread(self,threadName:str):
+    def __deleteThread(self,threadName:str):
         if(self.threads.get(threadName)):
             del self.threads[threadName]
         if(self.lastRepliedTime.get(threadName)):
@@ -151,7 +151,7 @@ class ChatSession:
 
     async def doChat(self, msg:str, threadName:str, attachments:List[Attachment]) -> ChatReply:
         if(msg in ChatSession.__CLEARCOMMANDS):
-            self.deleteThread(threadName)
+            self.__deleteThread(threadName)
             return ChatReply(msg="会話履歴をリセットしたわ。")
         thread = self.threads.get(threadName,ChatSession.__newThread())
         now = getnow()
