@@ -16,24 +16,27 @@ class FormulaItem:
         baseDict:Dict[str,float] = {}
         for item in formulaJson["costs"]:
             baseDict[item["id"]] = item["count"]
-        self.baseArray = itemArray.ItemArray(baseDict)
-        self.selfArray = itemArray.ItemArray({self.key:-formulaJson["count"]})
+        self.__baseArray = itemArray.ItemArray(baseDict)
+        self.__selfArray = itemArray.ItemArray({self.key:-formulaJson["count"]})
         outcomeDict:Dict[str,float] = {}
         for item in formulaJson["extraOutcomeGroup"]:
             weight = item["weight"]
             outcomeDict[item["itemId"]] = weight * item["itemCount"]
-        self.outcomeArray = itemArray.ItemArray(outcomeDict)
+        self.__outcomeArray = itemArray.ItemArray(outcomeDict)
         goldCost = formulaJson["goldCost"]
-        self.goldCostArray = itemArray.ItemArray({ItemIdToName.jaToId("龍門幣1000"):goldCost/1000})
+        self.__goldCostArray = itemArray.ItemArray({ItemIdToName.jaToId("龍門幣1000"):goldCost/1000})
 
     def toFormulaArray(self)->itemArray.ItemArray:
-        return self.baseArray + self.selfArray + self.goldCostArray
+        return self.__baseArray + self.__selfArray + self.__goldCostArray
+    
+    def toOutcomeArray(self,dropRate:float,isGlobal:bool) -> itemArray.ItemArray:
+        filterList = listInfo.getValueTarget(isGlobal)
+        outcomeArray = self.__outcomeArray.filterByZH(filterList)
+        outcomeArray *= 1/outcomeArray.totalCount()
+        return outcomeArray * dropRate
     
     def toFormulaArrayWithOutcome(self,dropRate:float,isGlobal:bool) -> itemArray.ItemArray:
-        filterList = listInfo.getValueTarget(isGlobal)
-        outcomeArray = self.outcomeArray.filterByZH(filterList)
-        outcomeArray *= 1/outcomeArray.totalCount()
-        return self.toFormulaArray() - outcomeArray * dropRate
+        return self.toFormulaArray() - self.toOutcomeArray(dropRate,isGlobal)
     
     def __repr__(self)->str:
         return self.name
@@ -46,19 +49,22 @@ class Formula:
     def init():
         FORMULA_URL = 'https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/building_data.json'
         allInfo:dict = get_json(FORMULA_URL)["workshopFormulas"]
-        Formula.__idToFormula:Dict[str,FormulaItem] = {}
-        for index,item in allInfo.items():
+        formulaDict = {}
+        for item in allInfo.values():
             id = item["itemId"]
             value = FormulaItem(item)
-            Formula.__idToFormula[id] = value
+            formulaDict[id] = value
+        Formula.__idToFormula = formulaDict
     
     def __checkAndInit():
         if(not Formula.__idToFormula): Formula.init()
 
-    def getFormulaArray(idStr:float) -> itemArray.ItemArray:
+    def getFormulaItem(idStr:float) -> FormulaItem:
         Formula.__checkAndInit()
-        formula = Formula.__idToFormula.get(idStr)
-        if(formula):
+        return Formula.__idToFormula.get(idStr)
+
+    def getFormulaArray(idStr:float) -> itemArray.ItemArray:
+        if formula := Formula.getFormulaItem(idStr):
             return formula.toFormulaArray()
         else:
             return itemArray.ItemArray()

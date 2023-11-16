@@ -1171,7 +1171,7 @@ class CalculatorManager:
                 toPrint.append([
                     "{0}: {1:.3f} ± {2:.3f}".format(CalculatorManager.left(15,valueTargetZHToJA(key)),value,stdDev*2)
                 ])
-                jsonForAI[valueTargetZHToJA(key)] = value
+                jsonForAI[valueTargetZHToJA(key)] = round(value,3)
             reply.embbedTitle = title
             reply.embbedContents = [CalculatorManager.dumpToPrint(toPrint)]
             reply.responseForAI = str({"values":jsonForAI})
