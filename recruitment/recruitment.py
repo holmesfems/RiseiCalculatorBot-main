@@ -3,21 +3,28 @@ import yaml
 import itertools
 from typing import List,Tuple,Optional,Iterable
 from rcutils.rcReply import RCMsgType,RCReply
+from abc import ABCMeta,abstractmethod
 
-class RecruitTag:
+class RecruitTag(ABCMeta):
     def __init__(self,tagName):
         self.name = tagName
-        self.type = ...
+    
+    @property
+    @abstractmethod
+    def type(self)->str:...
 
-    def containedIn(operator:Operator):...
+    @abstractmethod
+    def containedIn(operator:Operator)->bool:...
 
     def __repr__(self):
         return self.name
 
 class EliteTag(RecruitTag):
     def __init__(self,tagName):
-        RecruitTag.__init__(self,tagName)
-        self.type = "elite"
+        RecruitTag.__init__(self,tagName) 
+    
+    @property
+    def type(self): return "elite"
 
     def containedIn(self,operator:Operator):
         stars = operator.stars
@@ -30,8 +37,10 @@ class EliteTag(RecruitTag):
 class JobTag(RecruitTag):
     def __init__(self,tagName):
         RecruitTag.__init__(self,tagName)
-        self.type = "job"
     
+    @property
+    def type(self): return "job"
+
     def containedIn(self,operator:Operator):
         if(operator.job == self.name):
             return True
@@ -40,7 +49,9 @@ class JobTag(RecruitTag):
 class PositionAndOtherTag(RecruitTag):
     def __init__(self,tagName):
         RecruitTag.__init__(self,tagName)
-        self.type = "other"
+    
+    @property
+    def type(self): return "other"
     
     def containedIn(self,operator:Operator):
         if(self.name in operator.tags):
