@@ -3,9 +3,9 @@ import yaml
 import itertools
 from typing import List,Tuple,Optional,Iterable
 from rcutils.rcReply import RCReply
-from abc import ABCMeta,abstractmethod
+from abc import ABC,abstractmethod
 
-class RecruitTag(metaclass=ABCMeta):
+class RecruitTag(ABC):
     def __init__(self,tagName):
         self.name = tagName
     
