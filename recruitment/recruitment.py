@@ -2,10 +2,10 @@ from __future__ import annotations
 import yaml
 import itertools
 from typing import List,Tuple,Optional,Iterable
-from rcutils.rcReply import RCMsgType,RCReply
+from rcutils.rcReply import RCReply
 from abc import ABCMeta,abstractmethod
 
-class RecruitTag(ABCMeta):
+class RecruitTag(metaclass=ABCMeta):
     def __init__(self,tagName):
         self.name = tagName
     
