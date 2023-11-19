@@ -76,7 +76,7 @@
 - type: function
   function:
     name: operatorSkillInfo
-    description: Get the Information of an operator's skill. Each operator has up to 3 skills.
+    description: Get the material cost list to specialize one of the skill of an operator. Each operator has up to 3 skills.
     parameters:
       type: object
       properties:
@@ -86,16 +86,16 @@
         skillnum:
           type: number
           description: The skill number
-        infoType:
-          type: string
-          description: Type of the infomation
-          enum:
-          - Description
-          - Cost list to speciallize
+        # infoType:
+        #   type: string
+        #   description: Type of the infomation
+        #   enum:
+        #   - Description
+        #   - Cost list to speciallize
       required:
       - target
       - skillnum
-      - infoType
+      # - infoType
 - type: function
   function:
     name: operatorModuleCost

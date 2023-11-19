@@ -85,18 +85,17 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
         return OperatorCostsCalculator.operatorEliteCost(targetEstimated)
     
     elif(functionName == "operatorSkillInfo"):
-        #スキル説明
+        #スキル特化コスト
         targetEstimated = functionArgs["target"]
         number = functionArgs["skillnum"]
         autoComplete = OperatorCostsCalculator.autoCompleteForMasterCost(targetEstimated)
         if(autoComplete):
             targetEstimated = autoComplete[0][1]
         targetEstimated = operator_typo_correction(targetEstimated)
-        if(functionArgs["infoType"] == "Description"):
-            return OperatorCostsCalculator.operatorSkillInfo(targetEstimated,number)
-        else:
-            #スキル特化コスト
-            return OperatorCostsCalculator.skillMasterCost(targetEstimated,number)
+        # if(functionArgs["infoType"] == "Description"):
+        #     return OperatorCostsCalculator.operatorSkillInfo(targetEstimated,number)
+        # else:
+        return OperatorCostsCalculator.skillMasterCost(targetEstimated,number)
 
     elif(functionName == "operatormodulecost"):
         #モジュールコスト
