@@ -139,9 +139,9 @@ class SkillIdToName:
                 skillType = skillMetaDict.get(maxSkillItem["skillType"])
                 spType = skillMetaDict.get(maxSkillItem["spData"]["spType"])
                 duration = maxSkillItem["duration"]
-                skillTypeInfo = f"{spType}/{skillType}"
+                skillTypeInfo = skillType if skillType == "パッシブ" else f"{spType}/{skillType}"
                 if duration > 0:
-                    skillTypeInfo += f"⌚{duration}秒"
+                    skillTypeInfo += f" ⌚{duration}秒"
                 spInfo = "" if(skillType == "パッシブ") else f"▶{initSP} ⚡{totalSP}"
                 preInfo = f"{skillTypeInfo}\n{spInfo}" if spInfo else skillTypeInfo
                 description = f"{preInfo}\n{description}"
