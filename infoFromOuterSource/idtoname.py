@@ -103,7 +103,7 @@ class SkillIdToName:
                     return string.replace("[","").replace("]","").replace(".","")
                 description = cleanStr(description)
                 description = description.replace(":0%",":.0%")
-                rawDict = skillJson["levels"][-1]["blackboard"]
+                rawDict = skillJson["blackboard"]
                 try:
                     def checkint(x:float):
                         if(x is None): return None
@@ -111,7 +111,7 @@ class SkillIdToName:
                         return x
                     replaceDict = {cleanStr(item["key"]):checkint(item.get("value",None)) for item in rawDict}
                     if("duration" not in replaceDict):
-                        replaceDict["duration"] = value["levels"][-1]["duration"]
+                        replaceDict["duration"] = skillJson["duration"]
                     replaceDict_upper = {key.upper():value for key,value in replaceDict.items()}
                     if(replaceDict):
                         try:
