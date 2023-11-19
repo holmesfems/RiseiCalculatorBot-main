@@ -70,7 +70,7 @@
       properties:
         target:
           type: string
-          description: Name of the operator.
+          description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
       required:
       - target
 - type: function
@@ -82,7 +82,7 @@
       properties:
         target:
           type: string
-          description: Name of the operator.
+          description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
         skillnum:
           type: number
           description: The skill number
@@ -98,7 +98,7 @@
       properties:
         target:
           type: string
-          description: Name of the operator.
+          description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
         skillnum:
           type: number
           description: The skill number
@@ -115,7 +115,7 @@
       properties:
         target:
           type: string
-          description: Name of the operator.
+          description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
       required:
       - target
 
