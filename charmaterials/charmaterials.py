@@ -413,7 +413,7 @@ class OperatorCostsCalculator:
     def operatorSkillInfo(operatorName:str,skillNum:int) -> RCReply:
         #AIのみから呼び出す予定
         costItem = OperatorCostsCalculator.operatorInfo.getOperatorCostFromName(operatorName)
-        title = "スキル特化検索"
+        title = "スキル説明検索"
         if(not costItem): return RCReply(
             embbedTitle=title,
             embbedContents=["オペレーター【"+operatorName+"】は存在しません"],

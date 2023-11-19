@@ -75,24 +75,8 @@
       - target
 - type: function
   function:
-    name: operatorMasterCost
-    description: Get the material cost list to specialize one of the skill of an operator. Each operator has up to 3 skills.
-    parameters:
-      type: object
-      properties:
-        target:
-          type: string
-          description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
-        skillnum:
-          type: number
-          description: The skill number
-      required:
-      - target
-      - skillnum
-- type: function
-  function:
     name: operatorSkillInfo
-    description: Get the detailed description of an operator's skill
+    description: Get the Information of an operator's skill. Each operator has up to 3 skills.
     parameters:
       type: object
       properties:
@@ -102,9 +86,16 @@
         skillnum:
           type: number
           description: The skill number
+        infoType:
+          type: string
+          description: Type of the infomation
+          enum:
+          - Description
+          - Cost list to speciallize
       required:
       - target
       - skillnum
+      - infoType
 - type: function
   function:
     name: operatorModuleCost
