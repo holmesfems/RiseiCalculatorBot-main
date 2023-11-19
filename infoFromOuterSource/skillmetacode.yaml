@@ -1,0 +1,9 @@
+#SkillType
+AUTO: 自動発動
+MANUAL: 手動発動
+PASSIVE: パッシブ
+
+#spType
+INCREASE_WHEN_TAKEN_DAMAGE: 被撃回復
+INCREASE_WHEN_ATTACK: 攻撃回復
+INCREASE_WITH_TIME: 自然回復

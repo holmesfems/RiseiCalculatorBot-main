@@ -1,7 +1,7 @@
 import sys
 import yaml
 sys.path.append('../')
-from rcutils import netutil
+from rcutils import netutil,strutil
 from typing import Dict
 import re
 
@@ -86,23 +86,31 @@ class SkillIdToName:
     def init():
         allInfoCN,allInfoJP = netutil.get_json_aio([SKILL_TABLE_URL_CN,SKILL_TABLE_URL_JP])
         SkillIdToName.__idToStr = {}
+        with open("infoFromOuterSource/skillmetacode.yaml") as f:
+            skillMetaDict:Dict[str,str] = yaml.safe_load(f)
         for key,value in allInfoCN.items():
             jpValue = allInfoJP.get(key)
             if(jpValue):
                 value = jpValue
             SkillIdToName.__idToStr[key] = value["levels"][0]["name"]
             #最大特化のスキル説明
-            desription:str = value["levels"][-1]["description"]
-            if(desription):
+            maxSkillItem = value["levels"][-1]
+            description:str = maxSkillItem["description"]
+            if description:
                 bareplace1 = re.compile(r"<@ba\.?[a-z0-9]+>")
-                desription = bareplace1.sub("",desription)
+                description = bareplace1.sub("",description)
                 bareplace2 = re.compile(r"<\$ba\.?[a-z0-9]+>")
-                desription = bareplace2.sub("",desription)
-                desription = desription.replace("</>","").replace("-{-","{").replace("{-","-{").replace("\\n","\n")
+                description = bareplace2.sub("",description)
+                description = strutil.replace_byDict(description,{
+                    "</>":"",
+                    "-{-":"{",
+                    "{-":"-{",
+                    "\\n":"\n"
+                })
                 def cleanStr(string:str)->str:
                     return string.replace("[","").replace("]","").replace(".","")
-                desription = cleanStr(desription)
-                desription = desription.replace(":0%",":.0%")
+                description = cleanStr(description)
+                description = description.replace(":0%",":.0%")
                 rawDict = value["levels"][-1]["blackboard"]
                 try:
                     def checkint(x:float):
@@ -115,18 +123,31 @@ class SkillIdToName:
                     replaceDict_upper = {key.upper():value for key,value in replaceDict.items()}
                     if(replaceDict):
                         try:
-                            desription = desription.format(**replaceDict,**replaceDict_upper)
-                            desription = desription.replace("--","")
+                            description = description.format(**replaceDict,**replaceDict_upper)
+                            description = description.replace("--","")
                         except Exception as e:
-                            print(f"{desription=}")
+                            print(f"{description=}")
                             print(f"{replaceDict=}")
                             raise e
                 except Exception as e:
                     print(f"{rawDict=}")
                     raise e
+                
+                #SP/発動情報を補足
+                initSP = maxSkillItem["spData"]["initSp"]
+                totalSP = maxSkillItem["spData"]["spCost"]
+                skillType = skillMetaDict.get(maxSkillItem["skillType"])
+                spType = skillMetaDict.get(maxSkillItem["spData"]["spType"])
+                duration = maxSkillItem["duration"]
+                skillTypeInfo = f"{spType}/{skillType}"
+                if duration > 0:
+                    skillTypeInfo += f"⌚{duration}秒"
+                spInfo = "" if(skillType == "パッシブ") else f"▶{initSP} ⚡{totalSP}"
+                preInfo = f"{skillTypeInfo}\n{spInfo}" if spInfo else skillTypeInfo
+                description = f"{preInfo}\n{description}"
             else:
-                desription = ""
-            SkillIdToName.__idToDescription[key] = desription
+                description = ""
+            SkillIdToName.__idToDescription[key] = description
     
     def getStr(id):
         if(not SkillIdToName.__idToStr):
