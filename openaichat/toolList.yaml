@@ -1,6 +1,6 @@
 - type: function
   function:
-    name: riseimaterials
+    name: riseiMaterials
     description: Get the information (e.g. sanity efficiency,
       sanity cost, time efficiency, time cost, etc.) of stages to farm a kind of material in Arknights
     parameters:
@@ -31,7 +31,7 @@
       - target
 - type: function
   function:
-    name: riseistages
+    name: riseiStages
     description: Get the information (e.g. efficiency, sanity cost, time cost, main
       drop, etc.) of constant stages in Arknights
     parameters:
@@ -44,7 +44,7 @@
       - target
 - type: function
   function:
-    name: riseilists
+    name: riseiLists
     description: Get the contents of a table about sanity efficiency
     parameters:
       type: object
@@ -63,26 +63,26 @@
       - target
 - type: function
   function:
-    name: operatorelitecost
+    name: operatorEliteCost
     description: Get the material cost list to promote an operator, 
     parameters:
       type: object
       properties:
         target:
           type: string
-          description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
+          description: Name of the operator.
       required:
       - target
 - type: function
   function:
-    name: operatormastercost
+    name: operatorMasterCost
     description: Get the material cost list to specialize one of the skill of an operator. Each operator has up to 3 skills.
     parameters:
       type: object
       properties:
         target:
           type: string
-          description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
+          description: Name of the operator.
         skillnum:
           type: number
           description: The skill number
@@ -91,7 +91,23 @@
       - skillnum
 - type: function
   function:
-    name: operatormodulecost
+    name: operatorSkillInfo
+    description: Get the detailed description of an operator's skill
+    parameters:
+      type: object
+      properties:
+        target:
+          type: string
+          description: Name of the operator.
+        skillnum:
+          type: number
+          description: The skill number
+      required:
+      - target
+      - skillnum
+- type: function
+  function:
+    name: operatorModuleCost
     description: Get the material cost list to unlock or modify
       the module of an operator
     parameters:
@@ -99,7 +115,8 @@
       properties:
         target:
           type: string
-          description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
+          description: Name of the operator.
       required:
       - target
+
 - type: code_interpreter

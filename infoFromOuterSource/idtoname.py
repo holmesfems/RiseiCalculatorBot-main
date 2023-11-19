@@ -127,11 +127,11 @@ class SkillIdToName:
                 skillMetaDict = SkillIdToName.skillMetaDict
                 self.__description = description
                 #SP/発動情報を補足
-                self.initSP = skillJson["spData"]["initSp"]
-                self.totalSP = skillJson["spData"]["spCost"]
+                self.initSP:float = skillJson["spData"]["initSp"]
+                self.totalSP:float = skillJson["spData"]["spCost"]
                 self.skillType = skillMetaDict.get(skillJson["skillType"])
                 self.spType = skillMetaDict.get(skillJson["spData"]["spType"])
-                self.duration = skillJson["duration"]
+                self.duration:float = skillJson["duration"]
             else:
                 self.__description = ""
 

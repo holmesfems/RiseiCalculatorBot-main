@@ -409,6 +409,39 @@ class OperatorCostsCalculator:
             embbedContents=msgList,
             responseForAI=str(jsonForAI)
         )
+    
+    def operatorSkillInfo(operatorName:str,skillNum:int) -> RCReply:
+        #AIのみから呼び出す予定
+        costItem = OperatorCostsCalculator.operatorInfo.getOperatorCostFromName(operatorName)
+        title = "スキル特化検索"
+        if(not costItem): return RCReply(
+            embbedTitle=title,
+            embbedContents=["オペレーター【"+operatorName+"】は存在しません"],
+            msgType=RCMsgType.ERR,
+            responseForAI=f"Error: Invalid operator name: {operatorName}"
+        )
+        skillCostList = costItem.skills
+        if(not skillCostList): return RCReply(
+            embbedTitle=title,
+            embbedContents=["オペレーター【"+operatorName+"】はスキルが存在しません"],
+            msgType=RCMsgType.ERR,
+            responseForAI=f"Error: Operator {operatorName} has no skill"
+        )
+        if(skillNum is not None and skillNum > len(skillCostList)):return RCReply(
+            embbedTitle=title,
+            embbedContents=["オペレーター【"+operatorName+"】のスキル"+str(skillNum)+"は存在しません"],
+            msgType=RCMsgType.ERR,
+            responseForAI=f"Error: Operator {operatorName} does not have skill {skillNum}"
+        )
+        skillName,skillCost = skillCostList[skillNum-1]
+        title = "スキル情報: " + skillName
+        skillId = costItem.skillIds[skillNum-1]
+        skillItem = SkillIdToName.getItem(skillId)
+        return RCReply(
+            embbedTitle=title,
+            embbedContents=[skillItem.description],
+            responseForAI=str(skillItem.jsonForAI())
+        )
 
     def operatorCostList(selection:CostListSelection) -> RCReply:
         #OpenAIから呼び出す予定は現状なし、responseForAIは空欄にする

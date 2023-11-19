@@ -43,13 +43,13 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
     def operator_typo_correction(operatorName:str):
         return operator_typo_correction_dict.get(operatorName,operatorName)
 
-    if(functionName == "riseimaterials"):
+    if(functionName == "riseiMaterials"):
         #素材の理性効率を求める
         target = functionArgs["target"]
         targetEstimated = listInfo.estimateCategoryFromJPName(target)
         return CalculatorManager.riseimaterials(targetEstimated,True,CalculateMode.SANITY,maxItems=5)
     
-    elif(functionName == "riseistages"):
+    elif(functionName == "riseiStages"):
         #恒常ステージの理性効率を求める
         targetEstimated = functionArgs["target"]
         autoComplete = CalculatorManager.calculatorForMainland.autoCompleteMainStage(targetEstimated)
@@ -57,7 +57,7 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
             targetEstimated = autoComplete[0][1]
         return CalculatorManager.riseistages(targetEstimated,True,CalculateMode.SANITY,maxItems=5)
     
-    elif(functionName == "riseilists"):
+    elif(functionName == "riseiLists"):
         #理性価値表等
         targetEstimated = functionArgs["target"]
         targetDict = {
@@ -75,7 +75,7 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
         else:
             return RCReply(responseForAI=f"Error: list not found: {targetEstimated}")
         
-    elif(functionName == "operatorelitecost"):
+    elif(functionName == "operatorEliteCost"):
         #オペレーター昇進コスト
         targetEstimated = functionArgs["target"]
         autoComplete = OperatorCostsCalculator.autoCompleteForEliteCost(targetEstimated)
@@ -84,7 +84,7 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
         targetEstimated = operator_typo_correction(targetEstimated)
         return OperatorCostsCalculator.operatorEliteCost(targetEstimated)
 
-    elif(functionName == "operatormastercost"):
+    elif(functionName == "operatorMasterCost"):
         #スキル特化コスト
         targetEstimated = functionArgs["target"]
         number = functionArgs["skillnum"]
@@ -93,6 +93,16 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
             targetEstimated = autoComplete[0][1]
         targetEstimated = operator_typo_correction(targetEstimated)
         return OperatorCostsCalculator.skillMasterCost(targetEstimated,number)
+    
+    elif(functionName == "operatorSkillInfo"):
+        #スキル説明
+        targetEstimated = functionArgs["target"]
+        number = functionArgs["skillnum"]
+        autoComplete = OperatorCostsCalculator.autoCompleteForMasterCost(targetEstimated)
+        if(autoComplete):
+            targetEstimated = autoComplete[0][1]
+        targetEstimated = operator_typo_correction(targetEstimated)
+        return OperatorCostsCalculator.operatorSkillInfo(targetEstimated,number)
 
     elif(functionName == "operatormodulecost"):
         #モジュールコスト
