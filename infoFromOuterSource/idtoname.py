@@ -151,7 +151,7 @@ class SkillIdToName:
             return self.hasDescription() and self.skillType == "パッシブ"
 
         def hasDescription(self):
-            return bool(self.description)
+            return bool(self.__description)
         
         def jsonForAI(self):
             if self.hasDescription():
