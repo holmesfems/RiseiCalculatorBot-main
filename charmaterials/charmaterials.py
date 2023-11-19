@@ -411,7 +411,7 @@ class OperatorCostsCalculator:
         )
 
     def operatorCostList(selection:CostListSelection) -> RCReply:
-        #OpenAIから呼び出す予定は現状なし、responceForAIは空欄にする
+        #OpenAIから呼び出す予定は現状なし、responseForAIは空欄にする
         if(selection is OperatorCostsCalculator.CostListSelection.STAR5ELITE):
             star5Operators = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if value.stars == 5 and not value.isPatch}
             riseiValueDict = {key:value.totalPhaseCost().toRiseiValue_OnlyValueTarget(not value.isCNOnly()) for key,value in star5Operators.items()}
