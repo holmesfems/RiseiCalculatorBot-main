@@ -81,21 +81,13 @@ class ItemIdToName:
 SKILL_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/skill_table.json"
 SKILL_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData_YoStar/main/ja_JP/gamedata/excel/skill_table.json"
 class SkillIdToName:
-    __idToStr = {}
-    __idToDescription = {}
-    def init():
-        allInfoCN,allInfoJP = netutil.get_json_aio([SKILL_TABLE_URL_CN,SKILL_TABLE_URL_JP])
-        SkillIdToName.__idToStr = {}
-        with open("infoFromOuterSource/skillmetacode.yaml") as f:
-            skillMetaDict:Dict[str,str] = yaml.safe_load(f)
-        for key,value in allInfoCN.items():
-            jpValue = allInfoJP.get(key)
-            if(jpValue):
-                value = jpValue
-            SkillIdToName.__idToStr[key] = value["levels"][0]["name"]
-            #最大特化のスキル説明
-            maxSkillItem = value["levels"][-1]
-            description:str = maxSkillItem["description"]
+    
+    with open("infoFromOuterSource/skillmetacode.yaml") as f:
+        skillMetaDict:Dict[str,str] = yaml.safe_load(f)
+    class SkillItem:
+        def __init__(self,skillJson):
+            self.name = skillJson["name"]
+            description:str = skillJson["description"]
             if description:
                 bareplace1 = re.compile(r"<@ba\.?[a-z0-9]+>")
                 description = bareplace1.sub("",description)
@@ -111,7 +103,7 @@ class SkillIdToName:
                     return string.replace("[","").replace("]","").replace(".","")
                 description = cleanStr(description)
                 description = description.replace(":0%",":.0%")
-                rawDict = value["levels"][-1]["blackboard"]
+                rawDict = skillJson["levels"][-1]["blackboard"]
                 try:
                     def checkint(x:float):
                         if(x is None): return None
@@ -132,32 +124,80 @@ class SkillIdToName:
                 except Exception as e:
                     print(f"{rawDict=}")
                     raise e
-                
+                skillMetaDict = SkillIdToName.skillMetaDict
+                self.__description = description
                 #SP/発動情報を補足
-                initSP = maxSkillItem["spData"]["initSp"]
-                totalSP = maxSkillItem["spData"]["spCost"]
-                skillType = skillMetaDict.get(maxSkillItem["skillType"])
-                spType = skillMetaDict.get(maxSkillItem["spData"]["spType"])
-                duration = maxSkillItem["duration"]
-                skillTypeInfo = skillType if skillType == "パッシブ" else f"{spType}/{skillType}"
-                if duration > 0:
-                    skillTypeInfo += f" ⌚{duration}秒"
-                spInfo = "" if(skillType == "パッシブ") else f"▶{initSP} ⚡{totalSP}"
-                preInfo = f"{skillTypeInfo}\n{spInfo}" if spInfo else skillTypeInfo
-                description = f"{preInfo}\n{description}"
+                self.initSP = skillJson["spData"]["initSp"]
+                self.totalSP = skillJson["spData"]["spCost"]
+                self.skillType = skillMetaDict.get(skillJson["skillType"])
+                self.spType = skillMetaDict.get(skillJson["spData"]["spType"])
+                self.duration = skillJson["duration"]
             else:
-                description = ""
-            SkillIdToName.__idToDescription[key] = description
+                self.__description = ""
+
+        @property
+        def description(self):
+            if(self.__description):
+                skillTypeInfo = self.skillType if self.isPassive() else f"{self.spType}/{self.skillType}"
+                if self.duration > 0:
+                    skillTypeInfo += f" ⌚{self.duration}秒"
+                spInfo = "" if(self.isPassive()) else f"▶{self.initSP} ⚡{self.totalSP}"
+                preInfo = f"{skillTypeInfo}\n{spInfo}" if spInfo else skillTypeInfo
+                return f"{preInfo}\n{self.__description}"
+            else:
+                return ""
+            
+        def isPassive(self):
+            return self.hasDescription() and self.skillType == "パッシブ"
+
+        def hasDescription(self):
+            return bool(self.description)
+        
+        def jsonForAI(self):
+            if self.hasDescription():
+                if self.isPassive():
+                    return {
+                        "name": self.name,
+                        "skillType": self.skillType,
+                        "description": self.description
+                    }
+                else:
+                    return {
+                        "name": self.name,
+                        "skillType": self.skillType,
+                        "initialSp": self.initSP,
+                        "spCost": self.totalSP,
+                        "spType": self.spType,
+                        "description": self.description
+                    }
+            return {"name": self.name}
+        
+    __idToSkillItem:Dict[str,SkillItem] = {}
+    def init():
+        allInfoCN,allInfoJP = netutil.get_json_aio([SKILL_TABLE_URL_CN,SKILL_TABLE_URL_JP])
+        SkillIdToName.__idToSkillItem = {}
+        for key,value in allInfoCN.items():
+            jpValue = allInfoJP.get(key)
+            if(jpValue):
+                value = jpValue
+            SkillIdToName.__idToSkillItem[key] = SkillIdToName.SkillItem(value["levels"][-1])
+
+    def getItem(id):
+        if(not SkillIdToName.__idToSkillItem):
+            SkillIdToName.init()
+        return SkillIdToName.__idToSkillItem.get(id)
     
     def getStr(id):
-        if(not SkillIdToName.__idToStr):
-            SkillIdToName.init()
-        return SkillIdToName.__idToStr.get(id,"Missing")
+        if(skillItem := SkillIdToName.getItem(id)):
+            return skillItem.name
+        else:
+            return "Missing"
     
     def getDescription(id):
-        if(not SkillIdToName.__idToDescription):
-            SkillIdToName.init()
-        return SkillIdToName.__idToDescription.get(id,"")
+        if(skillItem := SkillIdToName.getItem(id)):
+            return skillItem.description
+        else:
+            return ""
 
 STAGE_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/stage_table.json"
 STAGE_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData_YoStar/main/ja_JP/gamedata/excel/stage_table.json"
