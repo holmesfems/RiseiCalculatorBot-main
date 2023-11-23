@@ -66,7 +66,7 @@ class MatchTagResponseData:
         return f"{self.matches=}, {self.isGlobal=}"
 
 def matchTag(result:str) -> MatchTagResponseData:
-    clearRegex = r"[.,·・]"
+    clearRegex = r"[.,·・´]"
     listResult = result.split("\n")
     listResult = [re.sub(clearRegex,"",item).replace('ブ',"プ").strip() for item in listResult] #塵の影響を除去..?
 
