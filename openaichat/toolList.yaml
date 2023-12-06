@@ -59,6 +59,8 @@
           - Distinction Certificate Efficiency table
           - Special Exchange Order Efficiency table
           - Contract Bounty Efficiency table
+          - Crystal Exchange Efficiency table
+          - Pinch-out Exchange Efficiency table
       required:
       - target
 - type: function

@@ -873,6 +873,7 @@ class CalculatorManager:
         TE3LIST = enum.auto()
         SPECIAL_LIST = enum.auto()
         CCLIST = enum.auto()
+        POLIST = enum.auto()
 
     def getValues(isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME) -> RiseiOrTimeValues:
         #print(f"mode:{mode},baseMinTimes:{baseMinTimes},cacheMinutes:{cache_minutes}")
@@ -1231,7 +1232,28 @@ class CalculatorManager:
                 df = pd.DataFrame(rows,columns=columns)
                 df.to_excel(CCLIST_FILENAME)
                 reply.attatchments = [CCLIST_FILENAME]
-                
+        elif toPrintTarget is CalculatorManager.ToPrint.POLIST:
+            #結晶交換所効率
+            POLIST_FILENAME = "POList.xlsx"
+            Price_PO = getPOList()
+            title = f"結晶交換所効率(Pinch Out)"
+            def efficiency(x:CCExchangeItem):
+                return riseiValues.getValueFromZH(x.name)/x.value
+            sorted_PricePO = sorted(Price_PO,key = efficiency,reverse=True)
+            ticket_efficiency_PO_sorted = [(x.fullname(),(efficiency(x),riseiValues.getStdDevFromZH(x.name)/x.value)) for x in sorted_PricePO]
+            toPrint = [["{0}: {1:.3f} ± {2:.3f}".format(CalculatorManager.left(18,name),value[0],value[1]*2)] for name,value in ticket_efficiency_PO_sorted]
+            jsonForAI = {key:round(value[0],3) for key,value in ticket_efficiency_PO_sorted}
+
+            reply.embbedTitle = title
+            reply.embbedContents = [CalculatorManager.dumpToPrint(toPrint)]
+            reply.responseForAI = str({"efficiencies":jsonForAI})
+
+            if toCsv:
+                columns = ["素材名","値段","在庫","交換効率"]
+                rows = [[ItemIdToName.zhToJa(x.name),x.value,x.quantity,efficiency(x)]for x in sorted_PricePO]
+                df = pd.DataFrame(rows,columns=columns)
+                df.to_excel(POLIST_FILENAME)
+                reply.attatchments = [POLIST_FILENAME]
         if(reply.embbedContents):
             if toCsv and not reply.attatchments:
                 calculator.dumpToFile(mode)

@@ -96,9 +96,16 @@ with open(f"riseicalculator2/price_cc{__ccNumber}.yaml","rb") as f:
     __price_CC:List[CCExchangeItem] = [CCExchangeItem(item) for item in __price_CC]
     #print(__price_CC)
 
+with open(f"riseicalculator2/price_pinchout.yaml","rb") as f:
+    __price_PO = yaml.safe_load(f)
+    __price_PO:List[CCExchangeItem] = [CCExchangeItem(item) for item in __price_PO]
+    #print(__price_CC)
+
 def getCCList() -> List[CCExchangeItem]:
     return __price_CC
 
+def getPOList() -> List[CCExchangeItem]:
+    return __price_PO
 
 
 with open("riseicalculator2/price_kakin.yaml","rb") as f:

@@ -97,6 +97,7 @@ modeChoice = [Choice(name="Sanity",value ="sanity"),Choice(name="Time",value ="t
         Choice(name = "上級資格証効率表",value = "te3list"),
         Choice(name = "特別引換証効率表",value = "special_list"),
         Choice(name = f"契約賞金引換効率表(CC#{CalculatorManager.CC_NUMBER})",value = "cclist"),
+        Choice(name = f"結晶交換所効率表(Pinch Out)",value = "polist"),
     ],
     target_item = targetItemChoice,
     mode = modeChoice
@@ -202,6 +203,7 @@ async def eventstage_autocomplete(inter:Interaction,current:str)->List[app_comma
         Choice(name = "上級資格証効率表",value = "te3list"),
         Choice(name = "特別引換証効率表",value = "special_list"),
         Choice(name = f"契約賞金引換効率表(CC#{CalculatorManager.CC_NUMBER})",value = "cclist"),
+        Choice(name = f"結晶交換所効率表(Pinch Out)",value = "polist"),
     ],
     mode = modeChoice
 )

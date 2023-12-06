@@ -67,6 +67,8 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
             "Distinction Certificate Efficiency table":"te3list",
             "Special Exchange Order Efficiency table":"special_list",
             "Contract Bounty Efficiency table": "cclist",
+            "Crystal Exchange Efficiency table": "polist",
+            "Pinch-out Exchange Efficiency table": "polist",
         }
         printTarget = targetDict.get(targetEstimated,None)
         if(printTarget):
