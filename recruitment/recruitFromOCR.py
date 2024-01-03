@@ -12,7 +12,8 @@ with open("recruitment/tagJaToJa.yaml","rb") as f:
     __jaExtraDict = {
         "範囲攻" : "範囲攻撃",
         "範圍攻擊": "範囲攻撃",
-        "一下" : "エリート"
+        "一下" : "エリート",
+        "医療夕": "医療"
     }
 
 #英語版認識用

@@ -256,6 +256,7 @@ class ChatSession:
                     print(f"function detected: {functionName=}, {functionArgs=}")
                     functionRes = toolCalling(functionName,functionArgs)
                     if(not functionRes.isMSGEmpty()):ret.append(functionRes)
+                    print(f"response:{functionRes.responseForAI}")
                     tool_outputs.append({
                         "tool_call_id": action.id,
                         "output": functionRes.responseForAI
