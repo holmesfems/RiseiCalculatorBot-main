@@ -18,3 +18,16 @@
 - id: voucher_pcharPack
   zh: 皇家信物交换券
   ja: ★6印交換券
+
+
+- id: MYRTLE_EXCHANGE
+  zh: 桃金娘交换券
+  ja: テンニンカ指名契約
+
+- id: T3_EXCHANGE
+  zh: 特级素材交换券
+  ja: 特級素材交換券
+
+- id: T2_EXCHANGE
+  zh: 高级素材交换券
+  ja: 高級素材交換券
