@@ -19,7 +19,6 @@
   zh: 皇家信物交换券
   ja: ★6印交換券
 
-
 - id: MYRTLE_EXCHANGE
   zh: 桃金娘交换券
   ja: テンニンカ指名契約
@@ -31,3 +30,7 @@
 - id: T2_EXCHANGE
   zh: 高级素材交换券
   ja: 高級素材交換券
+
+- id: SOCPRINTER_T0
+  zh: 芯片打印机
+  ja: SoCセルフプリンター

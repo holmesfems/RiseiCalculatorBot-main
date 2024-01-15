@@ -18,6 +18,7 @@ valueDict["上級SoC"] = 2*valueDict["中級SoC"] + valueDict["SoC強化剤"]
 valueDict["モジュールデータ"]=120*(30*(1-12*LMDVALUE_1000/1000)/21)
 valueDict["純正源石"] = 135
 valueDict["コーデ交換券"] = valueDict["純正源石"]*18
+valueDict["SoCセルフプリンター"] = valueDict["初級SoC"]*5
 valueDict["中級SoCセルフプリンター"] = valueDict["中級SoC"]*8 + valueDict["初級SoC"]*5
 valueDict["★6印交換券"] = valueDict["スカウト券"]*69.2
 valueDict["10回スカウト券"] = valueDict["スカウト券"]*10
