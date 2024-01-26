@@ -10,10 +10,11 @@ with open("recruitment/tagJaToJa.yaml","rb") as f:
     __jaTagDict = yaml.safe_load(f)
     #補正用データ
     __jaExtraDict = {
-        "範囲攻" : "範囲攻撃",
-        "範圍攻擊": "範囲攻撃",
-        "一下" : "エリート",
-        "医療夕": "医療"
+        r"範囲攻." : "範囲攻撃",
+        r"範圍攻擊": "範囲攻撃",
+        r"(?!上級)(..)?一下" : "エリート",
+        r"医療夕...?": "医療",
+        r"上級..一下": "上級エリート"
     }
 
 #英語版認識用
@@ -39,10 +40,11 @@ def matchTagCoreProcess(result:List[str],baseDict:Dict[str,str],extraDict:Option
             ret.add(value)
     if(not extraDict): return ret
     #一部誤字するやつがあるので、in検索で結果を補正
+    #上級エリート、エリートの識別に難があったので、より自由度の高い正規表現マッチングをする
     for key,value in extraDict.items():
         if len(ret)>=5: break
         if value in ret:continue
-        if(any((key in text) for text in result)):
+        if(any((re.match(key,text)) for text in result)):
             ret.add(value)
     return ret
 
