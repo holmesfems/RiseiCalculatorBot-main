@@ -484,7 +484,7 @@ async def msgForOCRReply(message:discord.Message,referencedMessage:discord.Messa
         "コスト回復": "COST回復",
     }
     def formatToTags(command:str):
-        command.replace("タイプ","")
+        command = command.replace("タイプ","")
         return abbreviations.get(command,command)
     def isNullOrEmpty(tag:str):
         return not tag or tag.isspace()
