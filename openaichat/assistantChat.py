@@ -112,7 +112,7 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
     return RCReply(responseForAI=f"Error: function is not implemented: {functionName}")
 
 class ChatSession:
-    MODEL = "gpt-4-1106-preview"
+    MODEL = "gpt-4-0125-preview"
     __client = openai.Client(api_key=os.environ["OPENAI_API_KEY"])
     def __init__(self,name:str, timeout = datetime.timedelta(minutes=10)):
         self.timeout = timeout
