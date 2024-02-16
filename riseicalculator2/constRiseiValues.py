@@ -27,6 +27,7 @@ valueDict["上級エリート特訓装置"] = EXPVALUE_1000*750 + LMDVALUE_1000*
 valueDict["テンニンカ指名契約"] = valueDict["スカウト券"]
 valueDict["★5特訓招待状"] = 371.947*LMDVALUE_1000 + 239.4*EXPVALUE_1000 + 4*valueDict["初級SoC"] + 3*valueDict["上級SoC"] + 1100
 valueDict["★6特訓招待状"] = 589.841*LMDVALUE_1000 + 361.4*EXPVALUE_1000 + 5*valueDict["初級SoC"] + 4*valueDict["上級SoC"] + 1700
+valueDict["18石コーデ"] = 18*valueDict["純正源石"]
 
 print(valueDict)
 

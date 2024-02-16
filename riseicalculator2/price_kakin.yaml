@@ -45,96 +45,96 @@
     アーツ学Ⅲ: 10
     龍門幣1000: 80
 
-4周年素材パック:
-  price: 1000
-  isConstant: false
-  contents:
-    純正源石: 13
-    焼結核凝晶: 2
-    ナノフレーク: 2
-    融合ゲル: 2
-    半自然溶剤: 6
+# 4周年素材パック:
+#   price: 1000
+#   isConstant: false
+#   contents:
+#     純正源石: 13
+#     焼結核凝晶: 2
+#     ナノフレーク: 2
+#     融合ゲル: 2
+#     半自然溶剤: 6
 
-4周年育成パック:
-  price: 1200
-  isConstant: false
-  contents:
-    合成玉: 4500
-    龍門幣1000: 100
-    SoC強化剤: 2
-    アーツ学Ⅰ: 80
-    モジュールデータ: 2
+# 4周年育成パック:
+#   price: 1200
+#   isConstant: false
+#   contents:
+#     合成玉: 4500
+#     龍門幣1000: 100
+#     SoC強化剤: 2
+#     アーツ学Ⅰ: 80
+#     モジュールデータ: 2
 
-スワイヤーの鞄:
-  price: 1200
-  isConstant: false
-  contents:
-    純正源石: 16
-    龍門幣1000: 700
+# スワイヤーの鞄:
+#   price: 1200
+#   isConstant: false
+#   contents:
+#     純正源石: 16
+#     龍門幣1000: 700
 
-特別訓練パック:
-  price: 1200
-  isConstant: false
-  contents:
-    純正源石: 11
-    エリート特訓装置: 1
+# 特別訓練パック:
+#   price: 1200
+#   isConstant: false
+#   contents:
+#     純正源石: 11
+#     エリート特訓装置: 1
 
-上級特別訓練パック:
-  price: 2000
-  isConstant: false
-  contents:
-    純正源石: 19
-    上級エリート特訓装置: 1
+# 上級特別訓練パック:
+#   price: 2000
+#   isConstant: false
+#   contents:
+#     純正源石: 19
+#     上級エリート特訓装置: 1
 
-昇進特訓パック:
-  price: 1500
-  isConstant: false
-  contents:
-    純正源石: 24
-    ★5特訓招待状: 1
+# 昇進特訓パック:
+#   price: 1500
+#   isConstant: false
+#   contents:
+#     純正源石: 24
+#     ★5特訓招待状: 1
 
-上級昇進特訓パック:
-  price: 2600
-  isConstant: false
-  contents:
-    純正源石: 36
-    ★6特訓招待状: 1
+# 上級昇進特訓パック:
+#   price: 2600
+#   isConstant: false
+#   contents:
+#     純正源石: 36
+#     ★6特訓招待状: 1
 
-4周年観光パック:
-  price: 3000
-  isConstant: false
-  contents:
-    純正源石: 24
-    10回スカウト券: 2
-    龍門幣1000: 200
-    上級作戦記録: 20
-    中級作戦記録: 30
-    SoC強化剤: 2
-    モジュールデータ: 2
-    上級切削液: 4
+# 4周年観光パック:
+#   price: 3000
+#   isConstant: false
+#   contents:
+#     純正源石: 24
+#     10回スカウト券: 2
+#     龍門幣1000: 200
+#     上級作戦記録: 20
+#     中級作戦記録: 30
+#     SoC強化剤: 2
+#     モジュールデータ: 2
+#     上級切削液: 4
 
-4周年満喫パック:
-  price: 4900
-  isConstant: false
-  contents:
-    純正源石: 90
-    10回スカウト券: 1
-    龍門幣1000: 220
-    上級作戦記録: 30
-    SoC強化剤: 4
-    モジュールデータ: 4
-    データ補完マシン: 20
-    データ補完チップ: 60
+# 4周年満喫パック:
+#   price: 4900
+#   isConstant: false
+#   contents:
+#     純正源石: 90
+#     10回スカウト券: 1
+#     龍門幣1000: 220
+#     上級作戦記録: 30
+#     SoC強化剤: 4
+#     モジュールデータ: 4
+#     データ補完マシン: 20
+#     データ補完チップ: 60
 
-医療/特殊訓練パック:
-  price: 650
-  isConstant: false
-  contents:
-    上級SoC: 4
-    初級SoC: 5
-    アーツ学Ⅲ: 45
-    アーツ学Ⅱ: 25
-    アーツ学Ⅰ: 10
+# 医療/特殊訓練パック:
+#   price: 650
+#   isConstant: false
+#   contents:
+#     上級SoC: 4
+#     初級SoC: 5
+#     アーツ学Ⅲ: 45
+#     アーツ学Ⅱ: 25
+#     アーツ学Ⅰ: 10
 
 月間素材パック:
   price: 650
@@ -164,6 +164,25 @@
     中級作戦記録: 10
     アーツ学Ⅲ: 8
     龍門幣1000: 50
+
+冬隠帰路パック:
+  price: 3000
+  isConstant: false
+  contents:
+    10回スカウト券: 1
+    上級エリート特訓装置: 1
+    エリート特訓装置: 1
+    18石コーデ: 1
+
+黎明前奏パック:
+  price: 3000
+  isConstant: false
+  contents:
+    10回スカウト券: 1
+    龍門幣1000: 200
+    上級作戦記録: 60
+    アーツ学Ⅲ: 20
+    18石コーデ: 1
 
 #constant
 10000円恒常パック:
