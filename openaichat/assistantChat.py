@@ -204,6 +204,7 @@ class ChatSession:
         for item in messages:
             if(item.role == "user"): break
             new_messages.append(item)
+        new_messages.reverse()
         ret:List[str] = []
         files:List[ChatFile] = []
         for item in new_messages:
