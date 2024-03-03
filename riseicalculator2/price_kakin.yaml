@@ -184,6 +184,23 @@
     アーツ学Ⅲ: 20
     18石コーデ: 1
 
+探索者の素材パック:
+  price: 1000
+  isConstant: false
+  contents:
+    合成玉: 2000
+    焼結核凝晶: 2
+    結晶制御装置: 2
+    精錬溶剤: 2
+    中級装置: 10
+  
+狩人の特訓パック:
+  price: 1500
+  isConstant: false
+  contents:
+    ★5特訓招待状: 1
+    合成玉: 4500
+
 #constant
 10000円恒常パック:
   price: 10000
