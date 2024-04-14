@@ -605,7 +605,7 @@ class OperatorCostsCalculator:
             responseForAI=str(jsonForAI)
         )
 
-    def autoCompleteForModuleCost(name:str,limit:int = 25) -> List[Tuple(str,str)]:
+    def autoCompleteForModuleCost(name:str,limit:int = 25) -> List[Tuple[str,str]]:
         return [(value.name,value.name) for value in OperatorCostsCalculator.operatorInfo.operatorDict.values() if name in value.name and value.hasUniqeEq()][:limit]
 
     def operatorModuleCost(operatorName:str) -> RCReply:
