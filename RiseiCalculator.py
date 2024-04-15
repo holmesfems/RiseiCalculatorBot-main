@@ -560,4 +560,4 @@ async def on_ready():
     checkBirtyday.start()
     print('Botでログインしました')
 
-client.run(TOKEN)
+client.run(TOKEN) 
