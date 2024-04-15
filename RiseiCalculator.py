@@ -14,13 +14,12 @@ import datetime
 from charmaterials.charmaterials import OperatorCostsCalculator
 from rcutils import sendReplyToDiscord
 from rcutils.rcReply import RCReply
+from serverModeration.moderationUtils import moderingMSG
 
 TOKEN = os.environ["BOT_TOKEN"]
 ID = os.environ["BOT_ID"]
 url_botCommands = f"https://discord.com/api/v8/applications/{ID}/commands"
-intents=discord.Intents.default()
-intents.message_content = True
-intents.members = True
+intents=discord.Intents.all()
 client = discord.Client(intents=intents,command_prefix = '/')
 t_delta = datetime.timedelta(hours=9)  # 9時間
 JST = datetime.timezone(t_delta, 'JST')  # UTCから9時間差の「JST」タイムゾーン
@@ -540,7 +539,9 @@ MAXMSGLEN = 200
 
 @client.event
 async def on_message(message:discord.Message):
-    if(message.author.bot): return
+    if(message.author.id == ID): return
+    moderated = await moderingMSG(message)
+    if(moderated): return
     if message.channel.id == OPENAI_CHANNELID:
         await msgForAIChat(message,"public")
     elif message.channel.id == RECRUIT_CHANNELID:
