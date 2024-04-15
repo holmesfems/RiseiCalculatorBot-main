@@ -12,7 +12,7 @@ async def autoDeletion(message:discord.Message) -> bool:
         int(os.environ["AUTODEL_1"])
     ]
     if message.channel.id in TARGET_CHANNNEL_IDS:
-        message.delete()
+        await message.delete()
         return True
     return False
 
@@ -21,6 +21,6 @@ async def autoBan(message:discord.Message) -> bool:
         "discord.gg/sexycontent"
     ]
     if any(word in message.content for word in BANWORDS):
-        message.author.ban(delete_message_days=7)
+        await message.author.ban(delete_message_days=7)
         return True
     return False
