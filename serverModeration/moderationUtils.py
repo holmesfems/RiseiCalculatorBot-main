@@ -9,7 +9,7 @@ async def moderingMSG(message:discord.Message):
 
 async def autoDeletion(message:discord.Message) -> bool:
     TARGET_CHANNNEL_IDS = [
-        os.environ["AUTODEL_1"]
+        int(os.environ["AUTODEL_1"])
     ]
     if message.channel.id in TARGET_CHANNNEL_IDS:
         message.delete()

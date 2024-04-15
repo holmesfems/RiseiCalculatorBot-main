@@ -539,7 +539,7 @@ MAXMSGLEN = 200
 
 @client.event
 async def on_message(message:discord.Message):
-    if(message.author.bot): return
+    if(message.author.id == int(ID)): return
     moderated = await moderingMSG(message)
     if(moderated): 
         print("Message moderated")
