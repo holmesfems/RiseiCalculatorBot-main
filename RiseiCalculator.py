@@ -539,9 +539,11 @@ MAXMSGLEN = 200
 
 @client.event
 async def on_message(message:discord.Message):
-    if(message.author.id == ID): return
+    if(message.author.bot): return
     moderated = await moderingMSG(message)
-    if(moderated): return
+    if(moderated): 
+        print("Message moderated")
+        return
     if message.channel.id == OPENAI_CHANNELID:
         await msgForAIChat(message,"public")
     elif message.channel.id == RECRUIT_CHANNELID:
