@@ -42,7 +42,7 @@ with open('riseicalculator2/price_special.yaml', 'rb') as f:
 
 #大陸版実装済み、グロ版未実装のステージまとめ 実装次第削除してOK
 new_zone:List[str] = [
-    'main_13', #13章
+    # 'main_13', #13章
     # 'permanent_sidestory_14_zone1', #LE
     # 'permanent_sidestory_15_zone1', #DV
     # 'permanent_sub_5_zone1', #CW
