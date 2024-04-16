@@ -25,7 +25,8 @@ class serverModerator:
 
     async def autoBan(self,message:discord.Message) -> bool:
         BANWORDS = [
-            "discord.gg/sexycontent"
+            "discord.gg/sexycontent",
+            "Teen Porn and Onlyfan Leaks here",
         ]
         if any(word in message.content for word in BANWORDS):
             await message.author.ban(delete_message_days=7)
