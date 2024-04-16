@@ -14,7 +14,7 @@ import datetime
 from charmaterials.charmaterials import OperatorCostsCalculator
 from rcutils import sendReplyToDiscord
 from rcutils.rcReply import RCReply
-from serverModeration.moderationUtils import moderingMSG
+from serverModeration.moderationUtils import serverModerator
 
 TOKEN = os.environ["BOT_TOKEN"]
 ID = os.environ["BOT_ID"]
@@ -536,11 +536,12 @@ async def msgForDM(message:discord.Message):
         await msgForAIChat(message,str(message.author.id))
         
 MAXMSGLEN = 200
+moderator:serverModerator = ...
 
 @client.event
 async def on_message(message:discord.Message):
     if(message.author.id == int(ID)): return
-    moderated = await moderingMSG(message)
+    moderated = await moderator.moderingMSG(message)
     if(moderated): 
         print("Message moderated")
         return
@@ -558,7 +559,9 @@ async def on_message(message:discord.Message):
 
 @client.event
 async def on_ready():
+    global moderator
     await tree.sync()
+    moderator = serverModerator(client.get_channel(int(os.environ["REPORT_CHANNEL_ID"])))
     checkBirtyday.start()
     print('Botでログインしました')
 
