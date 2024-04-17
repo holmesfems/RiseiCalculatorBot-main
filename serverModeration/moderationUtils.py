@@ -44,6 +44,7 @@ class serverModerator:
         BANWORDS = [
             "discord.gg/sexycontent",
             "Teen Porn and Onlyfan Leaks here",
+            "Hot Teen & Onlyfans Leaks"
         ]
         if any(word in message.content for word in BANWORDS):
             await message.author.ban(delete_message_days=7)
@@ -56,5 +57,5 @@ class serverModerator:
     async def createReport(self,report:str, message:discord.Message) -> None:
         content = f"{report}\n"
         content += f"author:{message.author.name}\n"
-        content += f"content:{message.content}"
+        content += f"content:```{message.content}```"
         await sendToDiscord(self.reportChannel,RCReply(plainText=content))
