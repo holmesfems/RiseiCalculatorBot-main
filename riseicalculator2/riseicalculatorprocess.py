@@ -767,6 +767,7 @@ class Calculator:
 
         #LS CE CAクラスは作成コスト低いのでとりあえず更新
         self.constStageMatrix = Calculator.ConstStageMatrix(self.isGlobal)
+        print(f"{self.constStageMatrix=}")
         self.calculate(mode,validBaseMinTimes)
         self.initialized = True
     
