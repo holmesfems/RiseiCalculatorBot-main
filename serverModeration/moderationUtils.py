@@ -32,7 +32,8 @@ class serverModerator:
         #しゃべるべきではないチャンネルでしゃべると、緩い条件でBAN
         BANWORDS = [
             "discord.gg",
-            "http"
+            "http",
+            "everyone"
         ]
         if any(word in message.content for word in BANWORDS):
             await message.author.ban(delete_message_days=7)
