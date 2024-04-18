@@ -767,14 +767,12 @@ class Calculator:
 
         #LS CE CAクラスは作成コスト低いのでとりあえず更新
         self.constStageMatrix = Calculator.ConstStageMatrix(self.isGlobal)
-        #print(f"{self.constStageMatrix=}")
         self.calculate(mode,validBaseMinTimes)
         self.initialized = True
     
     def calculate(self,mode:CalculateMode = None,validBaseMinTimes:int=3000):
         if (mode is None or mode is CalculateMode.SANITY):
             self.baseStageMatrixForSanity = Calculator.BaseStageMatrix(self.isGlobal,self.stageInfo,validBaseMinTimes)
-            print(f"{self.baseStageMatrixForSanity}")
             self.riseiValues = self.solveOptimizedValue(CalculateMode.SANITY)
         if (mode is None or mode is CalculateMode.TIME):
             self.baseStageMatrixForTime = Calculator.BaseStageMatrix(self.isGlobal,self.stageInfo,validBaseMinTimes)
