@@ -423,9 +423,7 @@ def checkIsMember(user:discord.User) -> bool:
     serverBooster = fserver.get_role(SERVERBOOSTER_ROLE)
     def userIsInRole(user:discord.User,role:discord.Role):
         return user.id in [member.id for member in role.members]
-    if userIsInRole(user,serverBooster): return True
-    if userIsInRole(user,youtubeMember): return True
-    return False
+    return userIsInRole(user,serverBooster) or userIsInRole(user,youtubeMember)
 
 OPENAI_CHANNELID = int(os.environ["OPENAI_CHANNELID"])
 async def msgForAIChat(message:discord.Message,threadName:str):
@@ -483,7 +481,7 @@ async def msgForOCRReply(message:discord.Message,referencedMessage:discord.Messa
         "コスト回復": "COST回復",
     }
     def formatToTags(command:str):
-        command = command.replace("タイプ","")
+        command = command.replace("タイプ","").upper()
         return abbreviations.get(command,command)
     def isNullOrEmpty(tag:str):
         return not tag or tag.isspace()
@@ -526,10 +524,9 @@ async def msgForOCRReply(message:discord.Message,referencedMessage:discord.Messa
 async def msgForDM(message:discord.Message):
     if(not checkIsMember(message.author)):
         msg = "【自動返信】DMありがとうございます！\n"
-        msg += "アステシアちゃんとお話をお楽しみいただくには、F鯖に加入の上、Youtubeアカウントと連携してふぉめの**Youtubeチャンネルメンバー登録**、もしくは**F鯖のサーバーブースト**をして頂く必要がございます！\n"
+        msg += "アステシアちゃんとお話をお楽しみいただくには、F鯖に加入の上、Youtubeアカウントと連携してふぉめの**Youtubeチャンネルメンバー登録**、もしくは**F鯖のサーバーブースト**をして頂く必要がございます\n"
         msg += "ふぉめチャンネルはこちら: https://www.youtube.com//holmesfems\n"
         msg += "F鯖はこちら: https://discord.gg/arknightsflame\n"
-        msg += "こちらの機能は有料限定であること、どうかご了承くださいまし:woman_bowing:"
         message.channel.send(msg)
     else:
         print("DM Recieved from: "+str(message.author))
