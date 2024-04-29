@@ -10,7 +10,8 @@ class serverModerator:
     async def moderingMSG(self,message:discord.Message):
         #指定したチャンネルは、追加したメッセージをすべて削除
         doneAny = await self.autoDeletion(message)
-        if(not doneAny): doneAny = await self.autoBan(message)
+        #良さげなBANワードを思いついてないので、autoBanは一旦機能オフにする
+        # if(not doneAny): doneAny = await self.autoBan(message)
         return doneAny
 
     async def autoDeletion(self,message:discord.Message) -> bool:
@@ -29,7 +30,8 @@ class serverModerator:
         return False
     
     async def autoBan_inAutoDeletion(self,message:discord.Message) -> bool:
-        #しゃべるべきではないチャンネルでしゃべると、緩い条件でBAN
+        #このチャンネルは人間がしゃべることを想定していないので、ここで誤検出は恐れなくてよい。
+        #漏れをなるべく減らす方向でBANワードを作る
         BANWORDS = [
             "discord.gg",
             "http",
@@ -43,6 +45,8 @@ class serverModerator:
         return False
 
     async def autoBan(self,message:discord.Message) -> bool:
+        #人間もしゃべる可能性があるので、誤検出は避けたい
+        #最低限のBANワードを入れる
         BANWORDS = [
             "discord.gg/sexycontent",
             "onlyfan leaks",
