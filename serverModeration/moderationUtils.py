@@ -33,9 +33,10 @@ class serverModerator:
         BANWORDS = [
             "discord.gg",
             "http",
-            "everyone"
+            "everyone",
+            "peach"
         ]
-        if any(word in message.content for word in BANWORDS):
+        if any(word in message.content.lower() for word in BANWORDS):
             await message.author.ban(delete_message_days=7)
             await self.createReport("スパムメッセージを検出したので、自動BANを実行しました。",message)
             return True
@@ -44,10 +45,10 @@ class serverModerator:
     async def autoBan(self,message:discord.Message) -> bool:
         BANWORDS = [
             "discord.gg/sexycontent",
-            "Teen Porn and Onlyfan Leaks here",
-            "Hot Teen & Onlyfans Leaks"
+            "onlyfan leaks",
+            "onlyfans leaks"
         ]
-        if any(word in message.content for word in BANWORDS):
+        if any(word in message.content.lower() for word in BANWORDS):
             await message.author.ban(delete_message_days=7)
             await self.createReport("スパムメッセージを検出したので、自動BANを実行しました。",message)
             return True
@@ -58,5 +59,5 @@ class serverModerator:
     async def createReport(self,report:str, message:discord.Message) -> None:
         content = f"{report}\n"
         content += f"author:{message.author.name}\n"
-        content += f"content:```{message.content}```"
+        content += f"content:```{message.content.replace(".","_").replace("http","ht tp")}```"
         await sendToDiscord(self.reportChannel,RCReply(plainText=content))
