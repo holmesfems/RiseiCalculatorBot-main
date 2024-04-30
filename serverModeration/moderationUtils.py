@@ -63,5 +63,5 @@ class serverModerator:
     async def createReport(self,report:str, message:discord.Message) -> None:
         content = f"{report}\n"
         content += f"author:{message.author.name}\n"
-        content += f"content:```{message.content.replace(".","_").replace("http","ht tp")}```"
+        content += f"content:```{message.content.replace('.','_').replace('http','ht tp')}```"
         await sendToDiscord(self.reportChannel,RCReply(plainText=content))
