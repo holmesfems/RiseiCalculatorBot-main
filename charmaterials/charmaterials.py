@@ -201,7 +201,7 @@ class OperatorCosts:
             #JP版表記
             self.stars:int = rarity+1
         
-        #昇格オペレーター(前衛アーミヤ)かの判定
+        #昇格オペレーター(前衛アーミヤ,医療アーミヤ)かの判定
         self.isPatch = value["isPatch"]
 
     #モジュールの素材を追加する
@@ -292,10 +292,11 @@ class AllOperatorsInfo:
             self.operatorDict[key] = OperatorCosts(key,value)
             self.nameToId[value["name"]] = key
         
-        #昇格(前衛アーミヤ)
+        #昇格
         patchInfoJP:dict = get_json(PATCH_CHAR_TABLE_URL_JP)["patchChars"]
         for key,value in patchInfoJP.items():
             #今は前衛アーミヤ一人だけ、今後追加されたらまた調整する必要があるかも
+            #医療アーミヤも追加されました 2024/05/01
             value["cnOnly"] = False
             value["name"] = value["name"] + "({0})".format(jobIdToName[value["profession"]])
             value["isPatch"] = True
