@@ -5,7 +5,7 @@ from rcutils.getnow import getnow
 import openai
 from openai.types.beta.assistant import Assistant
 from openai.types.beta.thread import Thread
-from openai.types.beta.threads import ThreadMessage,Run
+from openai.types.beta.threads import Message,Run
 import yaml
 import asyncio
 import json
@@ -112,7 +112,7 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
     return RCReply(responseForAI=f"Error: function is not implemented: {functionName}")
 
 class ChatSession:
-    MODEL = "gpt-4-0125-preview"
+    MODEL = "gpt-4o"
     __client = openai.Client(api_key=os.environ["OPENAI_API_KEY"])
     def __init__(self,name:str, timeout = datetime.timedelta(minutes=10)):
         self.timeout = timeout
@@ -170,9 +170,11 @@ class ChatSession:
             thread_id=thread.id,
             role = "user",
             content=msg,
-            file_ids=ChatSession.__uploadFile(attachments)
+            attachments=[{"file_id": id, "tools":[{"type":"code_interpreter"}]}
+                          for id in ChatSession.__uploadFile(attachments)]
+            
         )
-        run = ChatSession.__client.beta.threads.runs.create(
+        run = ChatSession.__client.beta.threads.runs.create_and_poll(
             thread_id=thread.id,
             assistant_id=self.assistantSession.id
         )
@@ -200,7 +202,7 @@ class ChatSession:
     async def __extractMsg(thread:Thread):
         msgList = ChatSession.__client.beta.threads.messages.list(thread_id=thread.id)
         messages = msgList.data
-        new_messages:List[ThreadMessage] = []
+        new_messages:List[Message] = []
         for item in messages:
             if(item.role == "user"): break
             new_messages.append(item)
@@ -210,7 +212,7 @@ class ChatSession:
         for item in new_messages:
             msgContent = item.content[0]
             if(msgContent.type == "image_file"):
-                image = ChatSession.__client.files.with_raw_response.retrieve_content(msgContent.image_file.file_id)
+                image = ChatSession.__client.files.with_raw_response.content(msgContent.image_file.file_id)
                 files.append(ChatFile(image.content,"image.png"))
                 continue
             msgValue = msgContent.text.value
@@ -223,7 +225,7 @@ class ChatSession:
                     citations.append(f'[{index}] {file_citation.quote} from {cited_file.filename}')
                 elif (file_path := getattr(annotation, 'file_path', None)):
                     cited_file = ChatSession.__client.files.retrieve(file_path.file_id)
-                    file = ChatSession.__client.files.with_raw_response.retrieve_content(cited_file.id)
+                    file = ChatSession.__client.files.with_raw_response.content(cited_file.id)
                     msgValue = msgValue.replace(annotation.text, f'{file.url}')
                     files.append(ChatFile(file.content,pathlib.Path(cited_file.filename).name))
             ret.append(msgValue + "\n" + "\n".join(citations))

@@ -82,7 +82,7 @@ SKILL_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameD
 SKILL_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData_YoStar/main/ja_JP/gamedata/excel/skill_table.json"
 class SkillIdToName:
     
-    with open("infoFromOuterSource/skillmetacode.yaml") as f:
+    with open("infoFromOuterSource/skillmetacode.yaml",encoding="utf-8") as f:
         skillMetaDict:Dict[str,str] = yaml.safe_load(f)
     class SkillItem:
         def __init__(self,skillJson):
