@@ -172,7 +172,6 @@ class ChatSession:
             content=msg,
             attachments=[{"file_id": id, "tools":[{"type":"code_interpreter"}]}
                           for id in ChatSession.__uploadFile(attachments)]
-            
         )
         run = ChatSession.__client.beta.threads.runs.create_and_poll(
             thread_id=thread.id,

@@ -6,11 +6,11 @@ from infoFromOuterSource.idtoname import ItemIdToName
 
 #ドロップアイテム&ステージのカテゴリ情報を入手
 with open("riseicalculator2/StageCategoryDict.json","rb") as file:
-    StageCategoryDict = yaml.safe_load(file)
+    StageCategoryDict:Dict = yaml.safe_load(file)
 
 #一部理論値と実際のクリア時間が乖離しているステージで個別修正
 with open("riseicalculator2/minClearTimeInjection.yaml","rb") as file:
-    minClearTimeInjection = yaml.safe_load(file)
+    minClearTimeInjection:Dict = yaml.safe_load(file)
 
 Item_rarity2:List[str] = [
     '固源岩组','全新装置','聚酸酯组', 
@@ -76,7 +76,7 @@ ValueTarget_new:List[str] = [
 ]
 
 #契約賞金引換証
-__ccNumber = '12'
+__ccNumber = '1'
 class CCExchangeItem:
     def __init__(self,dictItem:dict):
         self.name = dictItem["name"]

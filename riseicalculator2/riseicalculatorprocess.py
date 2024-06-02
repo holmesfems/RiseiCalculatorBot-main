@@ -26,18 +26,16 @@ EXCEL_FILENAME = 'BaseStages.xlsx'
 BASEMINTIMES_UPPER = 3000 #baseMinTimes上限値
 
 headers = {'User-Agent':'ArkPlanner'}
-def get_json(s,AdditionalReq=None):
+def get_json(s,AdditionalReq={}):
     return netutil.get_json(PENGUIN_URL+s,AdditionalReq,headers)
 
 #初級&上級資格証
-Price:Dict[str,float] = ...
 with open('riseicalculator2/price.yaml', 'rb') as f:
-    Price = yaml.safe_load(f)
+    Price:Dict[str,float] = yaml.safe_load(f)
 
 #特別引換証
-Price_Special:Dict[str,float] = ...
 with open('riseicalculator2/price_special.yaml', 'rb') as f:
-    Price_Special = yaml.safe_load(f)
+    Price_Special:Dict[str,float] = yaml.safe_load(f)
 
 
 #大陸版実装済み、グロ版未実装のステージまとめ 実装次第削除してOK
@@ -853,7 +851,7 @@ class CalculatorManager:
     calculatorForGlobal = Calculator(True)
     calculatorForMainland = Calculator(False)
     CC_NUMBER = "12"
-
+    
     def selectCalculator(isGlobal:bool):
         return CalculatorManager.calculatorForGlobal if isGlobal else CalculatorManager.calculatorForMainland
     
@@ -953,9 +951,9 @@ class CalculatorManager:
     def riseimaterials(targetCategory:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15, toCsv = False) -> RCReply:
         #大陸版先行素材を選ぶ場合、isGlobal指定にかかわらず、自動で大陸版計算とする
         if(targetCategory in StageCategoryDict["new"].keys()): isGlobal = False
-        riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
+        riseiValues:RiseiOrTimeValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         #print(riseiValue)
-        calculator = CalculatorManager.selectCalculator(isGlobal)
+        calculator:Calculator = CalculatorManager.selectCalculator(isGlobal)
         if not (categoryValue := calculator.stageInfo.categoryDict.get(targetCategory)):
             return RCReply(
                 embbedTitle=title,
@@ -1023,8 +1021,8 @@ class CalculatorManager:
         return reply
 
     def riseistages(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15,toCsv = False) -> RCReply:
-        riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
-        calculator = CalculatorManager.selectCalculator(isGlobal)
+        riseiValues:RiseiOrTimeValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
+        calculator:Calculator = CalculatorManager.selectCalculator(isGlobal)
         stagesToShow = calculator.searchMainStage(targetStage,showMinTimes)
         title = "通常ステージ検索"
         if(not stagesToShow):
@@ -1094,8 +1092,8 @@ class CalculatorManager:
         return reply
 
     def riseievents(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 20,toCsv = False) -> RCReply:
-        riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
-        calculator = CalculatorManager.selectCalculator(isGlobal)
+        riseiValues:RiseiOrTimeValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
+        calculator:Calculator = CalculatorManager.selectCalculator(isGlobal)
         stagesToShow = calculator.searchEventStage(targetStage,showMinTimes)
         #print(stages)
         title = "イベントステージ検索"
@@ -1154,8 +1152,8 @@ class CalculatorManager:
         return reply
       
     def riseilists(toPrintTarget:ToPrint,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,toCsv = False) -> RCReply:
-        riseiValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
-        calculator = CalculatorManager.selectCalculator(isGlobal)
+        riseiValues:RiseiOrTimeValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
+        calculator:Calculator = CalculatorManager.selectCalculator(isGlobal)
         reply = RCReply()
         if toPrintTarget is CalculatorManager.ToPrint.BASEMAPS:
             baseMapStr = calculator.getBaseStageMatrix(mode).toString()
@@ -1363,8 +1361,8 @@ class CalculatorManager:
                 responseForAI=f"Error: The purchase pack is not found: {toPrintTarget}"
             )
 
-        riseiValues = CalculatorManager.getValues(isGlobal,CalculateMode.SANITY,baseMinTimes,cache_minutes)
-        calculator = CalculatorManager.selectCalculator(isGlobal)
+        riseiValues:RiseiOrTimeValues = CalculatorManager.getValues(isGlobal,CalculateMode.SANITY,baseMinTimes,cache_minutes)
+        calculator:Calculator = CalculatorManager.selectCalculator(isGlobal)
         kakinList = getKakinList(isGlobal)
         #比較用
         constantList = [CalculatorManager.KakinPack(key,value,riseiValues) for key,value in kakinList.items() if value["isConstant"]]
