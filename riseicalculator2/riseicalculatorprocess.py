@@ -233,7 +233,7 @@ def getBufferedInfo(req:str,additional,force:bool):
     return ret
 
 def getStage(force):
-    return getBufferedInfo("stages",None,force)
+    return getBufferedInfo("stages",{},force)
 
 def getMatrix(force):
     additionalHeader = {"server":"CN","show_closed_zones":"true"}

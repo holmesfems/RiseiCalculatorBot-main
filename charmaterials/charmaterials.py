@@ -168,7 +168,7 @@ class EQCost:
             self.eqCostList.sort(key=lambda x: x.type)
 
 class OperatorCosts:
-    def __init__(self,key,value):
+    def __init__(self,key:str,value:Dict[str,str]):
         self.name = value["name"]
         self.id = key
         #昇進段階 昇進1, 昇進2に必要な素材
@@ -606,10 +606,10 @@ class OperatorCostsCalculator:
             responseForAI=str(jsonForAI)
         )
 
-    def autoCompleteForModuleCost(name:str,limit:int = 25) -> List[Tuple[str,str]]:
+    def autoCompleteForModuleCost(name:str,limit:int = 25):
         return [(value.name,value.name) for value in OperatorCostsCalculator.operatorInfo.operatorDict.values() if name in value.name and value.hasUniqeEq()][:limit]
 
-    def operatorModuleCost(operatorName:str) -> RCReply:
+    def operatorModuleCost(operatorName:str):
         costItem = OperatorCostsCalculator.operatorInfo.getOperatorCostFromName(operatorName)
         title = "モジュール必要素材検索"
         if(not costItem): return RCReply(
