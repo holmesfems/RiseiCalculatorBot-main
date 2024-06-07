@@ -61,3 +61,33 @@
 - name: 龙门币1000
   value: 14.28571428
   quantity: ∞
+- name: RMA70-12
+  value: 75
+  quantity: ∞
+- name: 研磨石
+  value: 60
+  quantity: ∞
+- name: 轻锰矿
+  value: 60
+  quantity: ∞
+- name: 扭转醇
+  value: 45
+  quantity: ∞
+- name: 酮凝集组
+  value: 60
+  quantity: ∞
+- name: 异铁组
+  value: 60
+  quantity: ∞
+- name: 糖组
+  value: 45
+  quantity: ∞
+- name: 聚酸酯组
+  value: 45
+  quantity: ∞
+- name: 全新装置
+  value: 75
+  quantity: ∞
+- name: 固源岩组
+  value: 45
+  quantity: ∞
