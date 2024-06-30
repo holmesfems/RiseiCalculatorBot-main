@@ -72,12 +72,12 @@
 #     純正源石: 13
 #     龍門幣1000: 300
 
-危機支援資金パック:
-  price: 1200
-  isConstant: false
-  contents:
-    純正源石: 16
-    龍門幣1000: 700
+# 危機支援資金パック:
+#   price: 1200
+#   isConstant: false
+#   contents:
+#     純正源石: 16
+#     龍門幣1000: 700
 
 # 特別訓練パック:
 #   price: 1200
@@ -214,6 +214,12 @@
 #   contents:
 #     ★5特訓招待状: 1
 #     合成玉: 4500
+
+中堅スカウトパック:
+  price: 1200
+  isConstant: false
+  contents:
+    10回中堅スカウト券: 1
 
 #constant
 10000円恒常パック:
