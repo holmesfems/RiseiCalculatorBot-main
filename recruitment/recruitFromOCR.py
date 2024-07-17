@@ -1,6 +1,6 @@
 import os,sys,re
 from typing import List,Set,Dict,Optional
-from google.cloud import vision
+from google.cloud import vision_v1 as vision
 from google.auth import api_key
 sys.path.append('../')
 import yaml
