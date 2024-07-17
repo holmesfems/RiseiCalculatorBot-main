@@ -105,7 +105,7 @@ def taglistFromImage(imageURI:str)->MatchTagResponseData:
     #料金節約のために、ランダムでどちらかを使うという手もある
     #今は一旦前者のみを使う
     result = client.text_detection(image=visionImage).text_annotations
-    #print(f"{result=}")
+    print(f"{result=}")
     result = result[0].description
     
     print("OCR result:" + result)
