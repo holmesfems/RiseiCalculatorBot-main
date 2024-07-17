@@ -1,6 +1,6 @@
 import os,sys,re
 from typing import List,Set,Dict,Optional
-from google.cloud import vision_v1 as vision
+from google.cloud import vision_v1p4beta1 as vision
 from google.auth import api_key
 sys.path.append('../')
 import yaml
@@ -105,7 +105,7 @@ def taglistFromImage(imageURI:str)->MatchTagResponseData:
     #料金節約のために、ランダムでどちらかを使うという手もある
     #今は一旦前者のみを使う
     result = client.text_detection(image=visionImage).text_annotations
-    print(f"{result=}")
+    #print(f"{result=}")
     result = result[0].description
     
     print("OCR result:" + result)
