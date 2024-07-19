@@ -106,6 +106,7 @@ def taglistFromImage(imageURI:str)->MatchTagResponseData:
     #今は一旦前者のみを使う
     result = client.text_detection(image=visionImage).text_annotations
     #print(f"{result=}")
+    if len(result)==0: return None
     result = result[0].description
     
     print("OCR result:" + result)

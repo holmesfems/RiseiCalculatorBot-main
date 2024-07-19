@@ -445,6 +445,11 @@ async def msgForOCR(message:discord.Message):
         if(not file.width or not file.height): return
         image = file.url
         tagMatch = recruitFromOCR.taglistFromImage(image)
+        if(tagMatch == None):
+            await sendReplyToDiscord.replyToDiscord(message,RCReply(
+                plainText="画像認識の調子が悪いみたいね。また後で試してちょうだい。"
+                ))
+            return
         print("タグを読みました",tagMatch)
         if(not tagMatch):return
         msg = recruitment.recruitDoProcess(tagMatch.matches,4,isGlobal=tagMatch.isGlobal)
