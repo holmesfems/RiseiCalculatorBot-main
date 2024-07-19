@@ -447,7 +447,7 @@ async def msgForOCR(message:discord.Message):
         tagMatch = recruitFromOCR.taglistFromImage(image)
         if(tagMatch == None):
             await sendReplyToDiscord.replyToDiscord(message,RCReply(
-                plainText="画像認識の調子が悪いみたいね。また後で試してちょうだい。"
+                plainText="画像認識の調子が悪いみたいね。また後で試すか、`/recruitsim`コマンドで手動入力を試してみてね。"
                 ))
             return
         print("タグを読みました",tagMatch)
