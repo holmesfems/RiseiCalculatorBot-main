@@ -261,6 +261,7 @@ class AllOperatorsInfo:
     def __init__(self):
         self.operatorDict:Dict[str,OperatorCosts] = {}
         self.nameToId:Dict[str,str] = {}
+        self.cnNameToJaName:Dict[str,str] = {}
         self.init()
 
     def init(self):
@@ -281,12 +282,14 @@ class AllOperatorsInfo:
             if(value["isNotObtainable"]): continue #獲得できるオペレーターのみ登録
             jpValue = allInfoJP.get(key)
             if(jpValue):
+                self.cnNameToJaName[value["name"]] = jpValue["name"]
                 value = jpValue
                 value["cnOnly"] = False
             else:
                 value["cnOnly"] = True
                 jpName = customZhToJaDict.get(value["name"],None)
                 if(jpName):
+                    self.cnNameToJaName[value["name"]] = jpName
                     value["name"] = jpName
             value["isPatch"] = False
             self.operatorDict[key] = OperatorCosts(key,value)
@@ -302,7 +305,7 @@ class AllOperatorsInfo:
             value["isPatch"] = True
             self.operatorDict[key] = OperatorCosts(key,value)
             self.nameToId[value["name"]] = key
-        
+        #モジュール情報
         for key,value in allUEQ.items():
             charId = value["charId"]
             jpValue = allUEQ_JP.get(key)

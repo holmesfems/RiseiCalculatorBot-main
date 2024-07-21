@@ -1,24 +1,31 @@
 import yaml,datetime
+from typing import Dict,List
+import sys
+sys.path.append("../")
+from charmaterials.charmaterials import OperatorCostsCalculator
 from rcutils.rcReply import RCReply
 
+__cnToJa = OperatorCostsCalculator.operatorInfo.cnNameToJaName
+
 with open("happybirthday/birthdayRev.yaml","rb") as f:
-    birthdayRevDict = yaml.safe_load(f)
+    birthdayRevDict:Dict[str,List[str]] = yaml.safe_load(f)
 
 reflectDict = {
     "アステシア": "私",
-    "アステジーニ": "エレナちゃん",
+    "アステジーニ": "エレナ",
 }
 
 chanList = [
     "スズラン","ポプカル","シャマレ","バブル"
 ]
 
-def reflectName(name:str):
-    reflect = reflectDict.get(name,None)
+def reflectName(cnName:str):
+    jaName = __cnToJa.get(cnName,cnName)
+    reflect = reflectDict.get(jaName,None)
     if(reflect): return reflect
-    chan = name in chanList
-    if(chan): return name + "ちゃん"
-    return name + "さん"
+    chan = jaName in chanList
+    if(chan): return jaName + "ちゃん"
+    return jaName + "さん"
 
 def mentionStr(reflectList):
     l = len(reflectList)
