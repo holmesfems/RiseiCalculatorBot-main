@@ -63,7 +63,7 @@ class FKInfo:
         fkList:List[str] = fkJson["values"][2:]
         self.fkData = {}
         for item in fkList:
-            if(len(item)<=12): continue
+            if(len(item)<12): continue
             name = item[4]
             newSkillFKInfo = SkillFKInfo(
                 operatorName = name,
