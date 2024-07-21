@@ -116,14 +116,16 @@
     name: operatorFKInfo
     description: Get the Frame-Kill(FK) info of a skill of the operator. To specify the skill, you need the name of the operator and the number of the skill.
     parameters:
-      target:
-        type: string
-        description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
-      skillnum:
-        type: number
-        description: The skill number
-    required:
-    - target
-    - skillnum
+      type: object
+      properties:
+        target:
+          type: string
+          description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
+        skillnum:
+          type: number
+          description: The skill number
+      required:
+      - target
+      - skillnum
 
 - type: code_interpreter
