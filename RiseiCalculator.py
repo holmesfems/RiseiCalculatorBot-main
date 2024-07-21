@@ -15,6 +15,7 @@ from charmaterials.charmaterials import OperatorCostsCalculator
 from rcutils import sendReplyToDiscord
 from rcutils.rcReply import RCReply
 from serverModeration.moderationUtils import serverModerator
+from fkDatabase.fkDataSearch import fkInfo
 
 TOKEN = os.environ["BOT_TOKEN"]
 ID = os.environ["BOT_ID"]
@@ -396,6 +397,26 @@ async def operator_name_autocomplete_formodule(inter:Interaction,current:str)->L
         Choice(name="実装済オペレーターの消費素材合計",value = "costofglobal")
     ]
 )
+
+@tree.command(
+    name="fksearch",
+    description="オペレーターのFK情報を出力します"
+)
+@app_commands.describe(
+    operator_name = "オペレーターの名前、大陸先行オペレーターも日本語を入れてください",
+    skill_num = "スキルは数字のみ(例:'1')、素質は'素質'+数字(例:'素質1')で入力してください"
+)
+async def fksearch(inter:Interaction, operator_name:str, skill_num:str):
+    operator_name = safeCallChoiceVal(operator_name)
+    skill_num = safeCallChoiceVal(skill_num)
+    await inter.response.defer(thinking=True)
+    msg = fkInfo.getReply(operator_name,skill_num)
+    await sendReplyToDiscord.followupToDiscord(inter,msg)
+@fksearch.autocomplete("operator_name")
+async def operator_name_autocomplete_forfk(inter:Interaction,current:str)->List[Choice[str]]:
+    strList = fkInfo.autoComplete(current)
+    return [app_commands.Choice(name = name, value = value) for name,value in strList]
+
 async def operatorcostlist(inter:Interaction,selection:Choice[str]):
     selection = safeCallChoiceVal(selection)
     selection = OperatorCostsCalculator.CostListSelection(selection)

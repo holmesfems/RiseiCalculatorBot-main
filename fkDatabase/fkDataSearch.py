@@ -8,7 +8,7 @@ from charmaterials.charmaterials import OperatorCostsCalculator
 from infoFromOuterSource.idtoname import SkillIdToName
 from rcutils.getnow import getnow
 from typing import List,Dict,Tuple
-from rcutils.rcReply import RCReply
+from rcutils.rcReply import RCReply,RCMsgType
 from datetime import datetime
 
 SSKEY = os.environ["SSAPI"]
@@ -88,16 +88,37 @@ class FKInfo:
         if(timeDiff.total_seconds() >= 3600): self.update()
         return self.fkData.get(name,None)
     
-    def getReplyForAI(self,name,skillNum):
+    def getReply(self,name,skillNum):
         info = self.getInfoFromName(name)
-        if(not info): return RCReply(responseForAI="There is no FK info for this operator")
+        title = "FK情報検索"
+        if(not info): return RCReply(
+            embbedTitle=title,
+            embbedContents=["指定のオペレーターのFK情報は見つかりませんでした"],
+            msgType=RCMsgType.ERR,
+            responseForAI="There is no FK info for this operator")
         skillInfo = info.getSkillFromNum(str(skillNum))
-        if(not skillInfo): return RCReply(responseForAI="This skill is not a FK skill")
-        return RCReply(responseForAI=json.dumps({
-            "skillName": skillInfo.skillName,
-            "fkNum": skillInfo.fkNum,
-            "fkErr": skillInfo.fkErr,
-            "detail": skillInfo.detail
-        }))
+        if(not skillInfo): return RCReply(
+            embbedTitle=title,
+            embbedContents=["指定のスキルのFK情報は見つかりませんでした"],
+            msgType=RCMsgType.ERR,
+            responseForAI="This skill is not a FK skill")
+        return RCReply(
+            embbedTitle=title,
+            embbedContents=[
+                f"スキル名: {skillInfo.skillName}\n" if skillInfo.skillName else f"スキル指定: {skillNum}\n",
+                f"最短FK数: {skillInfo.fkNum}\n",
+                f"FK誤差: {skillInfo.fkErr}\n",
+                f"詳細情報: \n```\n{skillInfo.detail}\n```"
+            ],
+            responseForAI=json.dumps({
+                "skillName": skillInfo.skillName,
+                "fkNum": skillInfo.fkNum,
+                "fkErr": skillInfo.fkErr,
+                "detail": skillInfo.detail
+            })
+        )
+    
+    
+
     
 fkInfo = FKInfo()

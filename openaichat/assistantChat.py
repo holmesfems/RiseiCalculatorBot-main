@@ -117,7 +117,7 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
         if(autoComplete):
             targetEstimated = autoComplete[0][1]
         targetEstimated = operator_typo_correction(targetEstimated)
-        return fkInfo.getReplyForAI(targetEstimated,number)
+        return fkInfo.getReply(targetEstimated,number)
     
     #全部ヒットしない場合、メソッド未実装である
     return RCReply(responseForAI=f"Error: function is not implemented: {functionName}")
