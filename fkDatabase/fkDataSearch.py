@@ -18,7 +18,7 @@ SSNAME = "スキル一覧"
 class SkillFKInfo:
     def __init__(self,operatorName:str,skillNum:str,fkNum:str,fkErr:str,detail:str,lastEdited:str,state:str):
         self.skillNum = skillNum
-        self.skillName = ""
+        self.skillName:str = ""
         while(True):
             if(not operatorName): break
             operatorSkills = OperatorCostsCalculator.operatorInfo.getOperatorCostFromName(operatorName)
@@ -37,6 +37,9 @@ class SkillFKInfo:
 
     def isAvailable(self):
         return self.lastEdited != ""
+    
+    def nameOrNum(self):
+        return self.skillName if self.skillName else self.skillNum
 
 class OperatorFKInfo:
     def __init__(self,name):
@@ -50,6 +53,9 @@ class OperatorFKInfo:
         ret = [x for x in self.skills if x.skillNum == skillNum]
         if(ret): return ret[0]
         else:return None
+
+    def hasOnlyOneSkill(self):
+        return len(self.skills) == 1
 
 class FKInfo:
     def __init__(self):
@@ -88,7 +94,7 @@ class FKInfo:
         if(timeDiff.total_seconds() >= 3600): self.update()
         return self.fkData.get(name,None)
     
-    def getReply(self,name,skillNum):
+    def getReply(self,name:str,skillNum:str):
         info = self.getInfoFromName(name)
         title = "FK情報検索"
         if(not info): return RCReply(
@@ -96,7 +102,16 @@ class FKInfo:
             embbedContents=["指定のオペレーターのFK情報は見つかりませんでした"],
             msgType=RCMsgType.ERR,
             responseForAI="There is no FK info for this operator")
-        skillInfo = info.getSkillFromNum(str(skillNum))
+        if(skillNum.strip() == "" and not info.hasOnlyOneSkill()):
+            skillDict = {x.skillNum: x.nameOrNum() for x in info.skills}
+            return RCReply(
+                embbedTitle=title,
+                embbedContents=[f"複数のFKスキルがあります: {skillDict}",
+                                f"どのスキルか選んでください"],
+                msgType=RCMsgType.ERR,
+                responseForAI=f"Please ask user to select a skill from following choices: {skillDict}")
+
+        skillInfo = info.skills[0] if info.hasOnlyOneSkill() and skillNum.strip() == "" else info.getSkillFromNum(str(skillNum))
         if(not skillInfo): return RCReply(
             embbedTitle=title,
             embbedContents=["指定のスキルのFK情報は見つかりませんでした"],
@@ -117,8 +132,5 @@ class FKInfo:
                 "detail": skillInfo.detail
             })
         )
-    
-    
-
     
 fkInfo = FKInfo()

@@ -114,7 +114,7 @@
 - type: function
   function:
     name: operatorFKInfo
-    description: Get the Frame-Kill(FK) info of a skill of the operator. To specify the skill, you need the name of the operator and the number of the skill.
+    description: Get the Frame-Kill(FK) info of a skill of the operator.
     parameters:
       type: object
       properties:
@@ -123,9 +123,8 @@
           description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
         skillnum:
           type: number
-          description: The skill number
+          description: The skill number. 
       required:
       - target
-      - skillnum
 
 - type: code_interpreter

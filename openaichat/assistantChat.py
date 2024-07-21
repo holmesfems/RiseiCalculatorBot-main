@@ -112,7 +112,7 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
     elif(functionName == "operatorFKInfo"):
         #FK情報
         targetEstimated = functionArgs["target"]
-        number = functionArgs["skillnum"]
+        number = functionArgs.get("skillnum","")
         autoComplete = fkInfo.autoComplete(targetEstimated)
         if(autoComplete):
             targetEstimated = autoComplete[0][1]

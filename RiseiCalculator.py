@@ -410,9 +410,9 @@ async def operatorcostlist(inter:Interaction,selection:Choice[str]):
 )
 @app_commands.describe(
     operator_name = "オペレーターの名前、大陸先行オペレーターも日本語を入れてください",
-    skill_num = "スキルは数字のみ(例:'1','2','3')、素質は'素質'+数字(例:'素質1')で入力してください"
+    skill_num = "スキルは数字のみ(例:'1','2','3')、素質は'素質'+数字(例:'素質1')で入力してください。FKスキル一つしか持たないオペレーターのみ、空欄でもOK"
 )
-async def fksearch(inter:Interaction, operator_name:str, skill_num:str):
+async def fksearch(inter:Interaction, operator_name:str, skill_num:str=""):
     operator_name = safeCallChoiceVal(operator_name)
     skill_num = safeCallChoiceVal(skill_num)
     await inter.response.defer(thinking=True)
