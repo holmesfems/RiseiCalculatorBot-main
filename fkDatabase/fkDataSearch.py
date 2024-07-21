@@ -91,7 +91,7 @@ class FKInfo:
     def getReplyForAI(self,name,skillNum):
         info = self.getInfoFromName(name)
         if(not info): return RCReply(responseForAI="There is no FK info for this operator")
-        skillInfo = info.getSkillFromNum(skillNum)
+        skillInfo = info.getSkillFromNum(str(skillNum))
         if(not skillInfo): return RCReply(responseForAI="This skill is not a FK skill")
         return RCReply(responseForAI=json.dumps({
             "skillName": skillInfo.skillName,
