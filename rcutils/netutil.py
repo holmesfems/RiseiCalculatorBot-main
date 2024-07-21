@@ -4,7 +4,8 @@ import asyncio
 import nest_asyncio
 nest_asyncio.apply()
 def getUrlWithReq(url:str,AdditionalReq:Dict[str,str]={}) -> str:
-    url += "?" + "&".join([f'{key}={value}' for key,value in AdditionalReq.items()])
+    if(AdditionalReq):
+        url += "?" + "&".join([f'{key}={value}' for key,value in AdditionalReq.items()])
     return url
 
 def get_json_aio(urlList:List[str],headers = {}) -> List[Dict[str, Any]]:

@@ -19,6 +19,7 @@ from charmaterials.charmaterials import OperatorCostsCalculator
 from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode
 from riseicalculator2 import listInfo
 from rcutils.rcReply import RCReply
+from fkDatabase.fkDataSearch import fkInfo
 
 with open("openaichat/systemPrompt.txt","r",encoding="utf-8_sig") as f:
     SYSTEM_PROMPT = f.read()
@@ -99,7 +100,7 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
         # else:
         return OperatorCostsCalculator.skillMasterCost(targetEstimated,number)
 
-    elif(functionName == "operatormodulecost"):
+    elif(functionName == "operatorModuleCost"):
         #モジュールコスト
         targetEstimated = functionArgs["target"]
         autoComplete = OperatorCostsCalculator.autoCompleteForModuleCost(targetEstimated)
@@ -107,6 +108,16 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
             targetEstimated = autoComplete[0][1]
         targetEstimated = operator_typo_correction(targetEstimated)
         return OperatorCostsCalculator.operatorModuleCost(targetEstimated)
+    
+    elif(functionName == "operatorFKInfo"):
+        #FK情報
+        targetEstimated = functionArgs["target"]
+        number = functionArgs["skillnum"]
+        autoComplete = fkInfo.autoComplete(targetEstimated)
+        if(autoComplete):
+            targetEstimated = autoComplete[0][1]
+        targetEstimated = operator_typo_correction(targetEstimated)
+        return fkInfo.getReplyForAI(targetEstimated,number)
     
     #全部ヒットしない場合、メソッド未実装である
     return RCReply(responseForAI=f"Error: function is not implemented: {functionName}")
