@@ -397,6 +397,12 @@ async def operator_name_autocomplete_formodule(inter:Interaction,current:str)->L
         Choice(name="実装済オペレーターの消費素材合計",value = "costofglobal")
     ]
 )
+async def operatorcostlist(inter:Interaction,selection:Choice[str]):
+    selection = safeCallChoiceVal(selection)
+    selection = OperatorCostsCalculator.CostListSelection(selection)
+    await inter.response.defer(thinking=True)
+    msg = OperatorCostsCalculator.operatorCostList(selection)
+    await sendReplyToDiscord.followupToDiscord(inter,msg)
 
 @tree.command(
     name="fksearch",
@@ -416,13 +422,6 @@ async def fksearch(inter:Interaction, operator_name:str, skill_num:str):
 async def operator_name_autocomplete_forfk(inter:Interaction,current:str)->List[Choice[str]]:
     strList = fkInfo.autoComplete(current)
     return [app_commands.Choice(name = name, value = value) for name,value in strList]
-
-async def operatorcostlist(inter:Interaction,selection:Choice[str]):
-    selection = safeCallChoiceVal(selection)
-    selection = OperatorCostsCalculator.CostListSelection(selection)
-    await inter.response.defer(thinking=True)
-    msg = OperatorCostsCalculator.operatorCostList(selection)
-    await sendReplyToDiscord.followupToDiscord(inter,msg)
 
 CHANNEL_ID_HAPPYBIRTHDAY = int(os.environ["CHANNEL_ID_HAPPYBIRTHDAY"])
 
