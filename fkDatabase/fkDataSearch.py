@@ -23,8 +23,8 @@ class SkillFKInfo:
             if(not operatorName): break
             operatorSkills = OperatorCostsCalculator.operatorInfo.getOperatorCostFromName(operatorName)
             if(not operatorSkills): break
-            idDict = {index:value for index,value in enumerate(operatorSkills.skillIds)}
-            skillId = idDict.get(int(skillNum),"")
+            idDict = {str(index):value for index,value in enumerate(operatorSkills.skillIds)}
+            skillId = idDict.get(skillNum,"")
             if(not skillId): break
             skillName = SkillIdToName.getStr(skillId)
             self.skillName = skillName
