@@ -1329,13 +1329,18 @@ class CalculatorManager:
             }
     
     def autoCompletion_riseikakin(current:str,limit:int=25)->List[Tuple[str,str]]:
-        totalCommandList = [("全体比較(グローバル)","Total_Global"),("全体比較(大陸版)","Total_Mainland")]
+        totalCommandList = [("全体比較(グローバル)","Total_Global"),
+        ]
+        #大陸版情報は誰も使用しなかったので、一旦オミット
+        #("全体比較(大陸版)","Total_Mainland")]
+        #グローバル版情報
         nameList = [(name,name) for name,value in getKakinList(True).items() if not value["isConstant"]]
-        nameList += [(name,name) for name,value in getKakinList(False).items() if not value["isConstant"]]
+        #大陸版情報
+        # nameList += [(name,name) for name,value in getKakinList(False).items() if not value["isConstant"]]
         ret = [item for item in totalCommandList+nameList if current in item[0]][:limit]
         if(ret): return ret
-        constantNameList = [(name,name) for name,value in getKakinList(True).items() if value["isConstant"]] +\
-            [(name,name) for name,value in getKakinList(False).items() if value["isConstant"]]
+        constantNameList = [(name,name) for name,value in getKakinList(True).items() if value["isConstant"]]
+            # +[(name,name) for name,value in getKakinList(False).items() if value["isConstant"]]
         ret = [item for item in constantNameList if current in item[0]][:limit]
         return ret
     
