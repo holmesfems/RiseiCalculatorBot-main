@@ -97,7 +97,8 @@ class SkillIdToName:
                     "</>":"",
                     "-{-":"{",
                     "{-":"-{",
-                    "\\n":"\n"
+                    "\\n":"\n",
+                    "AOE":"aoe"
                 })
                 def cleanStr(string:str)->str:
                     return string.replace("[","").replace("]","").replace(".","")
