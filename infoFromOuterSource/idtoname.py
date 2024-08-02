@@ -91,7 +91,7 @@ class SkillIdToName:
             if description:
                 bareplace1 = re.compile(r"<@ba\.?[a-z0-9]+>")
                 description = bareplace1.sub("",description)
-                bareplace2 = re.compile(r"<\$ba\.?[a-z0-9]+>")
+                bareplace2 = re.compile(r"<\$ba\.?(dt\.)?[a-z0-9]+>")
                 description = bareplace2.sub("",description)
                 description = strutil.replace_byDict(description,{
                     "</>":"",
