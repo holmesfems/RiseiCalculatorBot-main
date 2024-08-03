@@ -83,7 +83,7 @@ class serverModerator:
         anniRole = user.guild.get_role(anniRoleID)
         if(not anniRole): return False
 
-        await user.add_roles([anniRole])
+        await user.add_roles(anniRole)
         await self.createReport(f"{user.name} さんに一周年ロールを付けました！",None)
         return True
 
