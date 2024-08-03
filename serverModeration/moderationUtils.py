@@ -84,7 +84,7 @@ class serverModerator:
         if(not anniRole): return False
 
         await user.add_roles(anniRole)
-        await self.createReport(f"{user.name} さんに一周年ロールを付けました！",None)
+        #await self.createReport(f"{user.name} さんに一周年ロールを付けました！",None)
         return True
 
     async def createReport(self,report:str, message:discord.Message|None) -> None:
