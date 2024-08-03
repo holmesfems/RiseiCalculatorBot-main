@@ -69,7 +69,7 @@ class serverModerator:
         if(not isinstance(user,discord.Member)): return False
         nowtime = getnow()
         joinedtime = user.joined_at
-        anniRoleID = int(os.environ("ANNIROLEID"))
+        anniRoleID = int(os.environ.get("ANNIROLEID"))
         if(joinedtime == None):
             return False
         joinedtime = joinedtime.astimezone(JST)
