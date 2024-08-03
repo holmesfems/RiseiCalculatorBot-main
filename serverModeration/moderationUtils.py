@@ -84,11 +84,12 @@ class serverModerator:
         if(not anniRole): return False
 
         await user.add_roles([anniRole])
-        await self.createReport(f"{user.name} さんに一周年ロールを付けました！",)
+        await self.createReport(f"{user.name} さんに一周年ロールを付けました！",None)
         return True
 
-    async def createReport(self,report:str, message:discord.Message) -> None:
+    async def createReport(self,report:str, message:discord.Message|None) -> None:
         content = f"{report}\n"
-        content += f"author:{message.author.name}\n"
-        content += f"content:```{message.content.replace('.','_').replace('http','ht tp')}```"
+        if(message):
+            content += f"author:{message.author.name}\n"
+            content += f"content:```{message.content.replace('.','_').replace('http','ht tp')}```"
         await sendToDiscord(self.reportChannel,RCReply(plainText=content))
