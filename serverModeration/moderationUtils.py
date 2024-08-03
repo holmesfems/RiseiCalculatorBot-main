@@ -3,15 +3,20 @@ import os,sys
 sys.path.append('../')
 from rcutils.rcReply import RCReply
 from rcutils.sendReplyToDiscord import sendToDiscord
+from rcutils.getnow import getnow,JST
+from typing import Union
 class serverModerator:
     def __init__(self, reportChannel:discord.TextChannel) -> None:
         self.reportChannel = reportChannel
 
     async def moderingMSG(self,message:discord.Message):
         #指定したチャンネルは、追加したメッセージをすべて削除
-        doneAny = await self.autoDeletion(message)
+        autoDeleted = await self.autoDeletion(message)
+        autoAnniversaried = await self.autoAnniversary(message)
         #良さげなBANワードを思いついてないので、autoBanは一旦機能オフにする
         # if(not doneAny): doneAny = await self.autoBan(message)
+
+        doneAny = autoDeleted or autoAnniversaried
         return doneAny
 
     async def autoDeletion(self,message:discord.Message) -> bool:
@@ -58,7 +63,29 @@ class serverModerator:
             return True
         return False
     
+    #一周年ロールを付ける機能
+    async def autoAnniversary(self,message:discord.Message) -> bool:
+        user = message.author
+        if(not isinstance(user,discord.Member)): return False
+        nowtime = getnow()
+        joinedtime = user.joined_at
+        anniRoleID = int(os.environ("ANNIROLEID"))
+        if(joinedtime == None):
+            return False
+        joinedtime = joinedtime.astimezone(JST)
+        #一周年ロールがある場合、付けない
+        if(any([anniRoleID == role.id for role in user.roles])):
+            return False
+        canGetRole = (nowtime.year - joinedtime.year >= 2) or \
+            (nowtime.year - joinedtime.year > 1 and nowtime.month >= joinedtime.month)
+        if(not canGetRole): return False
 
+        anniRole = user.guild.get_role(anniRoleID)
+        if(not anniRole): return False
+
+        await user.add_roles([anniRole])
+        await self.createReport(f"{user.name} さんに一周年ロールを付けました！",)
+        return True
 
     async def createReport(self,report:str, message:discord.Message) -> None:
         content = f"{report}\n"
