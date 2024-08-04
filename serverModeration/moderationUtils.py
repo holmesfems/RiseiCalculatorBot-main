@@ -77,7 +77,7 @@ class serverModerator:
         if(any([anniRoleID == role.id for role in user.roles])):
             return False
         canGetRole = (nowtime.year - joinedtime.year >= 2) or \
-            (nowtime.year - joinedtime.year > 1 and nowtime.month >= joinedtime.month)
+            (nowtime.year - joinedtime.year >= 1 and nowtime.month >= joinedtime.month)
         if(not canGetRole): return False
 
         anniRole = user.guild.get_role(anniRoleID)
