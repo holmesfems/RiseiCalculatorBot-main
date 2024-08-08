@@ -87,7 +87,7 @@ with open("./recruitment/recruitmentOperators.json","rb") as file:
     operatorDB = yaml.safe_load(file)
     operators_JP = [Operator(item) for item in operatorDB["main"]]
     operators_New = [Operator(item) for item in operatorDB["new"]]
-    futureSets = [FutureOperatorSet([Operator(item) for item in dataSet], _parseDate(key)) for dataSet,key in operatorDB.items() if key != "main" and key != "new"]
+    futureSets = [FutureOperatorSet([Operator(item) for item in operatorDB[key]], _parseDate(key)) for key in operatorDB.keys() if key not in ["main","new"]]
 
 def get_operators(glob:bool) -> List[Operator]:
     ret = operators_JP
