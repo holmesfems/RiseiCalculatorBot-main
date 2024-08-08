@@ -2,7 +2,6 @@ import os,sys,re
 from typing import List,Set,Dict,Optional
 from google.cloud import vision_v1p4beta1 as vision
 from google.auth import api_key
-sys.path.append('../')
 import yaml
 
 #下二つと統一、日本版認識用

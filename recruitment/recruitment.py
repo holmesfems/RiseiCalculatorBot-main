@@ -4,6 +4,11 @@ import itertools
 from typing import List,Tuple,Optional,Iterable
 from rcutils.rcReply import RCReply
 from abc import ABC,abstractmethod
+import dataclasses
+from datetime import datetime,date
+import sys
+sys.path.append('../')
+from rcutils.getnow import getnow
 
 class RecruitTag(ABC):
     def __init__(self,tagName):
@@ -68,13 +73,42 @@ class Operator:
     def __repr__(self):
         return "★{0}".format(self.stars)+self.name
 
+#近い将来実装予定のオペレーターを、先に書き込めるようにするためのコード
+#"main","new"タグの他、"2024-08-08"などで、実装時間を指定できるようにする
+@dataclasses.dataclass
+class FutureOperatorSet:
+    operators:List[Operator]
+    beginTime:date
+    
+def _parseDate(key:str) -> date:
+    return date.fromisoformat(key)
+
 with open("./recruitment/recruitmentOperators.json","rb") as file:
     operatorDB = yaml.safe_load(file)
     operators_JP = [Operator(item) for item in operatorDB["main"]]
     operators_New = [Operator(item) for item in operatorDB["new"]]
+    futureSets = [FutureOperatorSet([Operator(item) for item in dataSet], _parseDate(key)) for dataSet,key in operatorDB.items() if key != "main" and key != "new"]
 
 def get_operators(glob:bool) -> List[Operator]:
-    return operators_JP if glob else operators_JP + operators_New
+    ret = operators_JP
+    if(glob):
+        now = getnow()
+        nowDate = now.date()
+        nowTime = now.time()
+        for operatorSet in futureSets:
+            if(nowDate > operatorSet.beginTime):
+                ret += operatorSet.operators
+            if(nowDate == operatorSet.beginTime):
+                #16時から実装する
+                if(nowTime.hour >= 16):
+                    ret += operatorSet.operators
+                else: break
+            else:break
+    else:
+        for operatorSet in futureSets:
+            ret += operatorSet.operators
+        ret += operators_New
+    return ret
 
 with open("./recruitment/tagList.json","rb") as file:
     tagList = yaml.safe_load(file)
