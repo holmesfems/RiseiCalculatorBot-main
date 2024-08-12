@@ -206,12 +206,12 @@
 #     精錬溶剤: 2
 #     中級装置: 10
   
-# 狩人の特訓パック:
-#   price: 1500
-#   isConstant: false
-#   contents:
-#     ★5特訓招待状: 1
-#     合成玉: 4500
+生息演算パック:
+  price: 1500
+  isConstant: false
+  contents:
+    ★5特訓招待状: 1
+    合成玉: 4500
 
 # 中堅スカウトパック:
 #   price: 1200
