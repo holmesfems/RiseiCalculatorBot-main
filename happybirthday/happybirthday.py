@@ -27,7 +27,7 @@ def reflectName(cnName:str):
     if(chan): return jaName + "ちゃん"
     return jaName + "さん"
 
-def mentionStr(reflectList):
+def mentionStr(reflectList:List[str]):
     l = len(reflectList)
     if(l == 0): return ""
     elif(l == 1): return reflectList[0]
