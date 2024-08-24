@@ -16,7 +16,7 @@ with open("recruitment/tagJaToJa.yaml","rb") as f:
         r"上級..一下": "上級エリート",
         r"補助...?": "補助",
         r"狙撃...?": "狙撃",
-        r"COSTO": "COST回復",
+        r"COST(O)?": "COST回復",
         r"防御.": "防御"
     }
 

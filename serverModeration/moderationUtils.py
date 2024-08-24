@@ -68,6 +68,7 @@ class serverModerator:
         user = message.author
         #botには一周年ロールを付けない
         if(user.bot): return False
+        #DMではロールを付けない
         if(not isinstance(user,discord.Member)): return False
         nowtime = getnow()
         joinedtime = user.joined_at
