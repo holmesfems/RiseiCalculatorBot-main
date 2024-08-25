@@ -534,7 +534,7 @@ class OperatorCostsCalculator:
             totalCost = ItemCost.sum([value.allCostExceptEq() for value in globalOperators.values()])
             msgList.append("全昇進、全特化の合計消費:" + totalCost.toStrBlock() + "\n")
             eqOperators = {key:value for key,value in globalOperators.items() if value.hasUniqeEq()}
-            eqCost = ItemCost.sum([value.totalUniqueEQCostCNOnly() for value in eqOperators.values()])
+            eqCost = ItemCost.sum([value.totalUniqueEQCostGlobal() for value in eqOperators.values()])
             msgList.append("実装済モジュールの合計消費:" + eqCost.toStrBlock() + "\n")
             msgList.append("全合計の中級素材換算:"+(totalCost+eqCost).rare3and4ToRare2().toStrBlock(sortByCount=True) + "\n")
             totalCostValue = totalCost.toRiseiValue(glob=True) + eqCost.toRiseiValue(glob=True)
