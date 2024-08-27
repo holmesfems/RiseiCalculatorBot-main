@@ -239,16 +239,15 @@ class OperatorCosts:
         return self.uniqeEq.hasCNOnlyUEQ()
     
     def allCost(self)->ItemCost:
-        ret = self.totalPhaseCost()
-        ret += self.totalSkillMasterCost()
-        ret += self.totalSkillLv7Cost()
+        ret = self.allCostExceptEq()
         ret += self.totalUniqueEQCost()
         return ret
     
     def allCostExceptEq(self)->ItemCost:
-        ret = self.totalPhaseCost()
-        ret += self.totalSkillMasterCost()
-        ret += self.totalSkillLv7Cost()
+        ret = self.totalSkillMasterCost()
+        if(not self.isPatch): 
+            ret += self.totalPhaseCost()
+            ret += self.totalSkillLv7Cost()
         return ret
     
     def isCNOnly(self):
