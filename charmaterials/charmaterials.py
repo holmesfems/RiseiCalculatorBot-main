@@ -18,6 +18,8 @@ CHAR_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameDa
 UNI_EQ_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/uniequip_table.json"
 UNI_EQ_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData_YoStar/main/ja_JP/gamedata/excel/uniequip_table.json"
 PATCH_CHAR_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData_YoStar/main/ja_JP/gamedata/excel/char_patch_table.json"
+PATCH_CHAR_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/char_patch_table.json"
+
 EPSILON = 1e-4
 get_json = netutil.get_json
 
@@ -245,6 +247,7 @@ class OperatorCosts:
     
     def allCostExceptEq(self)->ItemCost:
         ret = self.totalSkillMasterCost()
+        #昇格オペレーターは、元オペレーターと消費素材共有するため、ここでは計上しない
         if(not self.isPatch): 
             ret += self.totalPhaseCost()
             ret += self.totalSkillLv7Cost()
@@ -296,11 +299,25 @@ class AllOperatorsInfo:
         
         #昇格
         patchInfoJP:dict = get_json(PATCH_CHAR_TABLE_URL_JP)["patchChars"]
-        for key,value in patchInfoJP.items():
+        patchTableCN:dict = get_json(PATCH_CHAR_TABLE_URL_CN)
+        patchInfoCN:dict = patchTableCN["patchChars"]
+        patchKeyCN:dict = patchTableCN["infos"]
+        def originalOperatorName(patchKey:str):
+            candidate = [key for key,value in patchKeyCN.items() if patchKey in value]
+            if(candidate): 
+                operator = self.operatorDict.get(candidate[0])
+                if(operator): return operator.name
+            return ""
+        for key,value in patchInfoCN.items():
             #今は前衛アーミヤ一人だけ、今後追加されたらまた調整する必要があるかも
             #医療アーミヤも追加されました 2024/05/01
-            value["cnOnly"] = False
-            value["name"] = value["name"] + "({0})".format(jobIdToName[value["profession"]])
+            jpValue = patchInfoJP.get(key)
+            if(jpValue):
+                value = jpValue
+                value["cnOnly"] = False
+            else:
+                value["cnOnly"] = True
+            value["name"] = originalOperatorName(key) + "({0})".format(jobIdToName[value["profession"]])
             value["isPatch"] = True
             self.operatorDict[key] = OperatorCosts(key,value)
             self.nameToId[value["name"]] = key
