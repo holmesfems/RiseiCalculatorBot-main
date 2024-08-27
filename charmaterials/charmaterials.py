@@ -303,7 +303,7 @@ class AllOperatorsInfo:
         patchInfoCN:dict = patchTableCN["patchChars"]
         patchKeyCN:dict = patchTableCN["infos"]
         def originalOperatorName(patchKey:str):
-            candidate = [key for key,value in patchKeyCN.items() if patchKey in value]
+            candidate = [key for key,value in patchKeyCN.items() if patchKey in value["tmplIds"]]
             if(candidate): 
                 operator = self.operatorDict.get(candidate[0])
                 if(operator): return operator.name
