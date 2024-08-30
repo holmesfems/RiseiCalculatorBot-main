@@ -422,6 +422,9 @@ class StageInfo:
             key = item["stageId"]
             stageItem = allStageDict.get(key)
             if not stageItem: continue
+            #恒常ステージの期間限定統計を除外
+            if stageItem in self.mainStageDict.items() and item["end"] != None: 
+                continue
             stageItem.addDropList(item,self.isGlobal)
         self.lastUpdated = getnow.getnow()
         self.firstInitialized = True
