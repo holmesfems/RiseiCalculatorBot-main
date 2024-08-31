@@ -406,6 +406,7 @@ class StageInfo:
         for item in eventMainStageList:
             stageItem = StageItem(item)
             stageItem.name += "(Event)"
+            #print(f"add extra event:{stageItem}")
             self.eventStageDict[stageItem.name] = stageItem
 
         #作戦コードから逆引きする辞書を作成
@@ -416,6 +417,7 @@ class StageInfo:
             return codeToStage
         self.mainCodeToStageDict = createCodeToStageDict(self.mainStageDict)
         self.eventCodeToStageDict = createCodeToStageDict(self.eventStageDict)
+        #print(self.eventStageDict)
         
         #カテゴリ辞書の作成
         categoryDict = getStageCategoryDict(self.isGlobal)
@@ -439,17 +441,22 @@ class StageInfo:
         for item in matrix:
             key = item["stageId"]
             stageItem = allStageDict.get(key)
-            if not stageItem: continue
-            #恒常ステージの期間限定統計をイベント扱いにする
-            #14章のイベント時ドロップが該当
-            if key in self.mainStageDict.keys() and item["end"] is not None:
-                #print(f'{key=}, {item["end"]=}') 
-                key = key + "(Event)"
-                stageItem = self.eventStageDict.get(key)
-                if(not stageItem): continue
-                eventMainReferrence = eventMainDict.get(stageItem.zoneId)
-                if(not eventMainReferrence): continue
-                if(item["end"] != eventMainReferrence.end): continue
+            eventMainItem = self.eventStageDict.get(key + "(Event)")
+
+            if(stageItem is None and eventMainItem is None): continue
+            
+            if(item["end"] is not None and key in self.mainStageDict.keys()):
+                stageItem = eventMainItem
+            
+            if(stageItem is None):
+                stageItem = eventMainItem
+
+            if(stageItem is None):
+                continue
+
+            if(eventMainRefer:=eventMainDict.get(stageItem.zoneId)):
+                if(eventMainRefer.end != item["end"]):
+                    continue
             stageItem.addDropList(item,self.isGlobal)
         self.lastUpdated = getnow.getnow()
         self.firstInitialized = True
