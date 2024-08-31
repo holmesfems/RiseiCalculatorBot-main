@@ -44,8 +44,19 @@ new_zone:List[str] = [
     # 'permanent_sidestory_14_zone1', #LE
     # 'permanent_sidestory_15_zone1', #DV
     # 'permanent_sub_5_zone1', #CW
-    
 ]
+
+@dataclass
+class eventMainStage:
+    zone:str
+    start:int
+    end:int
+
+#新章実装時イベントドロップ、ゾーンIdと終了タイムスタンプの辞書
+eventMainList = [
+    eventMainStage("main_14",start=1714550400000,end=1715716800000)
+]
+eventMainDict = {x.zone:x for x in eventMainList}
 
 def valueTargetZHToJA(zhStr:str) -> str:
     return ItemIdToName.zhToJa(zhStr)
@@ -390,11 +401,18 @@ class StageInfo:
         self.mainStageDict = createStageDict(mainStageList)
         self.eventStageDict = createStageDict(eventStageList)
 
+        #イベント14章の作成(期間限定で特定ステージの泥率がめちゃ上がるやつ)
+        eventMainStageList = [x for x in allStageList if x["zoneId"] in [y.zone for y in eventMainList]]
+        for item in eventMainStageList:
+            stageItem = StageItem(item)
+            stageItem.name += "(Event)"
+            self.eventStageDict[stageItem.name] = stageItem
+
         #作戦コードから逆引きする辞書を作成
         def createCodeToStageDict(stageDict:Dict[str,StageItem]) -> Dict[str,StageItem]:
             codeToStage = {}
             for value in stageDict.values():
-                codeToStage[str(value)] = value
+                codeToStage[value.nameWithReplicate()] = value
             return codeToStage
         self.mainCodeToStageDict = createCodeToStageDict(self.mainStageDict)
         self.eventCodeToStageDict = createCodeToStageDict(self.eventStageDict)
@@ -422,11 +440,16 @@ class StageInfo:
             key = item["stageId"]
             stageItem = allStageDict.get(key)
             if not stageItem: continue
-            #恒常ステージの期間限定統計を除外
-            #14章のイベント時ドロップ、素材箱などが該当
+            #恒常ステージの期間限定統計をイベント扱いにする
+            #14章のイベント時ドロップが該当
             if key in self.mainStageDict.keys() and item["end"] is not None:
                 #print(f'{key=}, {item["end"]=}') 
-                continue
+                key = key + "(Event)"
+                stageItem = self.eventStageDict.get(key)
+                if(not stageItem): continue
+                eventMainReferrence = eventMainDict.get(stageItem.zoneId)
+                if(not eventMainReferrence): continue
+                if(item["end"] != eventMainReferrence.end): continue
             stageItem.addDropList(item,self.isGlobal)
         self.lastUpdated = getnow.getnow()
         self.firstInitialized = True
