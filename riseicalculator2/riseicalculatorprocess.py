@@ -407,7 +407,8 @@ class StageInfo:
             stageItem = StageItem(item)
             stageItem.name += "(Event)"
             #print(f"add extra event:{stageItem}")
-            self.eventStageDict[stageItem.name] = stageItem
+            self.eventStageDict[stageItem.id+"(Event)"] = stageItem
+        #print(self.eventStageDict)
 
         #作戦コードから逆引きする辞書を作成
         def createCodeToStageDict(stageDict:Dict[str,StageItem]) -> Dict[str,StageItem]:
@@ -442,11 +443,12 @@ class StageInfo:
             key = item["stageId"]
             stageItem = allStageDict.get(key)
             eventMainItem = self.eventStageDict.get(key + "(Event)")
-
+            #if(eventMainItem): print("eventMainItem found:" + str(eventMainItem))
             if(stageItem is None and eventMainItem is None): continue
             
             if(item["end"] is not None and key in self.mainStageDict.keys()):
                 stageItem = eventMainItem
+            #    if(eventMainItem): print("end Is Not None:" + str(stageItem))
             
             if(stageItem is None):
                 stageItem = eventMainItem
@@ -454,9 +456,13 @@ class StageInfo:
             if(stageItem is None):
                 continue
 
-            if(eventMainRefer:=eventMainDict.get(stageItem.zoneId)):
+            if(item["end"] is not None and (eventMainRefer:=eventMainDict.get(stageItem.zoneId))):
+            #    print(stageItem)
+            #    print(item["end"])
                 if(eventMainRefer.end != item["end"]):
+            #        print("skipped")
                     continue
+            
             stageItem.addDropList(item,self.isGlobal)
         self.lastUpdated = getnow.getnow()
         self.firstInitialized = True
