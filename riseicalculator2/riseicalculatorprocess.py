@@ -423,8 +423,9 @@ class StageInfo:
             stageItem = allStageDict.get(key)
             if not stageItem: continue
             #恒常ステージの期間限定統計を除外
-            if stageItem in self.mainStageDict.items() and item["end"] is not float:
-                print(f'{item["end"]=}') 
+            #14章のイベント時ドロップ、素材箱などが該当
+            if key in self.mainStageDict.keys() and item["end"] is not None:
+                #print(f'{key=}, {item["end"]=}') 
                 continue
             stageItem.addDropList(item,self.isGlobal)
         self.lastUpdated = getnow.getnow()
