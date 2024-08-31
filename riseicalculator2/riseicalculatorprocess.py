@@ -1067,7 +1067,7 @@ class CalculatorManager:
         riseiValues:RiseiOrTimeValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         calculator:Calculator = CalculatorManager.selectCalculator(isGlobal)
         stagesToShow = calculator.searchMainStage(targetStage,showMinTimes)
-        title = "通常ステージ検索" + "(大陸版)" if isGlobal else ""
+        title = "通常ステージ検索" + "(大陸版)" if not isGlobal else ""
         msgHeader = "検索内容 = " + targetStage
         if(not stagesToShow):
             if(isGlobal):
