@@ -1067,7 +1067,14 @@ class CalculatorManager:
         riseiValues:RiseiOrTimeValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         calculator:Calculator = CalculatorManager.selectCalculator(isGlobal)
         stagesToShow = calculator.searchMainStage(targetStage,showMinTimes)
-        title = "通常ステージ検索"
+        title = "通常ステージ検索" + "(大陸版)" if isGlobal else ""
+        msgHeader = "検索内容 = " + targetStage
+        if(not stagesToShow):
+            if(isGlobal):
+                mainLandCalculator:Calculator = CalculatorManager.selectCalculator(False)
+                stagesToShow = mainLandCalculator.searchMainStage(targetStage,showMinTimes)
+                msgHeader += "\nグローバル版未実装ステージにつき、大陸版結果を表示します"
+        
         if(not stagesToShow):
             return RCReply(
                 embbedTitle=title,
@@ -1075,7 +1082,7 @@ class CalculatorManager:
                 msgType=RCMsgType.ERR,
                 responseForAI=f"Error: Invalid stage: {targetStage}"
             )
-        msgHeader = "検索内容 = " + targetStage
+        
         #名前順でソート
         stagesToShow.sort(key = lambda x:x.name)
         msgChunks = [msgHeader]
