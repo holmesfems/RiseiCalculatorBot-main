@@ -448,9 +448,6 @@ class StageInfo:
                 eventMainItem = self.eventStageDict.get(key + "(Event)")
                 if(key in self.mainStageDict.keys() or stageItem is None):
                     stageItem = eventMainItem
-                    if(eventMainItem): 
-                        print("end Is Not None, stage Changed:" + str(stageItem))
-                        print(item)
 
                 if(stageItem is None):
                     #print("skipped")
@@ -1066,14 +1063,16 @@ class CalculatorManager:
     def riseistages(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15,toCsv = False) -> RCReply:
         riseiValues:RiseiOrTimeValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         calculator:Calculator = CalculatorManager.selectCalculator(isGlobal)
+        mainLandCalculator:Calculator = CalculatorManager.selectCalculator(False)
         stagesToShow = calculator.searchMainStage(targetStage,showMinTimes)
-        title = "通常ステージ検索" + "(大陸版)" if not isGlobal else ""
+        title = "通常ステージ検索" + ("(大陸版)" if not isGlobal else "")
         msgHeader = "検索内容 = " + targetStage
+        nowGlobal = isGlobal
         if(not stagesToShow):
             if(isGlobal):
-                mainLandCalculator:Calculator = CalculatorManager.selectCalculator(False)
                 stagesToShow = mainLandCalculator.searchMainStage(targetStage,showMinTimes)
-                msgHeader += "\nグローバル版未実装ステージにつき、大陸版結果を表示します"
+                msgHeader += "\nグロ版未実装につき、大陸版ステージを表示します"
+                nowGlobal = False
         
         if(not stagesToShow):
             return RCReply(
@@ -1096,7 +1095,7 @@ class CalculatorManager:
                 ["総合{1}効率    : {0:.1%}".format(stage.getEfficiency(riseiValues),str(mode))],
                 ["99%信頼区間(3σ): {0:.1%}".format(calculator.getStageDev(stage,riseiValues)*3)],
             ]
-            dropCategoryList = calculator.stageInfo.stageToCategory(stage)
+            dropCategoryList = calculator.stageInfo.stageToCategory(stage) if(nowGlobal == isGlobal) else mainLandCalculator.stageInfo.stageToCategory(stage)
             if len(dropCategoryList) == 0:
                 toPrint.append(["主ドロップ情報未登録"])
             else:
