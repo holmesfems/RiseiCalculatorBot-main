@@ -442,27 +442,29 @@ class StageInfo:
         for item in matrix:
             key = item["stageId"]
             stageItem = allStageDict.get(key)
-            eventMainItem = self.eventStageDict.get(key + "(Event)")
             #if(eventMainItem): print("eventMainItem found:" + str(eventMainItem))
-            if(stageItem is None and eventMainItem is None): continue
-            
-            if(item["end"] is not None and key in self.mainStageDict.keys()):
-                stageItem = eventMainItem
-            #    if(eventMainItem): print("end Is Not None:" + str(stageItem))
-            
-            if(stageItem is None):
-                stageItem = eventMainItem
+
+            if(item["end"] is not None):
+                eventMainItem = self.eventStageDict.get(key + "(Event)")
+                if(key in self.mainStageDict.keys() or stageItem is None):
+                    stageItem = eventMainItem
+                    if(eventMainItem): 
+                        print("end Is Not None, stage Changed:" + str(stageItem))
+                        print(item)
+
+                if(stageItem is None):
+                    #print("skipped")
+                    continue
+
+                if((eventMainRefer:=eventMainDict.get(stageItem.zoneId))):
+                #    print(stageItem)
+                #    print(item["end"])
+                    if(eventMainRefer.end != item["end"]):
+                #        print("skipped")
+                        continue
 
             if(stageItem is None):
                 continue
-
-            if(item["end"] is not None and (eventMainRefer:=eventMainDict.get(stageItem.zoneId))):
-            #    print(stageItem)
-            #    print(item["end"])
-                if(eventMainRefer.end != item["end"]):
-            #        print("skipped")
-                    continue
-            
             stageItem.addDropList(item,self.isGlobal)
         self.lastUpdated = getnow.getnow()
         self.firstInitialized = True
