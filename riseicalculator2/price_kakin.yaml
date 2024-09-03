@@ -87,6 +87,22 @@
     上級作戦記録: 30
     SoC強化剤: 2
 
+安全演習記念パック:
+  price: 2600
+  isConstant: false
+  contents:
+    純正源石: 18
+    10回スカウト券: 1
+    ホーム背景「Prestige」: 1
+    テーマ「Siege」: 1
+
+闇夜の盾支援パック:
+  price: 160
+  isConstant: false
+  contents:
+    合成玉: 600
+    プロファイルアイコン『「防衛」』: 1
+
 # 4.5周年記念パック・白:
 #   price: 3000
 #   isConstant: false
