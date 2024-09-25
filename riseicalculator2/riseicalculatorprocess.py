@@ -890,6 +890,7 @@ class Calculator:
 class CalculatorManager:
     calculatorForGlobal = Calculator(True)
     calculatorForMainland = Calculator(False)
+    CC_NUMBER = getCCNumber()
     
     def selectCalculator(isGlobal:bool):
         return CalculatorManager.calculatorForGlobal if isGlobal else CalculatorManager.calculatorForMainland
