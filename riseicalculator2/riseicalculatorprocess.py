@@ -890,7 +890,6 @@ class Calculator:
 class CalculatorManager:
     calculatorForGlobal = Calculator(True)
     calculatorForMainland = Calculator(False)
-    CC_NUMBER = "1"
     
     def selectCalculator(isGlobal:bool):
         return CalculatorManager.calculatorForGlobal if isGlobal else CalculatorManager.calculatorForMainland
@@ -1262,7 +1261,7 @@ class CalculatorManager:
             #契約賞金引換証
             CCLIST_FILENAME = "CCList.xlsx"
             Price_CC = getCCList()
-            title = f"契約賞金引換効率(CC#{CalculatorManager.CC_NUMBER})"
+            title = f"契約賞金引換効率(CC#{getCCNumber()})"
             def efficiency(x:CCExchangeItem):
                 return riseiValues.getValueFromZH(x.name)/x.value
             sorted_PriceCC = sorted(Price_CC,key = efficiency,reverse=True)

@@ -76,7 +76,7 @@ ValueTarget_new:List[str] = [
 ]
 
 #契約賞金引換証
-__ccNumber = '1'
+__ccNumber = '2'
 class CCExchangeItem:
     def __init__(self,dictItem:dict):
         self.name = dictItem["name"]
@@ -109,6 +109,8 @@ def getCCList() -> List[CCExchangeItem]:
 def getPOList() -> List[CCExchangeItem]:
     return __price_PO
 
+def getCCNumber() -> str:
+    return __ccNumber
 
 with open("riseicalculator2/price_kakin.yaml","rb") as f:
     kakinList_JP:Dict[str,Dict[str,Union[float,Dict[str,float]]]] = yaml.safe_load(f)
