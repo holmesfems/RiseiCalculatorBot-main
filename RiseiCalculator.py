@@ -577,7 +577,11 @@ async def on_message(message:discord.Message):
                 return
             async with message.channel.typing():
                 await msgForOCRReply(message,referenced_message)
-        await msgForOCR(message)
+        else:
+            attachment = message.attachments
+            if(not attachment): return
+            async with message.channel.typing():
+                await msgForOCR(message)
     elif message.channel.type is discord.ChannelType.private:
         await msgForDM(message)
 
