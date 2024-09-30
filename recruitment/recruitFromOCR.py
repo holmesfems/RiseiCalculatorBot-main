@@ -131,7 +131,8 @@ def __getResultFromAllClient(imageURI:str):
             _lastAvailabledClient = randomChoiced
             return result
         candidateSet.discard(randomChoiced)
-    return None
+    _lastAvailabledClient = None
+    return []
 
 def taglistFromImage(imageURI:str)->MatchTagResponseData:
     #メモ
