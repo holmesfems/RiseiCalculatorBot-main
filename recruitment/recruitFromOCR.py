@@ -123,7 +123,7 @@ def __getResultFromAllClient(imageURI:str):
         result = __getResult(imageURI,__lastAvailabledClient)
         if(len(result)!=0): return result
         candidateSet.discard(__lastAvailabledClient)
-    while(len(candidateSet)>1):
+    while(len(candidateSet)>=1):
         randomChoiced = random.choice(candidateSet)
         result = __getResult(imageURI, randomChoiced)
         if(len(result)!=0):
