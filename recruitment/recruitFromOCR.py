@@ -1,7 +1,13 @@
 import os,sys,re
 from typing import List,Set,Dict,Optional
-from google.cloud import vision as vision
+from google.cloud import vision
+from google.cloud import vision_v1
+from google.cloud import vision_v1p1beta1
+from google.cloud import vision_v1p2beta1
+from google.cloud import vision_v1p3beta1
+from google.cloud import vision_v1p4beta1
 from google.auth import api_key
+import random
 import yaml
 
 #下二つと統一、日本版認識用
@@ -93,10 +99,15 @@ def matchTag(result:str) -> MatchTagResponseData:
 
 #入力: 画像のURI
 #出力: 検出されたタグが含まれるリスト 画像によっては6個以上になってしまうこともある
-def taglistFromImage(imageURI:str)->MatchTagResponseData:
+
+__lastAvailabledClient = None
+__clientTypes = {vision,vision_v1,vision_v1p1beta1,vision_v1p2beta1,vision_v1p3beta1,vision_v1p4beta1}
+
+def __getResult(imageURI:str, clientType):
     API_KEY = os.environ["CLOUDVISION_API_KEY"]
-    client = vision.ImageAnnotatorClient(credentials=api_key.Credentials(API_KEY))
-    visionImage = vision.Image()
+    print(f"trying text annotation: {type(clientType)}")
+    client = clientType.ImageAnnotatorClient(credentials=api_key.Credentials(API_KEY))
+    visionImage = clientType.Image()
     visionImage.source.image_uri = imageURI
 
     #メモ
@@ -104,6 +115,29 @@ def taglistFromImage(imageURI:str)->MatchTagResponseData:
     #料金節約のために、ランダムでどちらかを使うという手もある
     #今は一旦前者のみを使う
     result = client.text_detection(image=visionImage).text_annotations
+    return result
+
+def __getResultFromAllClient(imageURI:str):
+    candidateSet = __clientTypes.copy()
+    if(__lastAvailabledClient != None):
+        result = __getResult(imageURI,__lastAvailabledClient)
+        if(len(result)!=0): return result
+        candidateSet.discard(__lastAvailabledClient)
+    while(len(candidateSet)>1):
+        randomChoiced = random.choice(candidateSet)
+        result = __getResult(imageURI, randomChoiced)
+        if(len(result)!=0):
+            __lastAvailabledClient = randomChoiced
+            return result
+        candidateSet.discard(randomChoiced)
+    return None
+
+def taglistFromImage(imageURI:str)->MatchTagResponseData:
+    #メモ
+    #text_detectionとdocument_text_detectionの違いがよくわからない
+    #料金節約のために、ランダムでどちらかを使うという手もある
+    #今は一旦前者のみを使う
+    result = __getResultFromAllClient(imageURI)
     
     #print(f"{result=}")
     if len(result)==0: return None

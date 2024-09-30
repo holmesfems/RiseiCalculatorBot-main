@@ -5,6 +5,6 @@ pyyaml
 openai==1.29.0
 openpyxl
 StrEnum
-google-cloud-vision==3.7.3
+google-cloud-vision==3.7.4
 aiohttp
 nest_asyncio
