@@ -101,11 +101,19 @@ def matchTag(result:str) -> MatchTagResponseData:
 #出力: 検出されたタグが含まれるリスト 画像によっては6個以上になってしまうこともある
 
 _lastAvailabledClient = None
-_clientTypes = {vision,vision_v1,vision_v1p1beta1,vision_v1p2beta1,vision_v1p3beta1,vision_v1p4beta1}
+_clientTypes = {
+    (vision,"vision"),
+    (vision_v1,"vision_v1"),
+    (vision_v1p1beta1,"vision_v1p1beta1"),
+    (vision_v1p2beta1,"vision_v1p2beta1"),
+    (vision_v1p3beta1,"vision_v1p3beta1"),
+    (vision_v1p4beta1,"vision_v1p4beta1")}
 
-def __getResult(imageURI:str, clientType):
+def __getResult(imageURI:str, clientTypeTuple):
     API_KEY = os.environ["CLOUDVISION_API_KEY"]
-    print(f"trying text annotation: {type(clientType)}")
+    clientType = clientTypeTuple[0]
+    clientName = clientTypeTuple[1]
+    print(f"trying text annotation: {clientName}")
     client = clientType.ImageAnnotatorClient(credentials=api_key.Credentials(API_KEY))
     visionImage = clientType.Image()
     visionImage.source.image_uri = imageURI
