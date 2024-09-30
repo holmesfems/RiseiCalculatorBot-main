@@ -100,8 +100,8 @@ def matchTag(result:str) -> MatchTagResponseData:
 #入力: 画像のURI
 #出力: 検出されたタグが含まれるリスト 画像によっては6個以上になってしまうこともある
 
-__lastAvailabledClient = None
-__clientTypes = {vision,vision_v1,vision_v1p1beta1,vision_v1p2beta1,vision_v1p3beta1,vision_v1p4beta1}
+_lastAvailabledClient = None
+_clientTypes = {vision,vision_v1,vision_v1p1beta1,vision_v1p2beta1,vision_v1p3beta1,vision_v1p4beta1}
 
 def __getResult(imageURI:str, clientType):
     API_KEY = os.environ["CLOUDVISION_API_KEY"]
@@ -118,17 +118,17 @@ def __getResult(imageURI:str, clientType):
     return result
 
 def __getResultFromAllClient(imageURI:str):
-    candidateSet = __clientTypes.copy()
-    global __lastAvailabledClient
-    if(__lastAvailabledClient != None):
-        result = __getResult(imageURI,__lastAvailabledClient)
+    candidateSet = _clientTypes.copy()
+    global _lastAvailabledClient
+    if(_lastAvailabledClient != None):
+        result = __getResult(imageURI,_lastAvailabledClient)
         if(len(result)!=0): return result
-        candidateSet.discard(__lastAvailabledClient)
+        candidateSet.discard(_lastAvailabledClient)
     while(len(candidateSet)>=1):
         randomChoiced = random.choice(candidateSet)
         result = __getResult(imageURI, randomChoiced)
         if(len(result)!=0):
-            __lastAvailabledClient = randomChoiced
+            _lastAvailabledClient = randomChoiced
             return result
         candidateSet.discard(randomChoiced)
     return None
