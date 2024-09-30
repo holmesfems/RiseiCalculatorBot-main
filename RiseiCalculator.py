@@ -467,7 +467,7 @@ async def msgForOCR(message:discord.Message):
         tagMatch = recruitFromOCR.taglistFromImage(image)
         if(tagMatch == None):
             await sendReplyToDiscord.replyToDiscord(message,RCReply(
-                plainText="画像認識の調子が悪いみたいね。また後で試すか、`/recruitsim`コマンドで手動入力を試してみてね。"
+                plainText="Google先生の画像認識の調子が悪いみたい。また後で試すか、`/recruitsim`コマンドで手動入力を試してみてね。"
                 ))
             return
         print("タグを読みました",tagMatch)
@@ -524,8 +524,9 @@ async def msgForOCRReply(message:discord.Message,referencedMessage:discord.Messa
         #Check Illigal
         illigalTags = [tag for tag in commandTags if isIlligal(tag) and not isNullOrEmpty(tag)]
         if(illigalTags):
+
             await sendReplyToDiscord.replyToDiscord(message,RCReply(
-                plainText=f"{illigalTags}のタグが違いますわ。もう一度入力してちょうだい。"
+                plainText=f"{illigalTags}のタグが分かりませんわ。どのタグを指してるのかしら？タグの正式名称を入力くれると嬉しいわ。"
             ))
             return
         if(len(commandTags) == 1):
