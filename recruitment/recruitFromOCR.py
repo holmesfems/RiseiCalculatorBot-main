@@ -119,6 +119,7 @@ def __getResult(imageURI:str, clientType):
 
 def __getResultFromAllClient(imageURI:str):
     candidateSet = __clientTypes.copy()
+    global __lastAvailabledClient
     if(__lastAvailabledClient != None):
         result = __getResult(imageURI,__lastAvailabledClient)
         if(len(result)!=0): return result
