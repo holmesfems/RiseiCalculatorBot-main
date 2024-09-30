@@ -125,7 +125,7 @@ def __getResultFromAllClient(imageURI:str):
         if(len(result)!=0): return result
         candidateSet.discard(_lastAvailabledClient)
     while(len(candidateSet)>=1):
-        randomChoiced = random.choice(candidateSet)
+        randomChoiced = random.choice(tuple(candidateSet))
         result = __getResult(imageURI, randomChoiced)
         if(len(result)!=0):
             _lastAvailabledClient = randomChoiced
