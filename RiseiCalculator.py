@@ -575,7 +575,8 @@ async def on_message(message:discord.Message):
             referenced_message = await message.channel.fetch_message(message.reference.message_id)
             if(referenced_message.author != client.user):
                 return
-            await msgForOCRReply(message,referenced_message)
+            async with message.channel.typing():
+                await msgForOCRReply(message,referenced_message)
         await msgForOCR(message)
     elif message.channel.type is discord.ChannelType.private:
         await msgForDM(message)
