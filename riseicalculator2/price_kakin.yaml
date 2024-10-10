@@ -63,45 +63,45 @@
 #     純正源石: 19
 #     上級エリート特訓装置: 1
 
-昇進特訓パック:
-  price: 1500
-  isConstant: false
-  contents:
-    純正源石: 24
-    ★5特訓招待状: 1
+# 昇進特訓パック:
+#   price: 1500
+#   isConstant: false
+#   contents:
+#     純正源石: 24
+#     ★5特訓招待状: 1
 
-上級昇進特訓パック:
-  price: 2600
-  isConstant: false
-  contents:
-    純正源石: 36
-    ★6特訓招待状: 1
+# 上級昇進特訓パック:
+#   price: 2600
+#   isConstant: false
+#   contents:
+#     純正源石: 36
+#     ★6特訓招待状: 1
 
-戦術配給パック:
-  price: 3000
-  isConstant: false
-  contents:
-    純正源石: 24
-    10回スカウト券: 2
-    龍門幣1000: 200
-    上級作戦記録: 30
-    SoC強化剤: 2
+# 戦術配給パック:
+#   price: 3000
+#   isConstant: false
+#   contents:
+#     純正源石: 24
+#     10回スカウト券: 2
+#     龍門幣1000: 200
+#     上級作戦記録: 30
+#     SoC強化剤: 2
 
-安全演習記念パック:
-  price: 2600
-  isConstant: false
-  contents:
-    純正源石: 18
-    10回スカウト券: 1
-    ホーム背景「Prestige」: 1
-    テーマ「Siege」: 1
+# 安全演習記念パック:
+#   price: 2600
+#   isConstant: false
+#   contents:
+#     純正源石: 18
+#     10回スカウト券: 1
+#     ホーム背景「Prestige」: 1
+#     テーマ「Siege」: 1
 
-闇夜の盾支援パック:
-  price: 160
-  isConstant: false
-  contents:
-    合成玉: 600
-    プロファイルアイコン『「防衛」』: 1
+# 闇夜の盾支援パック:
+#   price: 160
+#   isConstant: false
+#   contents:
+#     合成玉: 600
+#     プロファイルアイコン『「防衛」』: 1
 
 # 4.5周年記念パック・白:
 #   price: 3000
@@ -150,6 +150,18 @@
 #     モジュールデータ: 4
 #     データ補完マシン: 20
 #     データ補完チップ: 60
+
+イベント招集ミニパック:
+  price: 160
+  isConstant: false
+  contents:
+    イベントスカウト券: 2
+
+イベント招集パック:
+  price: 1100
+  isConstant: false
+  contents:
+    イベント10回スカウト券: 1
 
 特殊訓練パック:
   price: 650
@@ -219,12 +231,12 @@
 #     精錬溶剤: 2
 #     中級装置: 10
   
-生息演算パック:
-  price: 1500
-  isConstant: false
-  contents:
-    ★5特訓招待状: 1
-    合成玉: 4500
+# 生息演算パック:
+#   price: 1500
+#   isConstant: false
+#   contents:
+#     ★5特訓招待状: 1
+#     合成玉: 4500
 
 # 中堅スカウトパック:
 #   price: 1200
