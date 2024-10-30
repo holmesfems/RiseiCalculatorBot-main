@@ -23,7 +23,8 @@ with open("recruitment/tagJaToJa.yaml","rb") as f:
         r"補助...?": "補助",
         r"狙撃...?": "狙撃",
         r"COST(O)?": "COST回復",
-        r"防御.": "防御"
+        r"防御.": "防御",
+        r"重装...?": "重装"
     }
 
 #英語版認識用
