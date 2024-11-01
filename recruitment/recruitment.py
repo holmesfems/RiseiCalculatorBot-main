@@ -185,6 +185,9 @@ def clearSearchMap(redundantMap:dict):
 def createSearchMap(tagNameList:List[str],targetOperatorList:List[Operator],minStarToShow:int,equals = False,clearRedundant = False,showRobot = False):
     tagClasses = createTagList(tagNameList)
     tagCombinations:List[Tuple[RecruitTag]] = list()
+    robotTags = ["ロボット", "元素"]
+    def containsRobotTag(nameList:List[str])->bool:
+        return any([tag in nameList for tag in robotTags])
     for i in range(3):
         tagCombinations += createCombinations(tagClasses,i+1)
     searchMap = {}
@@ -195,7 +198,7 @@ def createSearchMap(tagNameList:List[str],targetOperatorList:List[Operator],minS
             if(not equals):
                 if(_minStar>=minStarToShow):
                     searchMap[combination] = satisfies
-                elif(showRobot and "ロボット" in [tag.name for tag in combination] and 1 in (operator.stars for operator in satisfies)):
+                elif(showRobot and containsRobotTag([tag.name for tag in combination]) and 1 in (operator.stars for operator in satisfies)):
                     searchMap[combination] = satisfies
             elif(_minStar==minStarToShow):
                 searchMap[combination] = [x for x in satisfies if x.stars == minStarToShow]
