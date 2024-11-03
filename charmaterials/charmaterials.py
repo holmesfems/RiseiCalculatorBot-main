@@ -341,6 +341,23 @@ class AllOperatorsInfo:
     
     def getAllCostItems(self)->Dict[str,OperatorCosts]:
         return self.operatorDict.copy()
+    
+    def getSortedStar5CostDict(self):
+        star5Operators = {key:value for key,value in self.getAllCostItems().items() if value.stars == 5 and not value.isPatch}
+        riseiValueDict = {key:value.totalPhaseCost().toRiseiValue_OnlyValueTarget(not value.isCNOnly()) for key,value in star5Operators.items()}
+        sortedValueDict = {key:value for key,value in sorted(riseiValueDict.items(),key=lambda x:x[1],reverse=True)}
+        return {star5Operators[key].name:value for key,value in sortedValueDict.items()}
+    
+    def getSortedStar6CostDict(self):
+        star6Operators = {key:value for key,value in self.getAllCostItems().items() if value.stars == 6 and not value.isPatch}
+        riseiValueDict = {key:value.totalPhaseCost().toRiseiValue_OnlyValueTarget(not value.isCNOnly()) for key,value in star6Operators.items()}
+        sortedValueDict = {key:value for key,value in sorted(riseiValueDict.items(),key=lambda x:x[1],reverse=True)}
+        return {star6Operators[key].name:value for key,value in sortedValueDict.items()}
+    
+    def getSortedCostDict(self,star):
+        if(star == 5): return self.getSortedStar5CostDict()
+        elif(star == 6): return self.getSortedStar6CostDict()
+        else: return None
 
 class OperatorCostsCalculator:
     class CostListSelection(StrEnum):
@@ -466,16 +483,14 @@ class OperatorCostsCalculator:
     def operatorCostList(selection:CostListSelection) -> RCReply:
         #OpenAIから呼び出す予定は現状なし、responseForAIは空欄にする
         if(selection is OperatorCostsCalculator.CostListSelection.STAR5ELITE):
-            star5Operators = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if value.stars == 5 and not value.isPatch}
-            riseiValueDict = {key:value.totalPhaseCost().toRiseiValue_OnlyValueTarget(not value.isCNOnly()) for key,value in star5Operators.items()}
-            sortedValueDict = {key:value for key,value in sorted(riseiValueDict.items(),key=lambda x:x[1],reverse=True)}
+            sortedValueDict = OperatorCostsCalculator.operatorInfo.getSortedStar5CostDict()
             title = "★5昇進素材価値表"
             headerMsg = "SoCは以下の計算に含まれません:"
             msgList = [headerMsg]
             toPrint = []
             for index,(key,value) in enumerate(sortedValueDict.items()):
 
-                name = star5Operators[key].name
+                name = key
                 #print(name,star5Operators[key].totalPhaseCost())
                 riseiValue = value
                 #phaseCost = star5Operators[key].totalPhaseCost()
@@ -491,15 +506,14 @@ class OperatorCostsCalculator:
                 embbedContents=msgList
             )
         elif(selection is OperatorCostsCalculator.CostListSelection.STAR6ELITE):
-            star6Operators = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if value.stars == 6 and not value.isPatch}
-            riseiValueDict = {key:value.totalPhaseCost().toRiseiValue_OnlyValueTarget(not value.isCNOnly()) for key,value in star6Operators.items()}
-            sortedValueDict = {key:value for key,value in sorted(riseiValueDict.items(),key=lambda x:x[1],reverse=True)}
+            
+            sortedValueDict = OperatorCostsCalculator.operatorInfo.getSortedStar6CostDict()
             title = "★6昇進素材価値表"
             headerMsg = "SoCは以下の計算に含まれません:"
             msgList = [headerMsg]
             toPrint = []
             for index,(key,value) in enumerate(sortedValueDict.items()):
-                name = star6Operators[key].name
+                name = key
                 #print(name,star5Operators[key].totalPhaseCost())
                 riseiValue = value
                 #phaseCost = star5Operators[key].totalPhaseCost()
@@ -618,6 +632,13 @@ class OperatorCostsCalculator:
         headerMsg = "合計  中級換算"
         blockMsg = r2Cost.toStrBlock()
         msgList.append(headerMsg + blockMsg)
+
+        if(not costItem.isPatch and (costItem.stars == 5 or costItem.stars == 6)):
+            sortedValues = OperatorCostsCalculator.operatorInfo.getSortedCostDict(costItem.stars)
+            index = list(sortedValues.keys()).index(costItem.name)
+            nums = len(sortedValues)
+            msgList.append(f"星{costItem.stars}オペレーター{nums}名中、第{index}位の消費です")
+
         #jsonForAI["totalIntermediateConvertion"] = r2Cost.itemArray.toNameCountDict()
         return RCReply(
             embbedTitle=title,
