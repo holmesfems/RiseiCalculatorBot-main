@@ -324,6 +324,7 @@ class AllOperatorsInfo:
         #モジュール情報
         for key,value in allUEQ.items():
             charId = value["charId"]
+            if(value["itemCost"] == None): continue #統合戦略モジュールをスキップ
             jpValue = allUEQ_JP.get(key)
             if(jpValue):
                 value["cnOnly"] = False
