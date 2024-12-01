@@ -26,11 +26,13 @@ valueDict["10回中堅スカウト券"] = valueDict["スカウト券"]*10
 valueDict["★5特訓装置"] = EXPVALUE_1000*495 + LMDVALUE_1000*447.378
 valueDict["★6特訓装置"] = EXPVALUE_1000*750 + LMDVALUE_1000*744.955
 valueDict["テンニンカ指名契約"] = valueDict["スカウト券"]
+valueDict["★4特訓招待状"] = 206.241*LMDVALUE_1000 + 150.2*EXPVALUE_1000 + 3*valueDict["初級SoC"] + 5*valueDict["中級SoC"] + 680 #テンニンカで簡易的に調べた数字
 valueDict["★5特訓招待状"] = 371.947*LMDVALUE_1000 + 239.4*EXPVALUE_1000 + 4*valueDict["初級SoC"] + 3*valueDict["上級SoC"] + 1100
 valueDict["★6特訓招待状"] = 589.841*LMDVALUE_1000 + 361.4*EXPVALUE_1000 + 5*valueDict["初級SoC"] + 4*valueDict["上級SoC"] + 1700
 valueDict["18石コーデ"] = 18*valueDict["純正源石"]
 valueDict["イベント10回スカウト券"] = valueDict["10回スカウト券"]
 valueDict["イベントスカウト券"] = valueDict["スカウト券"]
+valueDict["月パス交換資格証"] = valueDict["純正源石"]*6 + valueDict["合成玉"]*6000 + valueDict["初級理性回復剤+"]*30
 
 print(valueDict)
 

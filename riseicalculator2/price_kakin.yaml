@@ -15,6 +15,13 @@
 #     家具パーツ: 3000
 #     龍門幣1000: 1000
 
+重たい資金パック:
+  price: 1500
+  isConstant: false
+  contents:
+    純正源石: 21
+    龍門幣1000: 1000
+
 # 4.5周年素材パック:
 #   price: 1000
 #   isConstant: false
@@ -34,34 +41,34 @@
 #     SoC強化剤: 2
 #     中級作戦記録: 30
 
-ダック卿の小銭入れ:
-  price: 1000
-  isConstant: false
-  contents:
-    純正源石: 13
-    龍門幣1000: 300
+# ダック卿の小銭入れ:
+#   price: 1000
+#   isConstant: false
+#   contents:
+#     純正源石: 13
+#     龍門幣1000: 300
 
 
-ウィシャデルの鞄:
-  price: 1200
-  isConstant: false
-  contents:
-    純正源石: 16
-    龍門幣1000: 700
+# ウィシャデルの鞄:
+#   price: 1200
+#   isConstant: false
+#   contents:
+#     純正源石: 16
+#     龍門幣1000: 700
 
-特別訓練パック:
-  price: 1200
-  isConstant: false
-  contents:
-    純正源石: 11
-    ★5特訓装置: 1
+# 特別訓練パック:
+#   price: 1200
+#   isConstant: false
+#   contents:
+#     純正源石: 11
+#     ★5特訓装置: 1
 
-上級特別訓練パック:
-  price: 2000
-  isConstant: false
-  contents:
-    純正源石: 19
-    ★6特訓装置: 1
+# 上級特別訓練パック:
+#   price: 2000
+#   isConstant: false
+#   contents:
+#     純正源石: 19
+#     ★6特訓装置: 1
 
 # 昇進特訓パック:
 #   price: 1500
@@ -131,25 +138,25 @@
 #   contents:
 #     10回スカウト券: 1
 
-招聘指名パック:
-  price: 3000
-  isConstant: false
-  contents:
-    ★6招聘指名券: 1
-    10回スカウト券: 1
+# 招聘指名パック:
+#   price: 3000
+#   isConstant: false
+#   contents:
+#     ★6招聘指名券: 1
+#     10回スカウト券: 1
 
-感謝祭物資パック:
-  price: 4900
-  isConstant: false
-  contents:
-    純正源石: 90
-    10回スカウト券: 1
-    龍門幣1000: 260
-    上級作戦記録: 30
-    SoC強化剤: 4
-    モジュールデータ: 4
-    データ補完マシン: 20
-    データ補完チップ: 60
+# 感謝祭物資パック:
+#   price: 4900
+#   isConstant: false
+#   contents:
+#     純正源石: 90
+#     10回スカウト券: 1
+#     龍門幣1000: 260
+#     上級作戦記録: 30
+#     SoC強化剤: 4
+#     モジュールデータ: 4
+#     データ補完マシン: 20
+#     データ補完チップ: 60
 
 # イベント招集ミニパック:
 #   price: 160
@@ -282,12 +289,27 @@
     龍門幣1000: 10
     入門作戦記録: 20
 
-初心者助力パック:
-  price: 850
+# 初心者助力パック:
+#   price: 850
+#   isConstant: true
+#   contents:
+#     ★5特訓招待状: 1
+#     合成玉: 2000
+
+初心者月パスパック:
+  price: 1000
   isConstant: true
   contents:
+    月パス交換資格証: 1
+    スカウト券: 3
+
+初心者特訓パック:
+  price: 2600
+  isConstant: true
+  contents:
+    ★6特訓招待状: 1
     ★5特訓招待状: 1
-    合成玉: 2000
+    ★4特訓招待状: 2
 
 初心者支援パック:
   price: 160
