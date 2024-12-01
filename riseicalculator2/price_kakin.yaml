@@ -170,7 +170,7 @@
 #   contents:
 #     イベント10回スカウト券: 1
 
-狙撃/術師訓練パック:
+職業訓練パック:
   price: 650
   isConstant: false
   contents:
