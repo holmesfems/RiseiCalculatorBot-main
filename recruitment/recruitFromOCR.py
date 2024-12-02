@@ -56,7 +56,7 @@ def matchTagCoreProcess(result:List[str],baseDict:Dict[str,str],extraDict:Option
     for key,value in extraDict.items():
         if len(ret)>=5: break
         if value in ret:continue
-        if(any((re.match(key,text)) for text in result)):
+        if(any((re.match(key,text)) or any(re.match(key, part) for part in text.split(" ")) for text in result)):
             ret.add(value)
     return ret
 
@@ -82,7 +82,7 @@ class MatchTagResponseData:
 
 def matchTag(result:str) -> MatchTagResponseData:
     clearRegex = r"[.,·・´`‧˙。]+"
-    listResult = result.split("\n")
+    listResult = re.split("\n",result)
     listResult = [re.sub(clearRegex,"",item).replace('ブ',"プ").strip() for item in listResult] #塵の影響を除去..?
 
     #localeの判断は当てにならないので(大体undになる)、順番にマッチを試す
