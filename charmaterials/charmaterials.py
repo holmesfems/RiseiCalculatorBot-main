@@ -270,67 +270,75 @@ class AllOperatorsInfo:
         allInfoCN,allInfoJP,allUEQ,allUEQ_JP = netutil.get_json_aio([CHAR_TABLE_URL_CN,CHAR_TABLE_URL_JP,UNI_EQ_URL_CN,UNI_EQ_URL_JP])
         allUEQ = allUEQ["equipDict"]
         allUEQ_JP:dict = allUEQ_JP["equipDict"]
+        try:
+            operatorDict:Dict[str,OperatorCosts] = {}
+            nameToId:Dict[str,str] = {}
+            cnNameToJaName:Dict[str,str] = {}
+            with open("charmaterials/customZhToJa.yaml","rb") as f:
+                customZhToJaDict:Dict[str,str] = yaml.safe_load(f)
 
-        with open("charmaterials/customZhToJa.yaml","rb") as f:
-            customZhToJaDict:Dict[str,str] = yaml.safe_load(f)
-
-        for key,value in allInfoCN.items():
-            keyRegex = r"([^_]+)_(\d+)_([^_]+)"
-            #print(key)
-            match = re.match(keyRegex,key)
-            type = match.group(1)
-            #print(type)
-            if(type != "char"): continue #オペレーターのみ登録
-            if(value["isNotObtainable"]): continue #獲得できるオペレーターのみ登録
-            jpValue = allInfoJP.get(key)
-            if(jpValue):
-                self.cnNameToJaName[value["name"]] = jpValue["name"]
-                value = jpValue
-                value["cnOnly"] = False
-            else:
-                value["cnOnly"] = True
-                jpName = customZhToJaDict.get(value["name"],None)
-                if(jpName):
-                    self.cnNameToJaName[value["name"]] = jpName
-                    value["name"] = jpName
-            value["isPatch"] = False
-            self.operatorDict[key] = OperatorCosts(key,value)
-            self.nameToId[value["name"]] = key
-        
-        #昇格
-        patchInfoJP:dict = get_json(PATCH_CHAR_TABLE_URL_JP)["patchChars"]
-        patchTableCN:dict = get_json(PATCH_CHAR_TABLE_URL_CN)
-        patchInfoCN:dict = patchTableCN["patchChars"]
-        patchKeyCN:dict = patchTableCN["infos"]
-        def originalOperatorName(patchKey:str):
-            candidate = [key for key,value in patchKeyCN.items() if patchKey in value["tmplIds"]]
-            if(candidate): 
-                operator = self.operatorDict.get(candidate[0])
-                if(operator): return operator.name
-            return ""
-        for key,value in patchInfoCN.items():
-            #今は前衛アーミヤ一人だけ、今後追加されたらまた調整する必要があるかも
-            #医療アーミヤも追加されました 2024/05/01
-            jpValue = patchInfoJP.get(key)
-            if(jpValue):
-                value = jpValue
-                value["cnOnly"] = False
-            else:
-                value["cnOnly"] = True
-            value["name"] = originalOperatorName(key) + "({0})".format(jobIdToName[value["profession"]])
-            value["isPatch"] = True
-            self.operatorDict[key] = OperatorCosts(key,value)
-            self.nameToId[value["name"]] = key
-        #モジュール情報
-        for key,value in allUEQ.items():
-            charId = value["charId"]
-            if(value["itemCost"] == None): continue #統合戦略モジュールをスキップ
-            jpValue = allUEQ_JP.get(key)
-            if(jpValue):
-                value["cnOnly"] = False
-            else:
-                value["cnOnly"] = True
-            self.operatorDict[charId].addEq(value)
+            for key,value in allInfoCN.items():
+                keyRegex = r"([^_]+)_(\d+)_([^_]+)"
+                #print(key)
+                match = re.match(keyRegex,key)
+                type = match.group(1)
+                #print(type)
+                if(type != "char"): continue #オペレーターのみ登録
+                if(value["isNotObtainable"]): continue #獲得できるオペレーターのみ登録
+                jpValue = allInfoJP.get(key)
+                if(jpValue):
+                    cnNameToJaName[value["name"]] = jpValue["name"]
+                    value = jpValue
+                    value["cnOnly"] = False
+                else:
+                    value["cnOnly"] = True
+                    jpName = customZhToJaDict.get(value["name"],None)
+                    if(jpName):
+                        cnNameToJaName[value["name"]] = jpName
+                        value["name"] = jpName
+                value["isPatch"] = False
+                operatorDict[key] = OperatorCosts(key,value)
+                nameToId[value["name"]] = key
+            
+            #昇格
+            patchInfoJP:dict = get_json(PATCH_CHAR_TABLE_URL_JP)["patchChars"]
+            patchTableCN:dict = get_json(PATCH_CHAR_TABLE_URL_CN)
+            patchInfoCN:dict = patchTableCN["patchChars"]
+            patchKeyCN:dict = patchTableCN["infos"]
+            def originalOperatorName(patchKey:str):
+                candidate = [key for key,value in patchKeyCN.items() if patchKey in value["tmplIds"]]
+                if(candidate): 
+                    operator = operatorDict.get(candidate[0])
+                    if(operator): return operator.name
+                return ""
+            for key,value in patchInfoCN.items():
+                #今は前衛アーミヤ一人だけ、今後追加されたらまた調整する必要があるかも
+                #医療アーミヤも追加されました 2024/05/01
+                jpValue = patchInfoJP.get(key)
+                if(jpValue):
+                    value = jpValue
+                    value["cnOnly"] = False
+                else:
+                    value["cnOnly"] = True
+                value["name"] = originalOperatorName(key) + "({0})".format(jobIdToName[value["profession"]])
+                value["isPatch"] = True
+                operatorDict[key] = OperatorCosts(key,value)
+                nameToId[value["name"]] = key
+            #モジュール情報
+            for key,value in allUEQ.items():
+                charId = value["charId"]
+                if(value["itemCost"] == None): continue #統合戦略モジュールをスキップ
+                jpValue = allUEQ_JP.get(key)
+                if(jpValue):
+                    value["cnOnly"] = False
+                else:
+                    value["cnOnly"] = True
+                operatorDict[charId].addEq(value)
+            self.operatorDict = operatorDict
+            self.nameToId = nameToId
+            self.cnNameToJaName = cnNameToJaName
+        except Exception as e:
+            print(e)
     
     def getOperatorNames(self):
         return self.nameToId.keys()

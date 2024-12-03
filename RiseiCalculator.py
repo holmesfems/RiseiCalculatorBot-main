@@ -16,6 +16,7 @@ from rcutils import sendReplyToDiscord
 from rcutils.rcReply import RCReply
 from serverModeration.moderationUtils import serverModerator
 from fkDatabase.fkDataSearch import fkInfo
+import infoFromOuterSource.updator as infoUpdator
 
 TOKEN = os.environ["BOT_TOKEN"]
 ID = os.environ["BOT_ID"]
@@ -239,6 +240,8 @@ async def riseikakin_autoCompleteName(inter:Interaction,current:str)->List[app_c
 @tasks.loop(time=datetime.time(hour=3, minute = 0, tzinfo=JST))
 async def updateRiseiCalculatorInstances():
     CalculatorManager.updateAllCalculators()
+    OperatorCostsCalculator.init()
+    infoUpdator.initall()
 
 class RecruitView(discord.ui.View):
     def __init__(self,timeout=180):
