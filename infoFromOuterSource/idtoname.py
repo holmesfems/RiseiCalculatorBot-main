@@ -109,7 +109,7 @@ class ItemIdToName:
             ItemIdToName.init()
         return ItemIdToName.__ZHToid.get(zhStr,None)
     
-    def jaToId(jaStr:str,autoRegist:bool = False) :
+    def jaToId(jaStr:str) :
         if(not ItemIdToName.__JAToid):
             ItemIdToName.init()
         return ItemIdToName.__JAToid.get(jaStr,None)

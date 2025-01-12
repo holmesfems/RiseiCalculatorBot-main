@@ -176,6 +176,6 @@ class ItemArray:
     
     @staticmethod
     def fromJaCountDict(jaCountDict:Dict[str,float]) -> ItemArray:
-        idCountDict = {ItemIdToName.jaToId(key,True):value for key,value in jaCountDict.items() if ItemIdToName.jaToId(key,True)}
+        idCountDict = {ItemIdToName.jaToId(key):value for key,value in jaCountDict.items() if ItemIdToName.jaToId(key)}
         return ItemArray(idCountDict)
     
