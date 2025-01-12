@@ -11,9 +11,8 @@ valueDict = {
     "初級SoC":18*(1-12*LMDVALUE_1000/1000),
     "中級SoC":36*(1-12*LMDVALUE_1000/1000),
     "SoC強化剤":90*(30*(1-12*LMDVALUE_1000/1000)/21),
-    "特級素材交換券": 90,
-    "高級素材交換券": 26,
 }
+
 valueDict["上級SoC"] = 2*valueDict["中級SoC"] + valueDict["SoC強化剤"]
 valueDict["モジュールデータ"]=120*(30*(1-12*LMDVALUE_1000/1000)/21)
 valueDict["純正源石"] = 135
@@ -33,6 +32,16 @@ valueDict["18石コーデ"] = 18*valueDict["純正源石"]
 valueDict["イベント10回スカウト券"] = valueDict["10回スカウト券"]
 valueDict["イベントスカウト券"] = valueDict["スカウト券"]
 valueDict["月パス交換資格証"] = valueDict["純正源石"]*6 + valueDict["合成玉"]*6000 + valueDict["初級理性回復剤+"]*30
+
+valueDict["★6スキル指南集"] = 4000
+valueDict["★5スキル指南集"] = 2650
+valueDict["★4スキル指南集"] = 1360
+
+valueDict["特級素材交換券"]= 100
+valueDict["高級素材交換券"]= 35
+
+valueDict["T4素材交換券"] = 100
+valueDict["T3素材交換券"] = 35
 
 print(valueDict)
 

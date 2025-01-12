@@ -186,8 +186,12 @@ class RiseiOrTimeValues:
             return RiseiOrTimeValues.__constValueDict.get(jastr,0.0)
     
     def getValueFromJa(self,jastr:str) -> float:
-        zhStr = ItemIdToName.getZH(ItemIdToName.jaToId(jastr))
-        return self.getValueFromZH(zhStr)
+        itemID = ItemIdToName.jaToId(jastr)
+        if(itemID!=None):
+            zhStr = ItemIdToName.getZH(ItemIdToName.jaToId(jastr))
+            return self.getValueFromZH(zhStr)
+        else:
+            return RiseiOrTimeValues.__constValueDict.get(jastr,0.0)
     
     def getValueFromJaList(self,jastrList:List[str]) -> List[float]:
         return [self.getValueFromJa(jastr) for jastr in jastrList]

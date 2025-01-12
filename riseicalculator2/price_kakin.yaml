@@ -15,12 +15,12 @@
 #     家具パーツ: 3000
 #     龍門幣1000: 1000
 
-重たい資金パック:
-  price: 1500
-  isConstant: false
-  contents:
-    純正源石: 21
-    龍門幣1000: 1000
+# 重たい資金パック:
+#   price: 1500
+#   isConstant: false
+#   contents:
+#     純正源石: 21
+#     龍門幣1000: 1000
 
 # 4.5周年素材パック:
 #   price: 1000
@@ -49,26 +49,35 @@
 #     龍門幣1000: 300
 
 
-# ウィシャデルの鞄:
-#   price: 1200
-#   isConstant: false
-#   contents:
-#     純正源石: 16
-#     龍門幣1000: 700
+ペペの鞄:
+  price: 1200
+  isConstant: false
+  contents:
+    純正源石: 16
+    龍門幣1000: 700
 
-# 特別訓練パック:
-#   price: 1200
-#   isConstant: false
-#   contents:
-#     純正源石: 11
-#     ★5特訓装置: 1
+特別訓練パック:
+  price: 1200
+  isConstant: false
+  contents:
+    純正源石: 11
+    ★5特訓装置: 1
 
-# 上級特別訓練パック:
-#   price: 2000
-#   isConstant: false
-#   contents:
-#     純正源石: 19
-#     ★6特訓装置: 1
+上級特別訓練パック:
+  price: 2000
+  isConstant: false
+  contents:
+    純正源石: 19
+    ★6特訓装置: 1
+
+指南集総合パック:
+  price: 1500
+  isConstant: false
+  contents:
+    純正源石: 12
+    ★6スキル指南集: 1
+    ★5スキル指南集: 1
+    ★4スキル指南集: 1
 
 # 昇進特訓パック:
 #   price: 1500
@@ -84,15 +93,18 @@
 #     純正源石: 36
 #     ★6特訓招待状: 1
 
-# 戦術配給パック:
-#   price: 3000
-#   isConstant: false
-#   contents:
-#     純正源石: 24
-#     10回スカウト券: 2
-#     龍門幣1000: 200
-#     上級作戦記録: 30
-#     SoC強化剤: 2
+5周年観光パック:
+  price: 3000
+  isConstant: false
+  contents:
+    純正源石: 24
+    10回スカウト券: 2
+    龍門幣1000: 200
+    上級作戦記録: 20
+    中級作戦記録: 30
+    SoC強化剤: 2
+    T4素材交換券: 4
+    T3素材交換券: 6
 
 # 安全演習記念パック:
 #   price: 2600
@@ -119,18 +131,19 @@
 #     合成玉: 2100
 #     モジュールデータ: 4
 
-# 4.5周年記念パック・紅:
-#   price: 4900
-#   isConstant: false
-#   contents:
-#     純正源石: 90
-#     10回スカウト券: 1
-#     龍門幣1000: 260
-#     上級作戦記録: 30
-#     SoC強化剤: 4
-#     モジュールデータ: 4
-#     データ補完マシン: 20
-#     データ補完チップ: 60
+5周年満喫パック:
+  price: 4900
+  isConstant: false
+  contents:
+    純正源石: 90
+    10回スカウト券: 1
+    10回中堅スカウト券: 1
+    龍門幣1000: 260
+    上級作戦記録: 30
+    SoC強化剤: 4
+    モジュールデータ: 4
+    データ補完マシン: 20
+    データ補完チップ: 60
 
 # 4.5周年スカウトパック:
 #   price: 2600
@@ -180,12 +193,19 @@
     アーツ学Ⅱ: 25
     アーツ学Ⅰ: 10
 
-# 月間素材パック:
-#   price: 650
-#   isConstant: false
-#   contents:
-#     特級素材交換券: 8
-#     高級素材交換券: 12
+月間資金パック:
+  price: 480
+  isConstant: false
+  contents:
+    龍門幣1000: 240
+
+月間作戦記録パック:
+  price: 650
+  isConstant: false
+  contents:
+    上級作戦記録: 80
+    中級作戦記録: 100
+    初級作戦記録: 160
 
 # 帰艦助力パック:
 #   price: 1500
@@ -250,6 +270,20 @@
 #   isConstant: false
 #   contents:
 #     10回中堅スカウト券: 1
+
+5周年データパック:
+  price: 650
+  isConstant: false
+  contents:
+    モジュールデータ: 12
+
+5周年データボックス:
+  price: 1200
+  isConstant: false
+  contents:
+    モジュールデータ: 24
+    データ補完マシン: 30
+    データ補完チップ: 90
 
 #constant
 10000円恒常パック:
