@@ -15,6 +15,8 @@ class ItemIdToName:
     __ZHToid = {}
     __idToZH = {}
     __JAToid = {}
+    __tempJAID = {}
+    __tempIDJA = {}
     def init():
         allInfoCN,allInfoJP = netutil.get_json_aio([ITEM_TABLE_URL_CN,ITEM_TABLE_URL_JP])
         allInfoCN = allInfoCN["items"]
@@ -56,7 +58,11 @@ class ItemIdToName:
     def getStr(id:str)->str:
         if(not ItemIdToName.__idToStr):
             ItemIdToName.init()
-        return ItemIdToName.__idToStr.get(id,"Missing")
+        NormalName = ItemIdToName.__idToStr.get(id,None)
+        if(NormalName): return NormalName
+        tempName = ItemIdToName.__tempIDJA.get(id,None)
+        if(tempName): return tempName
+        return "Missing"
     
     def zhToJa(zhStr:str)->str:
         if(not ItemIdToName.__ZHToJA):
@@ -68,10 +74,22 @@ class ItemIdToName:
             ItemIdToName.init()
         return ItemIdToName.__ZHToid.get(zhStr,None)
     
-    def jaToId(jaStr:str)->str:
+    def jaToId(jaStr:str,autoRegist:bool = False)->str:
         if(not ItemIdToName.__JAToid):
             ItemIdToName.init()
-        return ItemIdToName.__JAToid.get(jaStr,None)
+        normalID= ItemIdToName.__JAToid.get(jaStr,None)
+        if(normalID): return normalID
+        tempID = ItemIdToName.__tempJAID.get(jaStr,None)
+        if(tempID): return tempID
+        if(autoRegist): return ItemIdToName.registJaID(jaStr)
+        return None
+    
+    def registJaID(jaStr:str):
+        tempNumber = len(ItemIdToName.__tempJAID)
+        tempID = f"TEMPID_{tempNumber}"
+        ItemIdToName.__tempJAID[jaStr] = tempID
+        ItemIdToName.__tempIDJA[tempID] = jaStr
+        return tempID
     
     def getZH(id:str)->str:
         if(not ItemIdToName.__idToZH):
