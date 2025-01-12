@@ -605,8 +605,8 @@ class OperatorCostsCalculator:
         filteredOperators= {key:value for key,value in globalOperators.items() if value.stars==star}
         skillCosts:List[Tuple[str,ItemCost]] = []
         for operator in filteredOperators.values():
-            for skillName, skillCost in operator.skills:
-                skillCosts.append((f"{operator.name}: {skillName}",sum(skillCost)))
+            for skillName, skillCostList in operator.skills:
+                skillCosts.append((f"{operator.name}: {skillName}",sum(skillCostList,ItemCost())))
         skillCosts.sort(key=lambda x:x[1].toRiseiValue())
         skillNums = len(skillCosts)
         title = f"星{star}の特化統計情報"
