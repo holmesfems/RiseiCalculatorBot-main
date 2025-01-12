@@ -97,7 +97,7 @@ class ItemIdToName:
     def getStr(id:str)->str:
         if(not ItemIdToName.__idToJA):
             ItemIdToName.init()
-        return ItemIdToName.__idToJA.get(id,ItemIdToName.__idToZH(id,"Missing"))
+        return ItemIdToName.__idToJA.get(id,ItemIdToName.__idToZH.get(id,"Missing"))
     
     def zhToJa(zhStr:str)->str:
         if(not ItemIdToName.__ZHToJA):
