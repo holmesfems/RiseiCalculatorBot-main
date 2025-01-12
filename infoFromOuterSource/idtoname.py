@@ -10,18 +10,16 @@ get_json = netutil.get_json
 ITEM_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/item_table.json"
 ITEM_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData_YoStar/main/ja_JP/gamedata/excel/item_table.json"
 class ItemIdToName:
-    __idToStr = {}
-    __ZHToJA = {}
-    __ZHToid = {}
-    __idToZH = {}
-    __JAToid = {}
-    __tempJAID = {}
-    __tempIDJA = {}
+    __idToJA:Dict[str,str] = {}
+    __ZHToJA:Dict[str,str] = {}
+    __ZHToid:Dict[str,str] = {}
+    __idToZH:Dict[str,str] = {}
+    __JAToid:Dict[str,str] = {}
     def init():
         allInfoCN,allInfoJP = netutil.get_json_aio([ITEM_TABLE_URL_CN,ITEM_TABLE_URL_JP])
-        allInfoCN = allInfoCN["items"]
-        allInfoJP = allInfoJP["items"]
-        ItemIdToName.__idToStr = {}
+        allInfoCN:dict = allInfoCN["items"]
+        allInfoJP:dict = allInfoJP["items"]
+        ItemIdToName.__idToJA = {}
         ItemIdToName.__ZHToJA = {}
         ItemIdToName.__ZHToid = {}
         ItemIdToName.__idToZH = {}
@@ -36,60 +34,85 @@ class ItemIdToName:
             if(jpValue):
                 ItemIdToName.__ZHToJA[value["name"]] = jpValue["name"]
                 value = jpValue
+                ItemIdToName.__idToJA[key] = value["name"]
+                ItemIdToName.__JAToid[value["name"]] = key
             else:
                 jaName = customZHToJA.get(value["name"])
                 if(jaName): 
                     ItemIdToName.__ZHToJA[value["name"]] = jaName
                     value["name"] = jaName
-            ItemIdToName.__idToStr[key] = value["name"]
-            ItemIdToName.__JAToid[value["name"]] = key
+                    ItemIdToName.__idToJA[key] = value["name"]
+                    ItemIdToName.__JAToid[value["name"]] = key
         
+        for key,jpValue in allInfoJP.items(): #中国語情報での追加漏れを確認
+            if(key in ItemIdToName.__idToZH): continue
+            jpName = jpValue["name"]
+            ItemIdToName.__idToJA[key] = jpName
+            ItemIdToName.__JAToid[jpName] = key
+
+            
         #理性価値計算で使う特殊なアイテムのIDを入れる
         with open("./infoFromOuterSource/customItemId.yaml","rb") as file:
             customItems = yaml.safe_load(file)
         for item in customItems:
-            if item["id"] in ItemIdToName.__idToStr.keys(): continue
-            ItemIdToName.__idToStr[item["id"]] = item["ja"]
-            ItemIdToName.__ZHToJA[item["zh"]] = item["ja"]
-            ItemIdToName.__ZHToid[item["zh"]] = item["id"]
-            ItemIdToName.__idToZH[item["id"]] = item["zh"]
-            ItemIdToName.__JAToid[item["ja"]] = item["id"]
-    
+            #中国語、日本語の情報が両方あるなら、スルー
+            if item["id"] in ItemIdToName.__idToZH and item["id"] in ItemIdToName.__idToJA: continue
+            if  item["id"] in ItemIdToName.__idToJA: #中国語情報のみ欠損
+                jaName = ItemIdToName.__idToJA[item["id"]]
+                ItemIdToName.__ZHToJA[item["zh"]] = jaName
+                ItemIdToName.__ZHToid[item["zh"]] = item["id"]
+                ItemIdToName.__idToZH[item["id"]] = item["zh"]
+                continue
+            if item["id"] in ItemIdToName.__idToZH: #日本語情報のみ欠損
+                zhName = ItemIdToName.__idToZH[item["id"]]
+                ItemIdToName.__ZHToJA[zhName] = item["ja"]
+                ItemIdToName.__idToJA[item["id"]] = item["ja"]
+                ItemIdToName.__JAToid[item["ja"]] = item["id"]
+                continue
+            #同じ情報(zh jaのセット)が既にある場合、更新によってcustomIDが古くなっているのでスルー 違うIDならこの項目に問題があるのでスルー
+            if item["zh"] in ItemIdToName.__ZHToid and item["ja"] in ItemIdToName.__JAToid:continue
+            if item["zh"] in ItemIdToName.__ZHToid: #中国語で対応するIDがある
+                idStr = ItemIdToName.__ZHToid[item["zh"]]
+                if(idStr in ItemIdToName.__idToJA): continue #正しい日本語が既にある
+                #日本語について補足
+                ItemIdToName.__idToJA[idStr] = item["ja"]
+                ItemIdToName.__JAToid[item["ja"]] = idStr
+                ItemIdToName.__ZHToJA[item["zh"]] = item["ja"]
+                continue
+            if item["ja"] in ItemIdToName.__JAToid: #日本語で対応するIDがある
+                idStr = ItemIdToName.__JAToid[item["ja"]]
+                if(idStr in ItemIdToName.__idToZH): continue #正しい中国語が既にある
+                ItemIdToName.__ZHToid[item["zh"]]=idStr
+                ItemIdToName.__ZHToJA[item["zh"]]=item["ja"]
+                ItemIdToName.__idToZH[idStr] = item["zh"]
+                continue
+
+            #完全オリジナルモノ
+            ItemIdToName.__idToJA[item["id"]]=item["ja"]
+            ItemIdToName.__ZHToJA[item["zh"]]=item["ja"]
+            ItemIdToName.__ZHToid[item["zh"]]=item["id"]
+            ItemIdToName.__idToZH[item["id"]]=item["zh"]
+            ItemIdToName.__JAToid[item["ja"]]=item["id"]
+
     def getStr(id:str)->str:
-        if(not ItemIdToName.__idToStr):
+        if(not ItemIdToName.__idToJA):
             ItemIdToName.init()
-        NormalName = ItemIdToName.__idToStr.get(id,None)
-        if(NormalName): return NormalName
-        tempName = ItemIdToName.__tempIDJA.get(id,None)
-        if(tempName): return tempName
-        return "Missing"
+        return ItemIdToName.__idToJA.get(id,ItemIdToName.__idToZH(id,"Missing"))
     
     def zhToJa(zhStr:str)->str:
         if(not ItemIdToName.__ZHToJA):
             ItemIdToName.init()
         return ItemIdToName.__ZHToJA.get(zhStr,zhStr)
     
-    def zhToId(zhStr:str)->str:
+    def zhToId(zhStr:str):
         if(not ItemIdToName.__ZHToid):
             ItemIdToName.init()
         return ItemIdToName.__ZHToid.get(zhStr,None)
     
-    def jaToId(jaStr:str,autoRegist:bool = False)->str:
+    def jaToId(jaStr:str,autoRegist:bool = False) :
         if(not ItemIdToName.__JAToid):
             ItemIdToName.init()
-        normalID= ItemIdToName.__JAToid.get(jaStr,None)
-        if(normalID): return normalID
-        tempID = ItemIdToName.__tempJAID.get(jaStr,None)
-        if(tempID): return tempID
-        if(autoRegist): return ItemIdToName.registJaID(jaStr)
-        return None
-    
-    def registJaID(jaStr:str):
-        tempNumber = len(ItemIdToName.__tempJAID)
-        tempID = f"TEMPID_{tempNumber}"
-        ItemIdToName.__tempJAID[jaStr] = tempID
-        ItemIdToName.__tempIDJA[tempID] = jaStr
-        return tempID
+        return ItemIdToName.__JAToid.get(jaStr,None)
     
     def getZH(id:str)->str:
         if(not ItemIdToName.__idToZH):

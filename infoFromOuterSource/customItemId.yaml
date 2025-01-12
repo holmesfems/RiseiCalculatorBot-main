@@ -38,3 +38,23 @@
 - id: COORD18
   zh: 18源石外套
   ja: 18石コーデ
+
+- id: T4_EXCHANGE_CUSTOM
+  zh: T4素材交换券
+  ja: T4素材交換券
+
+- id: T3_EXCHANGE_CUSTOM
+  zh: T3素材交换券
+  ja: T3素材交換券
+
+- id: voucher_skill_specialLevelMax_6
+  zh: 高级资深干员技巧集
+  ja: ★6スキル指南集
+
+- id: voucher_skill_specialLevelMax_5
+  zh: 资深干员技巧集
+  ja: ★5スキル指南集
+
+- id: voucher_skill_specialLevelMax_4
+  zh: 专业干员技巧集
+  ja: ★4スキル指南集
