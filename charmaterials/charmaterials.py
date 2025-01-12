@@ -12,6 +12,7 @@ from enum import StrEnum
 import enum
 import yaml
 from rcutils.rcReply import RCMsgType,RCReply
+from typing import Literal
 
 CHAR_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/character_table.json"
 CHAR_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData_YoStar/main/ja_JP/gamedata/excel/character_table.json"
@@ -374,6 +375,9 @@ class OperatorCostsCalculator:
         STAR6ELITE = enum.auto()
         COSTOFCNONLY = enum.auto()
         COSTOFGLOBAL = enum.auto()
+        MASTERSTAR6 = enum.auto()
+        MASTERSTAR5 = enum.auto()
+        MASTERSTAR4 = enum.auto()
 
     operatorInfo = AllOperatorsInfo()
 
@@ -584,11 +588,38 @@ class OperatorCostsCalculator:
                 embbedTitle=title,
                 embbedContents=msgList
             )
+        elif(selection is OperatorCostsCalculator.CostListSelection.MASTERSTAR6):
+            return OperatorCostsCalculator.getMasterCostStatistics(6)
+        elif(selection is OperatorCostsCalculator.CostListSelection.MASTERSTAR5):
+            return OperatorCostsCalculator.getMasterCostStatistics(5)
+        elif(selection is OperatorCostsCalculator.CostListSelection.MASTERSTAR4):
+            return OperatorCostsCalculator.getMasterCostStatistics(4)
         else:
             return RCReply(
                 embbedTitle="エラー",
                 embbedContents=["未知のコマンド:" + str(selection)]
             )
+
+    def getMasterCostStatistics(star:Literal[4,5,6]) -> RCReply:
+        globalOperators = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if not value.isCNOnly()}
+        filteredOperators= {key:value for key,value in globalOperators.items() if value.stars==star}
+        skillCosts:List[Tuple[str,ItemCost]] = []
+        for operator in filteredOperators.values():
+            for skillName, skillCost in operator.skills:
+                skillCosts.append((f"{operator.name}: {skillName}",sum(skillCost)))
+        skillCosts.sort(key=lambda x:x[1].toRiseiValue())
+        skillNums = len(skillCosts)
+        title = f"星{star}の特化統計情報"
+        msgList = []
+        msgList.append(f"総スキル数: {skillNums}")
+        msgList.append(f"一番消費が重い特化スキル:{skillCosts[0][0]}" + skillCosts[0][1].toStrBlock())
+        msgList.append(f"合計理性価値: {skillCosts[0][1].toRiseiValue()}")
+        msgList.append("-----------")
+        msgList.append(f"一番消費が軽い特化スキル:{skillCosts[skillNums-1][0]}" + skillCosts[skillNums-1][1].toStrBlock())
+        msgList.append(f"合計理性価値: {skillCosts[skillNums-1][1].toRiseiValue()}")
+        msgList.append("-----------")
+        msgList.append(f"消費理性価値の平均: {sum(skillValue.toRiseiValue() for name,skillValue in skillCosts)/skillNums}")
+        return RCReply(embbedTitle=title,embbedContents=msgList)
 
     def autoCompleteForEliteCost(name:str,limit:int = 25) -> List[Tuple[str,str]]:
         return [(value.name,value.name) for value in OperatorCostsCalculator.operatorInfo.operatorDict.values() if name in value.name and value.stars>=4 and not value.isPatch][:limit]

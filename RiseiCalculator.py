@@ -397,7 +397,10 @@ async def operator_name_autocomplete_formodule(inter:Interaction,current:str)->L
         Choice(name="星5昇進素材価値表",value="star5elite"),
         Choice(name="星6昇進素材価値表",value="star6elite"),
         Choice(name="未実装オペレーターの消費素材合計",value = "costofcnonly"),
-        Choice(name="実装済オペレーターの消費素材合計",value = "costofglobal")
+        Choice(name="実装済オペレーターの消費素材合計",value = "costofglobal"),
+        Choice(name="星6特化統計",value="masterstar6"),
+        Choice(name="星5特化統計",value="masterstar5"),
+        Choice(name="星4特化統計",value="masterstar4"),
     ]
 )
 async def operatorcostlist(inter:Interaction,selection:Choice[str]):
