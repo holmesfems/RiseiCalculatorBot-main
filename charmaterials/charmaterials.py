@@ -605,29 +605,40 @@ class OperatorCostsCalculator:
         filteredOperators= {key:value for key,value in globalOperators.items() if value.stars==star}
         skillCosts:List[Tuple[str,ItemCost]] = []
         for operator in filteredOperators.values():
+            index = 0
             for skillName, skillCostList in operator.skills:
-                skillCosts.append((f"{operator.name}: {skillName}",sum(skillCostList,ItemCost())))
+                index+=1
+                skillCosts.append((f"{operator.name}(S{index})",sum(skillCostList,ItemCost())))
         skillCosts.sort(key=lambda x:x[1].toRiseiValue(),reverse=True)
         skillNums = len(skillCosts)
         title = f"星{star}の特化統計情報"
         msgList = []
         msgList.append(f"総スキル数: {skillNums}")
         msgList.append(f"一番消費が重い特化スキル:{skillCosts[0][0]}" + skillCosts[0][1].toStrBlock())
-        msgList.append(f"合計理性価値: {skillCosts[0][1].toRiseiValue():2f}")
+        msgList.append(f"合計理性価値: {skillCosts[0][1].toRiseiValue():.2f}")
         msgList.append("\n-----------\n")
         msgList.append(f"一番消費が軽い特化スキル:{skillCosts[skillNums-1][0]}" + skillCosts[skillNums-1][1].toStrBlock())
-        msgList.append(f"合計理性価値: {skillCosts[skillNums-1][1].toRiseiValue():2f}")
+        msgList.append(f"合計理性価値: {skillCosts[skillNums-1][1].toRiseiValue():.2f}")
         msgList.append("\n-----------\n")
         msgList.append("消費が重いスキルTop10:")
         msg = "\n```\n"
         for index in range(10):
             if(index >= skillNums):break
             skillCostItem = skillCosts[index]
-            msg += f"{index+1}.{skillCostItem[0]}: {skillCostItem[1].toRiseiValue():2f}\n"
+            msg += f"{index+1}.{skillCostItem[0]}: {skillCostItem[1].toRiseiValue():.2f}\n"
         msg += "```"
         msgList.append(msg)
         msgList.append("\n-----------\n")
-        msgList.append(f"消費理性価値の平均: {sum(skillValue.toRiseiValue() for name,skillValue in skillCosts)/skillNums}")
+        msgList.append("消費が軽いスキルTop10:")
+        msg = "\n```\n"
+        for index in range(skillNums-10,skillNums):
+            if(index < 0):continue
+            skillCostItem = skillCosts[index]
+            msg += f"{index+1}.{skillCostItem[0]}: {skillCostItem[1].toRiseiValue():.2f}\n"
+        msg += "```"
+        msgList.append(msg)
+        msgList.append("\n-----------\n")
+        msgList.append(f"消費理性価値の平均: {sum(skillValue.toRiseiValue() for name,skillValue in skillCosts)/skillNums:.2f}")
 
         return RCReply(embbedTitle=title,embbedContents=msgList)
 
