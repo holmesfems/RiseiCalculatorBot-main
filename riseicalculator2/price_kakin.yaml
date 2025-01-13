@@ -79,19 +79,19 @@
     ★5スキル指南集: 1
     ★4スキル指南集: 1
 
-# 昇進特訓パック:
-#   price: 1500
-#   isConstant: false
-#   contents:
-#     純正源石: 24
-#     ★5特訓招待状: 1
+昇進特訓パック:
+  price: 1500
+  isConstant: false
+  contents:
+    純正源石: 24
+    ★5特訓招待状: 1
 
-# 上級昇進特訓パック:
-#   price: 2600
-#   isConstant: false
-#   contents:
-#     純正源石: 36
-#     ★6特訓招待状: 1
+上級昇進特訓パック:
+  price: 2600
+  isConstant: false
+  contents:
+    純正源石: 36
+    ★6特訓招待状: 1
 
 5周年観光パック:
   price: 3000
