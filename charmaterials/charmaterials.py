@@ -617,7 +617,7 @@ class OperatorCostsCalculator:
         msgList.append(f"一番消費が重い特化スキル:\n{skillCosts[0][0]}\n" + skillCosts[0][1].toStrBlock())
         msgList.append(f"合計理性価値: {skillCosts[0][1].toRiseiValue():.2f}\n")
         msgList.append("消費が重いスキルTop10:")
-        msg = "\n```\n"
+        msg = "```\n"
         for index in range(10):
             if(index >= skillNums):break
             skillCostItem = skillCosts[index]
@@ -627,7 +627,7 @@ class OperatorCostsCalculator:
         msgList.append(f"一番消費が軽い特化スキル:\n{skillCosts[skillNums-1][0]}\n" + skillCosts[skillNums-1][1].toStrBlock())
         msgList.append(f"合計理性価値: {skillCosts[skillNums-1][1].toRiseiValue():.2f}\n")
         msgList.append("消費が軽いスキルTop10:")
-        msg = "\n```\n"
+        msg = "```\n"
         for index in range(skillNums-10,skillNums):
             if(index < 0):continue
             skillCostItem = skillCosts[index]
