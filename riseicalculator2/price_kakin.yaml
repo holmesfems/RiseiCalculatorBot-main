@@ -49,7 +49,7 @@
 #     龍門幣1000: 300
 
 
-ペペの鞄:
+ペペの鞄/炉火資金パック:
   price: 1200
   isConstant: false
   contents:
@@ -92,6 +92,14 @@
   contents:
     純正源石: 36
     ★6特訓招待状: 1
+
+鏡影特訓パック:
+  price: 2600
+  isConstant: false
+  contents:
+    ★6特訓招待状: 1
+    ★5特訓招待状: 1
+    ★4特訓招待状: 1
 
 5周年観光パック:
   price: 3000
@@ -271,13 +279,13 @@
 #   contents:
 #     10回中堅スカウト券: 1
 
-5周年データパック:
+統合戦略データパック:
   price: 650
   isConstant: false
   contents:
     モジュールデータ: 12
 
-5周年データボックス:
+統合戦略データボックス:
   price: 1200
   isConstant: false
   contents:
