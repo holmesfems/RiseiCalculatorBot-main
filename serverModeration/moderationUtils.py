@@ -16,8 +16,8 @@ class serverModerator:
         #良さげなBANワードを思いついてないので、autoBanは一旦機能オフにする
         # if(not doneAny): doneAny = await self.autoBan(message)
 
-        doneAny = autoDeleted or autoAnniversaried
-        return doneAny
+        messageNeedDiscard = autoDeleted
+        return messageNeedDiscard
 
     async def autoDeletion(self,message:discord.Message) -> bool:
         TARGET_CHANNNEL_IDS = [
