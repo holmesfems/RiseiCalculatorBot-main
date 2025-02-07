@@ -394,8 +394,9 @@ async def operator_name_autocomplete_formodule(inter:Interaction,current:str)->L
 )
 @app_commands.choices(
     selection = [
-        Choice(name="星5昇進素材価値表",value="star5elite"),
         Choice(name="星6昇進素材価値表",value="star6elite"),
+        Choice(name="星5昇進素材価値表",value="star5elite"),
+        Choice(name="星4昇進素材価値表",value="star4elite"),
         Choice(name="未実装オペレーターの消費素材合計",value = "costofcnonly"),
         Choice(name="実装済オペレーターの消費素材合計",value = "costofglobal"),
         Choice(name="星6特化統計",value="masterstar6"),

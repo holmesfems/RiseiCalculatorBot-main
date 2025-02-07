@@ -352,27 +352,17 @@ class AllOperatorsInfo:
     def getAllCostItems(self)->Dict[str,OperatorCosts]:
         return self.operatorDict.copy()
     
-    def getSortedStar5CostDict(self):
-        star5Operators = {key:value for key,value in self.getAllCostItems().items() if value.stars == 5 and not value.isPatch}
-        riseiValueDict = {key:value.totalPhaseCost().toRiseiValue_OnlyValueTarget(not value.isCNOnly()) for key,value in star5Operators.items()}
-        sortedValueDict = {key:value for key,value in sorted(riseiValueDict.items(),key=lambda x:x[1],reverse=True)}
-        return {star5Operators[key].name:value for key,value in sortedValueDict.items()}
-    
-    def getSortedStar6CostDict(self):
-        star6Operators = {key:value for key,value in self.getAllCostItems().items() if value.stars == 6 and not value.isPatch}
-        riseiValueDict = {key:value.totalPhaseCost().toRiseiValue_OnlyValueTarget(not value.isCNOnly()) for key,value in star6Operators.items()}
-        sortedValueDict = {key:value for key,value in sorted(riseiValueDict.items(),key=lambda x:x[1],reverse=True)}
-        return {star6Operators[key].name:value for key,value in sortedValueDict.items()}
-    
     def getSortedCostDict(self,star):
-        if(star == 5): return self.getSortedStar5CostDict()
-        elif(star == 6): return self.getSortedStar6CostDict()
-        else: return None
+        operatorCosts = {key:value for key,value in self.getAllCostItems().items() if value.stars == star and not value.isPatch}
+        riseiValueDict = {key:value.totalPhaseCost().toRiseiValue_OnlyValueTarget(not value.isCNOnly()) for key,value in operatorCosts.items()}
+        sortedValueDict = {key:value for key,value in sorted(riseiValueDict.items(),key=lambda x:x[1],reverse=True)}
+        return {operatorCosts[key].name:value for key,value in sortedValueDict.items()}
 
 class OperatorCostsCalculator:
     class CostListSelection(StrEnum):
         STAR5ELITE = enum.auto()
         STAR6ELITE = enum.auto()
+        STAR4ELITE = enum.auto()
         COSTOFCNONLY = enum.auto()
         COSTOFGLOBAL = enum.auto()
         MASTERSTAR6 = enum.auto()
@@ -495,9 +485,7 @@ class OperatorCostsCalculator:
 
     def operatorCostList(selection:CostListSelection) -> RCReply:
         #OpenAIから呼び出す予定は現状なし、responseForAIは空欄にする
-        if(selection is OperatorCostsCalculator.CostListSelection.STAR5ELITE):
-            sortedValueDict = OperatorCostsCalculator.operatorInfo.getSortedStar5CostDict()
-            title = "★5昇進素材価値表"
+        def printCostRanking(sortedValueDict):
             headerMsg = "SoCは以下の計算に含まれません:"
             msgList = [headerMsg]
             toPrint = []
@@ -513,32 +501,27 @@ class OperatorCostsCalculator:
                     toPrint = []
             if(toPrint):
                 msgList.append(CalculatorManager.dumpToPrint(toPrint))
-
+            return msgList
+        if(selection is OperatorCostsCalculator.CostListSelection.STAR4ELITE):
+            sortedValueDict = OperatorCostsCalculator.operatorInfo.getSortedCostDict(4)
+            title = "★4昇進素材価値表"
             return RCReply(
                 embbedTitle=title,
-                embbedContents=msgList
+                embbedContents=printCostRanking(sortedValueDict)
+            )
+        elif(selection is OperatorCostsCalculator.CostListSelection.STAR5ELITE):
+            sortedValueDict = OperatorCostsCalculator.operatorInfo.getSortedCostDict(5)
+            title = "★5昇進素材価値表"
+            return RCReply(
+                embbedTitle=title,
+                embbedContents=printCostRanking(sortedValueDict)
             )
         elif(selection is OperatorCostsCalculator.CostListSelection.STAR6ELITE):
-            
-            sortedValueDict = OperatorCostsCalculator.operatorInfo.getSortedStar6CostDict()
+            sortedValueDict = OperatorCostsCalculator.operatorInfo.getSortedCostDict(6)
             title = "★6昇進素材価値表"
-            headerMsg = "SoCは以下の計算に含まれません:"
-            msgList = [headerMsg]
-            toPrint = []
-            for index,(key,value) in enumerate(sortedValueDict.items()):
-                name = key
-                #print(name,star5Operators[key].totalPhaseCost())
-                riseiValue = value
-                #phaseCost = star5Operators[key].totalPhaseCost()
-                toPrint.append(f"{index+1}. {name} : {riseiValue:.3f}")
-                if((index + 1)% 50 == 0):
-                    msgList.append(CalculatorManager.dumpToPrint(toPrint))
-                    toPrint = []
-            if(toPrint):
-                msgList.append(CalculatorManager.dumpToPrint(toPrint))
             return RCReply(
                 embbedTitle=title,
-                embbedContents=msgList
+                embbedContents=printCostRanking(sortedValueDict)
             )
         
         elif(selection is OperatorCostsCalculator.CostListSelection.COSTOFCNONLY):
