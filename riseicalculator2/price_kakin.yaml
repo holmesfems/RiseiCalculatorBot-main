@@ -93,7 +93,7 @@
 #     純正源石: 36
 #     ★6特訓招待状: 1
 
-テラ味覚探求特訓パック:
+テラ味覚探求特訓パック/上級特訓パック:
   price: 2600
   isConstant: false
   contents:
@@ -167,11 +167,12 @@
 #     データ補完マシン: 20
 #     データ補完チップ: 60
 
-# 4.5周年スカウトパック:
-#   price: 2600
-#   isConstant: false
-#   contents:
-#     10回スカウト券: 1
+セレクトスカウトパック:
+  price: 2600
+  isConstant: false
+  contents:
+    純正源石: 9
+    10回スカウト券: 2
 
 # 招聘指名パック:
 #   price: 3000
@@ -297,19 +298,19 @@
 #   contents:
 #     10回中堅スカウト券: 1
 
-# 統合戦略データパック:
-#   price: 650
-#   isConstant: false
-#   contents:
-#     モジュールデータ: 12
+ロドスデータパック:
+  price: 650
+  isConstant: false
+  contents:
+    モジュールデータ: 12
 
-# 統合戦略データボックス:
-#   price: 1200
-#   isConstant: false
-#   contents:
-#     モジュールデータ: 24
-#     データ補完マシン: 30
-#     データ補完チップ: 90
+ロドスデータボックス:
+  price: 1200
+  isConstant: false
+  contents:
+    モジュールデータ: 24
+    データ補完マシン: 30
+    データ補完チップ: 90
 
 #constant
 10000円恒常パック:
