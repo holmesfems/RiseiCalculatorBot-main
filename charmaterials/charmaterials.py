@@ -366,7 +366,7 @@ class AllOperatorsInfo:
         index: int
         totalCost: ItemCost
         def operatorNameIndex(self):
-            return self.operatorName + f"S({self.index})"
+            return self.operatorName + f"(S{self.index})"
 
     def getSortedSkillCostDict(self,star:int):
         operatorCosts = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if value.stars==star}
