@@ -13,6 +13,7 @@ import enum
 import yaml
 from rcutils.rcReply import RCMsgType,RCReply
 from typing import Literal
+import dataclasses
 
 CHAR_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/character_table.json"
 CHAR_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData_YoStar/main/ja_JP/gamedata/excel/character_table.json"
@@ -352,11 +353,31 @@ class AllOperatorsInfo:
     def getAllCostItems(self)->Dict[str,OperatorCosts]:
         return self.operatorDict.copy()
     
-    def getSortedCostDict(self,star):
+    def getSortedCostDict(self,star:int):
         operatorCosts = {key:value for key,value in self.getAllCostItems().items() if value.stars == star and not value.isPatch}
         riseiValueDict = {key:value.totalPhaseCost().toRiseiValue_OnlyValueTarget(not value.isCNOnly()) for key,value in operatorCosts.items()}
         sortedValueDict = {key:value for key,value in sorted(riseiValueDict.items(),key=lambda x:x[1],reverse=True)}
         return {operatorCosts[key].name:value for key,value in sortedValueDict.items()}
+    
+    @dataclasses.dataclass
+    class SkillCostInfo:
+        skillName: str
+        operatorName: str
+        index: int
+        totalCost: ItemCost
+        def operatorNameIndex(self):
+            return self.operatorName + f"S({self.index})"
+
+    def getSortedSkillCostDict(self,star:int):
+        operatorCosts = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if value.stars==star}
+        skillCosts:List[AllOperatorsInfo.SkillCostInfo] = []
+        for operator in operatorCosts.values():
+            index = 0
+            for skillName, skillCostList in operator.skills:
+                index+=1
+                skillCosts.append(AllOperatorsInfo.SkillCostInfo(skillName,operator.name,index,sum(skillCostList,ItemCost())))
+        skillCosts.sort(key=lambda x:x.totalCost.toRiseiValue(),reverse=True)
+        return skillCosts
 
 class OperatorCostsCalculator:
     class CostListSelection(StrEnum):
@@ -584,40 +605,32 @@ class OperatorCostsCalculator:
             )
 
     def getMasterCostStatistics(star:Literal[4,5,6]) -> RCReply:
-        globalOperators = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if not value.isCNOnly()}
-        filteredOperators= {key:value for key,value in globalOperators.items() if value.stars==star}
-        skillCosts:List[Tuple[str,ItemCost]] = []
-        for operator in filteredOperators.values():
-            index = 0
-            for skillName, skillCostList in operator.skills:
-                index+=1
-                skillCosts.append((f"{operator.name}(S{index})",sum(skillCostList,ItemCost())))
-        skillCosts.sort(key=lambda x:x[1].toRiseiValue(),reverse=True)
+        skillCosts = OperatorCostsCalculator.operatorInfo.getSortedSkillCostDict(star)
         skillNums = len(skillCosts)
         title = f"星{star}の特化統計情報"
         msgList = []
         msgList.append(f"総スキル数: {skillNums}\n")
-        msgList.append(f"一番消費が重い特化スキル:\n{skillCosts[0][0]}\n" + skillCosts[0][1].toStrBlock())
-        msgList.append(f"合計理性価値: {skillCosts[0][1].toRiseiValue():.2f}\n")
+        msgList.append(f"一番消費が重い特化スキル:\n{skillCosts[0].operatorNameIndex()}\n" + skillCosts[0].totalCost.toStrBlock())
+        msgList.append(f"合計理性価値: {skillCosts[0].totalCost.toRiseiValue():.2f}\n")
         msgList.append("消費が重いスキルTop10:")
         msg = "```\n"
         for index in range(10):
             if(index >= skillNums):break
             skillCostItem = skillCosts[index]
-            msg += f"{index+1}.{skillCostItem[0]}: {skillCostItem[1].toRiseiValue():.2f}\n"
+            msg += f"{index+1}.{skillCostItem.operatorNameIndex()}: {skillCostItem.totalCost.toRiseiValue():.2f}\n"
         msg += "```\n"
         msgList.append(msg)
-        msgList.append(f"一番消費が軽い特化スキル:\n{skillCosts[skillNums-1][0]}\n" + skillCosts[skillNums-1][1].toStrBlock())
-        msgList.append(f"合計理性価値: {skillCosts[skillNums-1][1].toRiseiValue():.2f}\n")
+        msgList.append(f"一番消費が軽い特化スキル:\n{skillCosts[skillNums-1].operatorNameIndex()}\n" + skillCosts[skillNums-1].totalCost.toStrBlock())
+        msgList.append(f"合計理性価値: {skillCosts[skillNums-1].totalCost.toRiseiValue():.2f}\n")
         msgList.append("消費が軽いスキルTop10:")
         msg = "```\n"
         for index in range(skillNums-10,skillNums):
             if(index < 0):continue
             skillCostItem = skillCosts[index]
-            msg += f"{index+1}.{skillCostItem[0]}: {skillCostItem[1].toRiseiValue():.2f}\n"
+            msg += f"{index+1}.{skillCostItem.operatorNameIndex()}: {skillCostItem.totalCost.toRiseiValue():.2f}\n"
         msg += "```\n"
         msgList.append(msg)
-        msgList.append(f"平均理性価値: {sum(skillValue.toRiseiValue() for name,skillValue in skillCosts)/skillNums:.2f}")
+        msgList.append(f"平均理性価値: {sum(skillCost.totalCost.toRiseiValue() for skillCost in skillCosts)/skillNums:.2f}")
 
         return RCReply(embbedTitle=title,embbedContents=msgList)
 
