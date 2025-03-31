@@ -17,6 +17,7 @@ from rcutils.rcReply import RCReply
 from serverModeration.moderationUtils import serverModerator
 from fkDatabase.fkDataSearch import fkInfo
 import infoFromOuterSource.updator as infoUpdator
+from eventPrediction import eventPredicton
 
 TOKEN = os.environ["BOT_TOKEN"]
 ID = os.environ["BOT_ID"]
@@ -431,6 +432,15 @@ async def operator_name_autocomplete_forfk(inter:Interaction,current:str)->List[
     return [app_commands.Choice(name = name, value = value) for name,value in strList]
 
 CHANNEL_ID_HAPPYBIRTHDAY = int(os.environ["CHANNEL_ID_HAPPYBIRTHDAY"])
+
+@tree.command(
+    name = "eventprediction",
+    description= "近い未来のイベント開催情報を予測します"
+)
+async def event_prediction(inter:Interaction):
+    await inter.response.defer(thinking=True)
+    msg = eventPredicton.getFutureEvents()
+    await sendReplyToDiscord.followupToDiscord(inter,msg)
 
 @tasks.loop(time=datetime.time(hour=0, minute=0, tzinfo=JST))
 async def checkBirtyday():
