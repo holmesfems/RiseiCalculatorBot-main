@@ -365,6 +365,7 @@ class AllOperatorsInfo:
         operatorName: str
         index: int
         totalCost: ItemCost
+        key:str
         def operatorNameIndex(self):
             return self.operatorName + f"(S{self.index})"
 
@@ -375,7 +376,7 @@ class AllOperatorsInfo:
             index = 0
             for skillName, skillCostList in operator.skills:
                 index+=1
-                skillCosts.append(AllOperatorsInfo.SkillCostInfo(skillName,operator.name,index,sum(skillCostList,ItemCost())))
+                skillCosts.append(AllOperatorsInfo.SkillCostInfo(skillName,operator.name,index,sum(skillCostList,ItemCost()),operator.skillIds[index-1]))
         skillCosts.sort(key=lambda x:x.totalCost.toRiseiValue(),reverse=True)
         return skillCosts
 
@@ -464,6 +465,16 @@ class OperatorCostsCalculator:
         blockMsg = r2Cost.toStrBlock()
         msgList.append(headerMsg + blockMsg)
         #jsonForAI["totalIntermediateConvertion"] = r2Cost.itemArray.toNameCountDict()
+
+        #ランキング
+        skillCostRanking = OperatorCostsCalculator.operatorInfo.getSortedSkillCostDict(costItem.stars)
+        try: 
+            nums = len(skillCostRanking)
+            index = [item.key for item in skillCostRanking].index(costItem.skillIds[skillNum-1])
+            msgList.append(f"星{costItem.stars}スキル{nums}個中、第{index+1}位の消費です")
+
+        except:
+            ...
 
         return RCReply(
             embbedTitle=title,
@@ -690,7 +701,7 @@ class OperatorCostsCalculator:
             sortedValues = OperatorCostsCalculator.operatorInfo.getSortedCostDict(costItem.stars)
             index = list(sortedValues.keys()).index(costItem.name)
             nums = len(sortedValues)
-            msgList.append(f"星{costItem.stars}オペレーター{nums}名中、第{index}位の消費です")
+            msgList.append(f"星{costItem.stars}オペレーター{nums}名中、第{index+1}位の消費です")
 
         #jsonForAI["totalIntermediateConvertion"] = r2Cost.itemArray.toNameCountDict()
         return RCReply(
