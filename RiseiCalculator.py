@@ -68,7 +68,7 @@ async def riseicalculatorMaster(inter:Interaction,target:str,target_item:str=Non
         print(msg)
         #channel = inter.channel()
 
-targetItemChoice=[Choice(name=v["to_ja"],value=x) for x,v in getStageCategoryDict(False).items()]
+targetItemChoice=[Choice(name=v.to_ja,value=x) for x,v in getStageCategoryDict(False).items()]
 modeChoice = [Choice(name="Sanity",value ="sanity"),Choice(name="Time",value ="time")]
 
 @tree.command(

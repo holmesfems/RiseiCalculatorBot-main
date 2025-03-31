@@ -77,7 +77,7 @@ def idInValueTarget(id:str,glob:bool) -> bool:
 
 def categoryZHToJA(zhStr:str,glob:bool) -> str:
     categoryDict = getStageCategoryDict(glob)
-    return categoryDict[zhStr]["to_ja"]
+    return categoryDict[zhStr].to_ja
 
 class CalculateMode(StrEnum):
     SANITY = enum.auto()
@@ -430,12 +430,12 @@ class StageInfo:
         for key,value in categoryDict.items():
             #print(value)
             self.categoryDict[key] = {
-                "Stages" : [self.mainCodeToStageDict[x] for x in value["Stages"] if x in self.mainCodeToStageDict],
-                "Items" : value["Items"],
-                "MainItem": value["MainItem"],
-                "SubItem" : value.get("SubItem",[]),
-                "SubOrder" : value.get("SubOrder",[]),
-                "to_ja" : value["to_ja"]
+                "Stages" : [self.mainCodeToStageDict[x] for x in value.Stages if x in self.mainCodeToStageDict],
+                "Items" : value.Items,
+                "MainItem": value.MainItem,
+                "SubItem" : value.SubItem,
+                "SubOrder" : value.SubOrder,
+                "to_ja" : value.to_ja
             }
         self.initMatrix()
     
@@ -685,12 +685,14 @@ class Calculator:
         
         def getRowsName(self):
             return [x.name for x in self.constStageItemList]
-        
+    
+    @dataclass
     class BaseStageDropItem:
-        def __init__(self, isGlobal:bool, category:str, stageItem:StageItem):
-            self.stageItem = stageItem
-            self.name = categoryZHToJA(category,isGlobal) + stageItem.name
-            self.isGlobal = isGlobal
+        isGlobal: bool
+        category: str
+        stageItem: StageItem
+        def ___post_init__(self):
+            self.name = categoryZHToJA(self.category,self.isGlobal) + self.stageItem.name
         def __repr__(self) -> str:
             return self.name # + ":" + str(self.stageItem.toDropArray(self.isGlobal))
 

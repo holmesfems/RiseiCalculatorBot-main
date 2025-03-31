@@ -1,12 +1,24 @@
 from typing import List,Dict,Union
 import yaml
 import sys
+from dataclasses import dataclass,field
 sys.path.append('../')
 from infoFromOuterSource.idtoname import ItemIdToName
+
+@dataclass
+class StageCategoryInfo:
+    Stages: List[str]
+    Items: List[str]
+    MainItem: str
+    to_ja: str
+    SubItem: List[str] = field(default_factory=list)
+    SubOrder: List[int] = field(default_factory=list)
 
 #ドロップアイテム&ステージのカテゴリ情報を入手
 with open("riseicalculator2/StageCategoryDict.json","rb") as file:
     StageCategoryDict:Dict = yaml.safe_load(file)
+    MainCategoryDict:Dict[str,StageCategoryInfo] = {key:StageCategoryInfo(**value) for key,value in StageCategoryDict['main'].items()}
+    NewCategoryDict:Dict[str,StageCategoryInfo] = {key:StageCategoryInfo(**value) for key,value in StageCategoryDict['new'].items()}
 
 #一部理論値と実際のクリア時間が乖離しているステージで個別修正
 with open("riseicalculator2/minClearTimeInjection.yaml","rb") as file:
@@ -141,11 +153,11 @@ def getItemRarity4(glob:bool) -> List[str]:
 def getValueTarget(glob:bool) -> List[str]:
     return getGlobalOrMainland("ValueTarget",glob)
 
-def getStageCategoryDict(glob:bool) -> Dict[str,dict]:
+def getStageCategoryDict(glob:bool):
     if glob:
-        return StageCategoryDict["main"]
+        return MainCategoryDict
     else:
-        return {**StageCategoryDict["main"],**StageCategoryDict["new"]}
+        return {**MainCategoryDict,**NewCategoryDict}
     
 def estimateCategoryFromJPName(current:str):
     with open("riseicalculator2/categoryEnToZh.yaml","rb") as f:
@@ -153,7 +165,7 @@ def estimateCategoryFromJPName(current:str):
     if zh := categoryEnToZh.get(current,None):
         return zh
     categoryDict = getStageCategoryDict(glob=False)
-    if(estimatedValue:=next(filter(lambda x: current in x[1]["to_ja"] or x[1]["to_ja"] in current,categoryDict.items()),None)):
+    if(estimatedValue:=next(filter(lambda x: current in x[1].to_ja or x[1].to_ja in current,categoryDict.items()),None)):
         return estimatedValue[0]
     return current
     
