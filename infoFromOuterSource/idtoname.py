@@ -15,6 +15,7 @@ class ItemIdToName:
     __ZHToid:Dict[str,str] = {}
     __idToZH:Dict[str,str] = {}
     __JAToid:Dict[str,str] = {}
+    @staticmethod
     def init():
         allInfoCN,allInfoJP = netutil.get_json_aio([ITEM_TABLE_URL_CN,ITEM_TABLE_URL_JP])
         allInfoCN:dict = allInfoCN["items"]
@@ -94,26 +95,31 @@ class ItemIdToName:
             ItemIdToName.__idToZH[item["id"]]=item["zh"]
             ItemIdToName.__JAToid[item["ja"]]=item["id"]
 
+    @staticmethod
     def getStr(id:str)->str:
         if(not ItemIdToName.__idToJA):
             ItemIdToName.init()
         return ItemIdToName.__idToJA.get(id,ItemIdToName.__idToZH.get(id,"Missing"))
     
+    @staticmethod
     def zhToJa(zhStr:str)->str:
         if(not ItemIdToName.__ZHToJA):
             ItemIdToName.init()
         return ItemIdToName.__ZHToJA.get(zhStr,zhStr)
     
+    @staticmethod
     def zhToId(zhStr:str):
         if(not ItemIdToName.__ZHToid):
             ItemIdToName.init()
         return ItemIdToName.__ZHToid.get(zhStr,None)
     
+    @staticmethod
     def jaToId(jaStr:str) :
         if(not ItemIdToName.__JAToid):
             ItemIdToName.init()
         return ItemIdToName.__JAToid.get(jaStr,None)
     
+    @staticmethod
     def getZH(id:str)->str:
         if(not ItemIdToName.__idToZH):
             ItemIdToName.init()
@@ -122,7 +128,6 @@ class ItemIdToName:
 SKILL_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/skill_table.json"
 SKILL_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData_YoStar/main/ja_JP/gamedata/excel/skill_table.json"
 class SkillIdToName:
-    
     with open("infoFromOuterSource/skillmetacode.yaml",encoding="utf-8") as f:
         skillMetaDict:Dict[str,str] = yaml.safe_load(f)
     class SkillItem:
@@ -215,6 +220,8 @@ class SkillIdToName:
             return {"name": self.name}
         
     __idToSkillItem:Dict[str,SkillItem] = {}
+
+    @staticmethod
     def init():
         allInfoCN,allInfoJP = netutil.get_json_aio([SKILL_TABLE_URL_CN,SKILL_TABLE_URL_JP])
         SkillIdToName.__idToSkillItem = {}
@@ -224,17 +231,20 @@ class SkillIdToName:
                 value = jpValue
             SkillIdToName.__idToSkillItem[key] = SkillIdToName.SkillItem(value["levels"][-1])
 
+    @staticmethod
     def getItem(id):
         if(not SkillIdToName.__idToSkillItem):
             SkillIdToName.init()
         return SkillIdToName.__idToSkillItem.get(id)
     
+    @staticmethod
     def getStr(id):
         if(skillItem := SkillIdToName.getItem(id)):
             return skillItem.name
         else:
             return "Missing"
     
+    @staticmethod
     def getDescription(id):
         if(skillItem := SkillIdToName.getItem(id)):
             return skillItem.description
@@ -244,7 +254,9 @@ class SkillIdToName:
 STAGE_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/stage_table.json"
 STAGE_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData_YoStar/main/ja_JP/gamedata/excel/stage_table.json"
 class StageIdToName:
-    __idToStr = {}
+    __idToStr:Dict[str,str] = {}
+
+    @staticmethod
     def init():
         allInfoCN,allInfoJP = netutil.get_json_aio([STAGE_TABLE_URL_CN,STAGE_TABLE_URL_JP])
         allInfoCN = allInfoCN["stages"]
@@ -256,14 +268,17 @@ class StageIdToName:
                 value = jpValue
             StageIdToName.__idToStr[key] = value["code"]
     
+    @staticmethod
     def getStr(id):
         if(not StageIdToName.__idToStr):
             StageIdToName.init()
-        return SkillIdToName.__idToStr.get(id,"Missing")
+        return StageIdToName.__idToStr.get(id,"Missing")
 
 ZONE_TABLE_URL = "https://penguin-stats.io/PenguinStats/api/v2/zones"
 class ZoneIdToName:
-    __idToStr = {}
+    __idToStr:Dict[str,str] = {}
+
+    @staticmethod
     def init():
         headers = {'User-Agent':'ArkPlanner'}
         allInfo = get_json(ZONE_TABLE_URL,headers=headers)
@@ -271,6 +286,7 @@ class ZoneIdToName:
         for items in allInfo:
             ZoneIdToName.__idToStr[items["zoneId"]] = items["zoneName_i18n"]["ja"]
     
+    @staticmethod
     def getStr(id):
         if(not ZoneIdToName.__idToStr):
             ZoneIdToName.init()

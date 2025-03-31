@@ -896,13 +896,16 @@ class CalculatorManager:
     calculatorForMainland = Calculator(False)
     CC_NUMBER = getCCNumber()
     
+    @staticmethod
     def selectCalculator(isGlobal:bool):
         return CalculatorManager.calculatorForGlobal if isGlobal else CalculatorManager.calculatorForMainland
     
+    @staticmethod
     def updateAllCalculators():
         CalculatorManager.calculatorForGlobal.init(forceRecreateStageInfo=True)
         CalculatorManager.calculatorForMainland.init(forceRecreateStageInfo=True)
 
+    @staticmethod
     def __getTimeDelta(minutes:float):
         return datetime.timedelta(minutes = minutes)
     
@@ -918,6 +921,7 @@ class CalculatorManager:
         CCLIST = enum.auto()
         POLIST = enum.auto()
 
+    @staticmethod
     def getValues(isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME) -> RiseiOrTimeValues:
         #print(f"mode:{mode},baseMinTimes:{baseMinTimes},cacheMinutes:{cache_minutes}")
         if baseMinTimes > BASEMINTIMES_UPPER: baseMinTimes = BASEMINTIMES_UPPER
@@ -926,16 +930,19 @@ class CalculatorManager:
         calculator.tryReInit(CalculatorManager.__getTimeDelta(cache_minutes),baseMinTimes,mode)
         return calculator.getValues(mode)
     
+    @staticmethod
     def filterStagesByShowMinTimes(stageList:List[StageItem],showMinTimes:int,isGlobal:bool):
         ret = [x for x in stageList if x.isValidForShow(showMinTimes,isGlobal)]
         if(not ret):
             return stageList #フィルターの結果全部なくなってしまう可哀想なカテゴリは全部返す
         return ret
 
+    @staticmethod
     def dumpToPrint(toPrint,header = ""):
         body = "\n".join(["".join(x) for x in toPrint])
         return f"```{header}\n{body}```"
     
+    @staticmethod
     def left(digit, msg):
         for c in msg:
             if unicodedata.east_asian_width(c) in ('F', 'W', 'A'):
@@ -943,6 +950,8 @@ class CalculatorManager:
             else:
                 digit -= 1
         return msg + ' '*digit
+    
+    @staticmethod
     def stagesToExcelFile(mode:CalculateMode,isGlobal:bool,stageList:List[StageItem],filename:str):
         calculator = CalculatorManager.selectCalculator(isGlobal)
         valuesDF = calculator.toDataFrame(mode)
@@ -951,6 +960,7 @@ class CalculatorManager:
         df:pd.DataFrame = pd.concat(objs=allDFs)
         df.to_excel(filename)
     
+    @staticmethod
     def execStagesToExcelFile(mode:CalculateMode,isGlobal:bool,stageList:List[StageItem],filename:str,exec:bool = True)->str:
         if(exec):
             CalculatorManager.stagesToExcelFile(mode,isGlobal,stageList,filename)
@@ -958,10 +968,11 @@ class CalculatorManager:
         else:
             return None
 
+    @staticmethod
     def sortStagesByEfficiency(stageList:List[StageItem],riseiValues:RiseiOrTimeValues):
         return sorted(stageList,key = lambda x: x.getEfficiency(riseiValues),reverse=True)
     
-    
+    @staticmethod
     def riseicalculatorMaster(toPrint:str,targetItem:str,targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15, toCsv = False) -> RCReply:
         #Chat GPT経由で呼び出されることはないので、responseToAIの値は入れなくて良い
         if toPrint == "items":
@@ -992,6 +1003,7 @@ class CalculatorManager:
             toPrintTarget = CalculatorManager.ToPrint(toPrint)
             return CalculatorManager.riseilists(toPrintTarget,isGlobal,mode,baseMinTimes,cache_minutes,toCsv)
 
+    @staticmethod
     def riseimaterials(targetCategory:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15, toCsv = False) -> RCReply:
         #大陸版先行素材を選ぶ場合、isGlobal指定にかかわらず、自動で大陸版計算とする
         if(targetCategory in StageCategoryDict["new"].keys()): isGlobal = False
@@ -1064,6 +1076,7 @@ class CalculatorManager:
             reply.attatchments = CalculatorManager.execStagesToExcelFile(mode,isGlobal,stagesToShow,MATERIAL_CSV_NAME)
         return reply
 
+    @staticmethod
     def riseistages(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15,toCsv = False) -> RCReply:
         riseiValues:RiseiOrTimeValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         calculator:Calculator = CalculatorManager.selectCalculator(isGlobal)
@@ -1144,6 +1157,7 @@ class CalculatorManager:
             reply.attatchments = CalculatorManager.execStagesToExcelFile(mode,isGlobal,stagesToShow,STAGE_CSV_NAME)
         return reply
 
+    @staticmethod
     def riseievents(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 20,toCsv = False) -> RCReply:
         riseiValues:RiseiOrTimeValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         calculator:Calculator = CalculatorManager.selectCalculator(isGlobal)
@@ -1203,7 +1217,8 @@ class CalculatorManager:
         if(toCsv):
             reply.attatchments = CalculatorManager.execStagesToExcelFile(mode,isGlobal,stagesToShow,EVENT_CSV_NAME)
         return reply
-      
+    
+    @staticmethod
     def riseilists(toPrintTarget:ToPrint,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,toCsv = False) -> RCReply:
         riseiValues:RiseiOrTimeValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         calculator:Calculator = CalculatorManager.selectCalculator(isGlobal)
@@ -1381,6 +1396,7 @@ class CalculatorManager:
                 "contents":self.array.toNameCountDict()
             }
     
+    @staticmethod
     def autoCompletion_riseikakin(current:str,limit:int=25)->List[Tuple[str,str]]:
         totalCommandList = [("全体比較(グローバル)","Total_Global"),
         ]
@@ -1397,6 +1413,7 @@ class CalculatorManager:
         ret = [item for item in constantNameList if current in item[0]][:limit]
         return ret
     
+    @staticmethod
     def riseikakin(toPrintTarget:str,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME, toCsv:bool = False) -> RCReply:
         #グローバル状態を計算
         KAKIN_FILENAME = "kakinList.xlsx"
