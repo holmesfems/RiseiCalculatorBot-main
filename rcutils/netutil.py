@@ -8,7 +8,7 @@ def getUrlWithReq(url:str,AdditionalReq:Dict[str,str]={}) -> str:
         url += "?" + "&".join([f'{key}={value}' for key,value in AdditionalReq.items()])
     return url
 
-def get_json_aio(urlList:List[str],headers = {}) -> List[Any]:
+def get_json_aio(urlList:List[str],headers = {}):
     async def get_json_single(session:aiohttp.ClientSession, url:str) -> Dict[str, Any]:
         print("request:"+url)
         nowEpoch = 0

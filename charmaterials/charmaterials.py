@@ -88,6 +88,7 @@ class ItemCost:
             copy += formulaCost
         return copy.filterRare2()
     
+    @staticmethod
     def sum(list:List[ItemCost]):
         if(not list): return ItemCost()
         ret = list[0].copy()
