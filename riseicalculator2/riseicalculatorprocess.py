@@ -426,17 +426,15 @@ class StageInfo:
         
         #カテゴリ辞書の作成
         categoryDict = getStageCategoryDict(self.isGlobal)
-        self.categoryDict:Dict[str,dict] ={}
-        for key,value in categoryDict.items():
-            #print(value)
-            self.categoryDict[key] = {
-                "Stages" : [self.mainCodeToStageDict[x] for x in value.Stages if x in self.mainCodeToStageDict],
-                "Items" : value.Items,
-                "MainItem": value.MainItem,
-                "SubItem" : value.SubItem,
-                "SubOrder" : value.SubOrder,
-                "to_ja" : value.to_ja
-            }
+
+        @dataclass
+        class CategoryInstanse:
+            categoryInfo: StageCategoryInfo
+            def __post_init__(self2):
+                self2.stageInstanses = [self.mainCodeToStageDict[x] for x in self2.categoryInfo.Stages if x in self.mainCodeToStageDict]
+
+        self.categoryInstanseDict = {key:CategoryInstanse(value) for key,value in categoryDict.items()}
+
         self.initMatrix()
     
     def initMatrix(self):
@@ -474,14 +472,14 @@ class StageInfo:
         return sum([self.categoryValidStages(category,validBaseMinTimes) for category in getStageCategoryDict(self.isGlobal).keys()],[])
 
     def categoryValidStages(self,category:str,validBaseMinTimes:int)->List[StageItem]:
-        allStageList:List[StageItem] = self.categoryDict[category]["Stages"]
+        allStageList:List[StageItem] = self.categoryInstanseDict[category].stageInstanses
         #新素材のステージの有効ステージが存在しない場合、validBaseMinTimesを無視する
         validStageList:List[StageItem] = [x for x in allStageList if x.maxTimes() >= validBaseMinTimes]
         if(not validStageList): validStageList = allStageList
         return validStageList
     
     def stageToCategory(self,stage:StageItem) -> List[str]:
-        return [key for key,value in self.categoryDict.items() if stage in value["Stages"]]
+        return [key for key,value in self.categoryInstanseDict.items() if stage in value.stageInstanses]
     
     #全ステージの効率を計算し、最大効率のカテゴリを取得
     class CategoryMaxEfficiencyItem:
@@ -499,7 +497,7 @@ class StageInfo:
 
     def generateCategorySeed(self,validBaseMinTimes:int) -> Dict[str,StageItem]:
         ret:Dict[str,StageItem] = {}
-        for key in self.categoryDict.keys():
+        for key in self.categoryInstanseDict.keys():
             validStageList = self.categoryValidStages(key,validBaseMinTimes)
             randomChoiced = random.choice(validStageList)
             ret[key] = randomChoiced
@@ -1012,7 +1010,7 @@ class CalculatorManager:
         riseiValues:RiseiOrTimeValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         #print(riseiValue)
         calculator:Calculator = CalculatorManager.selectCalculator(isGlobal)
-        if not (categoryValue := calculator.stageInfo.categoryDict.get(targetCategory)):
+        if not (categoryValue := calculator.stageInfo.categoryInstanseDict.get(targetCategory)):
             return RCReply(
                 embbedTitle=title,
                 embbedContents=["無効なカテゴリ:" + targetCategory],
@@ -1119,12 +1117,12 @@ class CalculatorManager:
                 toPrint.append(["主ドロップ情報未登録"])
             else:
                 for category in dropCategoryList:
-                    categoryValue = calculator.stageInfo.categoryDict[category]
-                    toPrint.append(["{0}: {1:.1%}".format(CalculatorManager.left(15,categoryValue["to_ja"]+"効率"),
-                        stage.getPartialEfficiency(riseiValues,categoryValue["Items"]))])
+                    categoryValue = calculator.stageInfo.categoryInstanseDict[category]
+                    toPrint.append(["{0}: {1:.1%}".format(CalculatorManager.left(15,categoryValue.categoryInfo.to_ja+"効率"),
+                        stage.getPartialEfficiency(riseiValues,categoryValue.categoryInfo.Items))])
                     if stage.minClearTime > 0:
-                        dropValues = stage.getDropRate(categoryValue["MainItem"],isGlobal)
-                        for item,order in zip(categoryValue["SubItem"],categoryValue["SubOrder"]):
+                        dropValues = stage.getDropRate(categoryValue.categoryInfo.MainItem,isGlobal)
+                        for item,order in zip(categoryValue.categoryInfo.SubItem,categoryValue.categoryInfo.SubOrder):
                             dropValues += stage.getDropRate(item,isGlobal)/order
                         dropPerMin = dropValues/stage.minClearTime*120
                         toPrint += [
