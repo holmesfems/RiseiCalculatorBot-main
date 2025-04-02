@@ -443,7 +443,7 @@ async def event_prediction(inter:Interaction):
     await sendReplyToDiscord.followupToDiscord(inter,msg)
 
 @tree.command(
-    name="eventsearch bydate",
+    name="eventsearch_bydate",
     description= "特定の月で開催されたイベント情報を調べます"
 )
 @app_commands.describe(
