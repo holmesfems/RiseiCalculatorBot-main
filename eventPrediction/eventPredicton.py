@@ -42,6 +42,10 @@ class EventInfo:
         return datetime.fromtimestamp(self.rewardEndTime,tz = getnow.JST)
     
     @property
+    def isSideStory(self):
+        return self.type.startswith("TYPE_ACT")
+
+    @property
     def eventType(self):
         if(self.type == "CHECKIN_ONLY"):
             return "スタンプラリー"
@@ -51,7 +55,7 @@ class EventInfo:
             return "期間限定任務"
         elif(self.type == "LOGIN_ONLY"):
             return "ログインボーナス"
-        elif(self.type.startswith("TYPE_ACT")):
+        elif(self.isSideStory):
             return "サイドストーリー"
         elif(self.type == "MINISTORY"):
             return "オムニバス"
@@ -104,12 +108,13 @@ def getFutureEvents():
     return rcReply.RCReply(embbedTitle=title,embbedContents=msgChunks)
 
 #特定の月でなんのイベントがあったかを調べる
-def searchEventByStartDate(startYear:int|None, startMonth:int|None):
+def searchEventByStartDate(startYear:int|None, startMonth:int|None, sidestoryOnly:bool = True):
     __initIfNeed()
     now = getnow.getnow()
     if(startYear is None): startYear = now.year
     if(startMonth is None): startMonth = now.month
     filteredEvents = {key:value for key,value in eventInfoDict.items() if value.startTime_datetime.year == startYear and value.startTime_datetime.month == startMonth}
+    if(sidestoryOnly): filteredEvents = {key:value for key,value in filteredEvents.items() if value.isSideStory}
     sortedEvents = sorted([item for item in filteredEvents.values()], key=lambda x: x.startTime)
     title = f"イベント検索：{startYear}年{startMonth}月"
     msgChunks = []

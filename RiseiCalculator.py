@@ -448,17 +448,19 @@ async def event_prediction(inter:Interaction):
 )
 @app_commands.describe(
     start_year = "開催年",
-    start_month = "開催月"
+    start_month = "開催月",
+    sidestory_only = "サイドストーリーのみを表示"
 )
 @app_commands.choices(
     start_year = [Choice(name=str(i),value = i) for i in range(max(2020,getnow.getnow().year-19),getnow.getnow().year+1)],
     start_month = [Choice(name=str(i),value = i) for i in range(1,13)]
 )
-async def eventsearch_bydate(inter:Interaction,start_year:Choice[int],start_month:Choice[int]):
+async def eventsearch_bydate(inter:Interaction,start_year:Choice[int],start_month:Choice[int],sidestory_only:bool=True):
     start_year = safeCallChoiceVal(start_year)
     start_month = safeCallChoiceVal(start_month)
+    sidestory_only = safeCallChoiceVal(sidestory_only)
     await inter.response.defer(thinking=True)
-    msg = eventPredicton.searchEventByStartDate(start_year,start_month)
+    msg = eventPredicton.searchEventByStartDate(start_year,start_month,sidestory_only)
     await sendReplyToDiscord.followupToDiscord(inter,msg)
 
 @tasks.loop(time=datetime.time(hour=0, minute=0, tzinfo=JST))
