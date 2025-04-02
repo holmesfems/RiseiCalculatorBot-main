@@ -102,3 +102,21 @@ def getFutureEvents():
         for item in sortedFutureEvents:
             msgChunks.append(item.toStrBlock())
     return rcReply.RCReply(embbedTitle=title,embbedContents=msgChunks)
+
+#特定の月でなんのイベントがあったかを調べる
+def searchEventByStartDate(startYear:int|None, startMonth:int|None):
+    __initIfNeed()
+    now = getnow.getnow()
+    if(startYear is None): startYear = now.year
+    if(startMonth is None): startMonth = now.month
+    filteredEvents = {key:value for key,value in eventInfoDict.items() if value.startTime_datetime.year == startYear and value.startTime_datetime.month == startMonth}
+    sortedEvents = sorted([item for item in filteredEvents.values()], key=lambda x: x.startTime)
+    title = f"イベント検索：{startYear}年{startMonth}月"
+    msgChunks = []
+    if(not sortedEvents):
+        msgChunks.append("該当時期のイベントは見つかりませんでした")
+    else:
+        msgChunks.append("以下のイベントがヒットしました:")
+        for item in sortedEvents:
+            msgChunks.append(item.toStrBlock())
+    return rcReply.RCReply(embbedTitle=title,embbedContents=msgChunks)
