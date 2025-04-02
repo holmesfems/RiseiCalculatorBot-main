@@ -451,7 +451,7 @@ async def event_prediction(inter:Interaction):
     start_month = "開催月"
 )
 @app_commands.choices(
-    start_year = [Choice(name=str(i),value = i) for i in range((max(2020,getnow.getnow().year-19),getnow.getnow().year+1))],
+    start_year = [Choice(name=str(i),value = i) for i in range(max(2020,getnow.getnow().year-19),getnow.getnow().year+1)],
     start_month = [Choice(name=str(i),value = i) for i in range(1,13)]
 )
 async def eventsearch_bydate(inter:Interaction,start_year:Choice[int],start_month:Choice[int]):
