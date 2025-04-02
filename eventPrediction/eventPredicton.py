@@ -82,14 +82,23 @@ def __initIfNeed():
 def getFutureEvents():
     __initIfNeed()
     now = getnow.getnow()
-    futureEvents = {key:value for key,value in eventInfoDict.items() if value.startTime_datetime >= now}
-    sortedEvents = sorted([item for item in futureEvents.values()],key=lambda x: x.startTime)
     title = "イベント予測"
     msgChunks = []
-    if(not sortedEvents):
-        msgChunks.append("開催が確定されたイベントは現在ありません")
+    nowEvents = {key:value for key,value in eventInfoDict.items() if value.startTime_datetime <= now and value.endTime_datetime >= now}
+    sortedNowEvents = sorted([item for item in nowEvents.values()],key=lambda x: x.startTime)
+    if(not sortedNowEvents):
+        msgChunks.append("現在開催中のイベントはありません。\n")
+    else:
+        msgChunks.append("現在開催中のイベント：")
+        for item in sortedNowEvents:
+            msgChunks.append(item.toStrBlock())
+    msgChunks.append("\n")
+    futureEvents = {key:value for key,value in eventInfoDict.items() if value.startTime_datetime >= now}
+    sortedFutureEvents = sorted([item for item in futureEvents.values()],key=lambda x: x.startTime)
+    if(not sortedFutureEvents):
+        msgChunks.append("開催確定のイベントはまだありません。\n")
     else:
         msgChunks.append("イベント予測情報:")
-        for item in sortedEvents:
+        for item in sortedFutureEvents:
             msgChunks.append(item.toStrBlock())
     return rcReply.RCReply(embbedTitle=title,embbedContents=msgChunks)
