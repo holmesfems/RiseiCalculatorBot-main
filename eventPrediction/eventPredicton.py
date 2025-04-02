@@ -121,7 +121,7 @@ def searchEventByStartDate(startYear:int|None, startMonth:int|None, sidestoryOnl
     if(not sortedEvents):
         msgChunks.append("該当時期のイベントは見つかりませんでした")
     else:
-        msgChunks.append("以下のイベントがヒットしました:")
+        msgChunks.append("以下のイベントが見つかりました:")
         for item in sortedEvents:
             msgChunks.append(item.toStrBlock())
     return rcReply.RCReply(embbedTitle=title,embbedContents=msgChunks)
