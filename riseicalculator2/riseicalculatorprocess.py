@@ -1022,7 +1022,7 @@ class CalculatorManager:
         stagesToShow = CalculatorManager.filterStagesByShowMinTimes(stages,showMinTimes,isGlobal)
         
 
-        msgHeader = categoryValue["to_ja"]+ ": {2}価値(中級)={0:.3f}±{1:.3f}\n".format(riseiValues.getValueFromZH(categoryValue["MainItem"]),riseiValues.getStdDevFromZH(categoryValue["MainItem"]),str(mode))
+        msgHeader = categoryValue.categoryInfo.to_ja+ ": {2}価値(中級)={0:.3f}±{1:.3f}\n".format(riseiValues.getValueFromZH(categoryValue.categoryInfo.MainItem),riseiValues.getStdDevFromZH(categoryValue.categoryInfo.MainItem),str(mode))
         msgChunks = [msgHeader]
         
         #並び変え
@@ -1039,8 +1039,8 @@ class CalculatorManager:
                 ["理性消費       : {0}".format(stage.apCost)]
             ]
             if stage.minClearTime > 0:
-                dropValues = stage.getDropRate(categoryValue["MainItem"],isGlobal)
-                for item,order in zip(categoryValue["SubItem"],categoryValue["SubOrder"]):
+                dropValues = stage.getDropRate(categoryValue.categoryInfo.MainItem,isGlobal)
+                for item,order in zip(categoryValue.categoryInfo.SubItem,categoryValue.categoryInfo.SubOrder):
                     dropValues += stage.getDropRate(item,isGlobal)/order
                 dropPerMin = dropValues/stage.minClearTime*120
                 toPrint += [
@@ -1048,7 +1048,7 @@ class CalculatorManager:
                     ["分入手数(中級) : {0:.2f}".format(dropPerMin)],
                 ]
             toPrint += [
-                ["主素材効率     : {0:.1%}".format(stage.getPartialEfficiency(riseiValues,categoryValue["Items"]))],
+                ["主素材効率     : {0:.1%}".format(stage.getPartialEfficiency(riseiValues,categoryValue.categoryInfo.Items))],
                 ["99%信頼区間(3σ): {0:.1%}".format(calculator.getStageDev(stage,riseiValues)*3)],
                 ["昇進効率       : {0:.1%}".format(stage.getPartialEfficiency(riseiValues,getValueTarget(isGlobal)[4:]))],
                 ["試行数         : ",str(stage.maxTimes())],
@@ -1057,7 +1057,7 @@ class CalculatorManager:
             jsonForAI.append({
                 "stageName":stage.nameWithReplicate(),
                 "totalEfficiency":round(stage.getEfficiency(riseiValues),3),
-                "mainDropEfficiency":round(stage.getPartialEfficiency(riseiValues,categoryValue["Items"]),3),
+                "mainDropEfficiency":round(stage.getPartialEfficiency(riseiValues,categoryValue.categoryInfo.Items),3),
                 "sanityCost":stage.apCost,
                 "timeCost":round(stage.minClearTime/2.0,2),
                 "dropPerMinute": round(dropPerMin,2)
