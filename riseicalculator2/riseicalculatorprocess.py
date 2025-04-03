@@ -1018,7 +1018,7 @@ class CalculatorManager:
                 responseForAI=f"Error: Invalid Category: {targetCategory}"
             )
         title = "昇進素材検索"
-        stages = categoryValue.get("Stages",[])
+        stages = categoryValue.stageInstanses
         stagesToShow = CalculatorManager.filterStagesByShowMinTimes(stages,showMinTimes,isGlobal)
         
 
