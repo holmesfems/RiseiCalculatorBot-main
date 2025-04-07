@@ -430,6 +430,7 @@ class StageInfo:
         @dataclass
         class CategoryInstanse:
             categoryInfo: StageCategoryInfo
+            stageInstanses: List[StageItem] = field(init=False)
             def __post_init__(self2):
                 self2.stageInstanses = [self.mainCodeToStageDict[x] for x in self2.categoryInfo.Stages if x in self.mainCodeToStageDict]
 
