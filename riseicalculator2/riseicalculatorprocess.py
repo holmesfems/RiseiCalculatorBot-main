@@ -471,7 +471,7 @@ class StageInfo:
     def validBaseStages(self,validBaseMinTimes:int) -> List[StageItem]:
         return sum([self.categoryValidStages(category,validBaseMinTimes) for category in getStageCategoryDict(self.isGlobal).keys()],[])
 
-    def categoryValidStages(self,category:str,validBaseMinTimes:int)->List[StageItem]:
+    def categoryValidStages(self,category:str,validBaseMinTimes:int):
         allStageList:List[StageItem] = self.categoryInstanseDict[category].stageInstanses
         #新素材のステージの有効ステージが存在しない場合、validBaseMinTimesを無視する
         validStageList:List[StageItem] = [x for x in allStageList if x.maxTimes() >= validBaseMinTimes]
@@ -495,14 +495,15 @@ class StageInfo:
         maxCategories = self.stageToCategory(maxStage)
         return StageInfo.CategoryMaxEfficiencyItem(maxValue,maxStage,maxCategories)
 
-    def generateCategorySeed(self,validBaseMinTimes:int) -> Dict[str,StageItem]:
+    def generateCategorySeed(self,validBaseMinTimes:int) :
         ret:Dict[str,StageItem] = {}
-        for key in self.categoryInstanseDict.keys():
-            validStageList = self.categoryValidStages(key,validBaseMinTimes)
-            randomChoiced = random.choice(validStageList)
-            ret[key] = randomChoiced
-        if hasduplicates.has_duplicates(ret.values()):
-            return self.generateCategorySeed(validBaseMinTimes) #重複要素があればやり直し
+        while(True):
+            for key in self.categoryInstanseDict.keys():
+                validStageList = self.categoryValidStages(key,validBaseMinTimes)
+                randomChoiced = random.choice(validStageList)
+                ret[key] = randomChoiced
+            if not hasduplicates.has_duplicates(ret.values()):
+                break #重複要素があればやり直し
         return ret
 
     def __repr__(self) -> str:
