@@ -691,7 +691,7 @@ class Calculator:
         category: str
         stageItem: StageItem
         name: str = field(init=False)
-        def ___post_init__(self):
+        def __post_init__(self):
             self.name = categoryZHToJA(self.category,self.isGlobal) + self.stageItem.name
         def __repr__(self) -> str:
             return self.name # + ":" + str(self.stageItem.toDropArray(self.isGlobal))
