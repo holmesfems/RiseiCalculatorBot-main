@@ -44,6 +44,7 @@ new_zone:List[str] = [
     # 'permanent_sidestory_14_zone1', #LE
     # 'permanent_sidestory_15_zone1', #DV
     # 'permanent_sub_5_zone1', #CW
+    'main_15' #15章
 ]
 
 @dataclass
@@ -243,7 +244,6 @@ def getBufferedInfo(req:str,additional,force:bool):
     ret = __allBufferdInfo.get(req,None)
     if (ret is None):
         ret = get_json(req,additional)
-    if(not force):
         __allBufferdInfo[req] = ret
     return ret
 
