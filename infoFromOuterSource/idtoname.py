@@ -1,8 +1,9 @@
 import sys
 import yaml
 sys.path.append('../')
-from rcutils import netutil,strutil
+from rcutils import netutil,strutil,getnow
 from typing import Dict
+from datetime import datetime,timedelta
 import re
 
 get_json = netutil.get_json
@@ -220,6 +221,7 @@ class SkillIdToName:
             return {"name": self.name}
         
     __idToSkillItem:Dict[str,SkillItem] = {}
+    __lastUpdated:datetime = ...
 
     @staticmethod
     def init():
@@ -230,11 +232,16 @@ class SkillIdToName:
             if(jpValue):
                 value = jpValue
             SkillIdToName.__idToSkillItem[key] = SkillIdToName.SkillItem(value["levels"][-1])
+        SkillIdToName.__lastUpdated = getnow.getnow()
+
+    @staticmethod
+    def initIfNeed():
+        if(not SkillIdToName.__idToSkillItem or getnow.getnow() - SkillIdToName.__lastUpdated > timedelta(days=1)):
+            SkillIdToName.init()
 
     @staticmethod
     def getItem(id):
-        if(not SkillIdToName.__idToSkillItem):
-            SkillIdToName.init()
+        SkillIdToName.initIfNeed()
         return SkillIdToName.__idToSkillItem.get(id)
     
     @staticmethod
@@ -267,7 +274,7 @@ class StageIdToName:
             if(jpValue):
                 value = jpValue
             StageIdToName.__idToStr[key] = value["code"]
-    
+
     @staticmethod
     def getStr(id):
         if(not StageIdToName.__idToStr):
