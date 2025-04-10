@@ -59,9 +59,9 @@ class Formula:
     def __checkAndInit():
         if(not Formula.__idToFormula): Formula.init()
 
-    def getFormulaItem(idStr:float) -> FormulaItem:
+    def getFormulaItem(idStr:float) -> FormulaItem|None:
         Formula.__checkAndInit()
-        return Formula.__idToFormula.get(idStr)
+        return Formula.__idToFormula.get(idStr,None)
 
     def getFormulaArray(idStr:float) -> itemArray.ItemArray:
         if formula := Formula.getFormulaItem(idStr):

@@ -34,7 +34,7 @@ Item_rarity2:List[str] = [
 ]
 
 Item_rarity2_new:List[str] = [
-    
+    '类凝结核'
 ]
 
 Item_rarity3:List[str] = [
@@ -47,7 +47,7 @@ Item_rarity3:List[str] = [
 ]
 
 Item_rarity3_new:List[str] = [
-    
+    '手性屈光体'
 ]
 
 Item_rarity4:List[str] = [
@@ -55,7 +55,7 @@ Item_rarity4:List[str] = [
 ]
 
 Item_rarity4_new:List[str] = [
-    
+    '重相位对映体'
 ]
 
 ValueTarget:List[str] = [
@@ -84,7 +84,7 @@ ValueTarget:List[str] = [
 ]
 
 ValueTarget_new:List[str] = [
-    
+    '类凝结核','手性屈光体','重相位对映体'
 ]
 
 #契約賞金引換証
