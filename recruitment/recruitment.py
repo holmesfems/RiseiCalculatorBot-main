@@ -63,12 +63,12 @@ class PositionAndOtherTag(RecruitTag):
             return True
         return False
 
+@dataclasses.dataclass
 class Operator:
-    def __init__(self,operatorJson):
-        self.name = operatorJson["name"]
-        self.job = operatorJson["job"]
-        self.tags = operatorJson["tags"]
-        self.stars = int(operatorJson["stars"])
+    name:str
+    job:str
+    tags:List[str]
+    stars:int
 
     def __repr__(self):
         return "★{0}".format(self.stars)+self.name
@@ -85,12 +85,12 @@ def _parseDate(key:str) -> date:
 
 with open("./recruitment/recruitmentOperators.json","rb") as file:
     operatorDB = yaml.safe_load(file)
-    operators_JP = [Operator(item) for item in operatorDB["main"]]
-    operators_New = [Operator(item) for item in operatorDB["new"]]
-    futureSets = [FutureOperatorSet([Operator(item) for item in operatorDB[key]], _parseDate(key)) for key in operatorDB.keys() if key not in ["main","new"]]
+    operators_JP = [Operator(**item) for item in operatorDB["main"]]
+    operators_New = [Operator(**item) for item in operatorDB["new"]]
+    futureSets = [FutureOperatorSet([Operator(**item) for item in operatorDB[key]], _parseDate(key)) for key in operatorDB["future"]]
 
 def get_operators(glob:bool) -> List[Operator]:
-    ret = operators_JP
+    ret = operators_JP.copy()
     if(glob):
         now = getnow()
         nowDate = now.date()
@@ -103,7 +103,7 @@ def get_operators(glob:bool) -> List[Operator]:
                 if(nowTime.hour >= 16):
                     ret += operatorSet.operators
                 else: break
-            else:break
+            else: break
     else:
         for operatorSet in futureSets:
             ret += operatorSet.operators
