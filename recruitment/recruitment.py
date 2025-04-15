@@ -87,7 +87,7 @@ with open("./recruitment/recruitmentOperators.json","rb") as file:
     operatorDB = yaml.safe_load(file)
     operators_JP = [Operator(**item) for item in operatorDB["main"]]
     operators_New = [Operator(**item) for item in operatorDB["new"]]
-    futureSets = [FutureOperatorSet([Operator(**item) for item in operatorDB[key]], _parseDate(key)) for key in operatorDB["future"]]
+    operators_Future = [FutureOperatorSet([Operator(**item) for item in operatorDB[key]], _parseDate(key)) for key in operatorDB["future"]]
 
 def get_operators(glob:bool) -> List[Operator]:
     ret = operators_JP.copy()
@@ -95,7 +95,7 @@ def get_operators(glob:bool) -> List[Operator]:
         now = getnow()
         nowDate = now.date()
         nowTime = now.time()
-        for operatorSet in futureSets:
+        for operatorSet in operators_Future:
             if(nowDate > operatorSet.beginTime):
                 ret += operatorSet.operators
             if(nowDate == operatorSet.beginTime):
@@ -105,7 +105,7 @@ def get_operators(glob:bool) -> List[Operator]:
                 else: break
             else: break
     else:
-        for operatorSet in futureSets:
+        for operatorSet in operators_Future:
             ret += operatorSet.operators
         ret += operators_New
     return ret
