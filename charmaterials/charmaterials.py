@@ -370,7 +370,7 @@ class AllOperatorsInfo:
         def operatorNameIndex(self):
             return self.operatorName + f"(S{self.index})"
 
-    def getSortedSkillCostDict(self,star:int):
+    def getSortedSkillCostDict_Mainland(self,star:int):
         operatorCosts = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if value.stars==star}
         skillCosts:List[AllOperatorsInfo.SkillCostInfo] = []
         for operator in operatorCosts.values():
@@ -378,7 +378,7 @@ class AllOperatorsInfo:
             for skillName, skillCostList in operator.skills:
                 index+=1
                 skillCosts.append(AllOperatorsInfo.SkillCostInfo(skillName,operator.name,index,sum(skillCostList,ItemCost()),operator.skillIds[index-1]))
-        skillCosts.sort(key=lambda x:x.totalCost.toRiseiValue(),reverse=True)
+        skillCosts.sort(key=lambda x:x.totalCost.toRiseiValue(False),reverse=True)
         return skillCosts
 
 class OperatorCostsCalculator:
@@ -468,7 +468,7 @@ class OperatorCostsCalculator:
         #jsonForAI["totalIntermediateConvertion"] = r2Cost.itemArray.toNameCountDict()
 
         #ランキング
-        skillCostRanking = OperatorCostsCalculator.operatorInfo.getSortedSkillCostDict(costItem.stars)
+        skillCostRanking = OperatorCostsCalculator.operatorInfo.getSortedSkillCostDict_Mainland(costItem.stars)
         try: 
             nums = len(skillCostRanking)
             index = [item.key for item in skillCostRanking].index(costItem.skillIds[skillNum-1])
@@ -617,7 +617,7 @@ class OperatorCostsCalculator:
             )
 
     def getMasterCostStatistics(star:Literal[4,5,6]) -> RCReply:
-        skillCosts = OperatorCostsCalculator.operatorInfo.getSortedSkillCostDict(star)
+        skillCosts = OperatorCostsCalculator.operatorInfo.getSortedSkillCostDict_Mainland(star)
         skillNums = len(skillCosts)
         title = f"星{star}の特化統計情報"
         msgList = []
