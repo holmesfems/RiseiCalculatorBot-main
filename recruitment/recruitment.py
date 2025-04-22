@@ -81,13 +81,16 @@ class FutureOperatorSet:
     beginTime:date
     
 def _parseDate(key:str) -> date:
-    return date.fromisoformat(key)
+    year = int(key[:4])
+    month = int(key[4:6])
+    day = int(key[6:8])
+    return date(year,month,day)
 
 with open("./recruitment/recruitmentOperators.json","rb") as file:
     operatorDB = yaml.safe_load(file)
     operators_JP = [Operator(**item) for item in operatorDB["main"]]
     operators_New = [Operator(**item) for item in operatorDB["new"]]
-    operators_Future = [FutureOperatorSet([Operator(**item) for item in operatorDB[key]], _parseDate(key)) for key in operatorDB["future"]]
+    operators_Future = [FutureOperatorSet([Operator(**item) for item in operatorDB["future"][key]], _parseDate(key)) for key in operatorDB["future"]]
 
 def get_operators(glob:bool) -> List[Operator]:
     ret = operators_JP.copy()
@@ -98,12 +101,10 @@ def get_operators(glob:bool) -> List[Operator]:
         for operatorSet in operators_Future:
             if(nowDate > operatorSet.beginTime):
                 ret += operatorSet.operators
-            if(nowDate == operatorSet.beginTime):
+            elif(nowDate == operatorSet.beginTime):
                 #16時から実装する
                 if(nowTime.hour >= 16):
                     ret += operatorSet.operators
-                else: break
-            else: break
     else:
         for operatorSet in operators_Future:
             ret += operatorSet.operators
