@@ -245,12 +245,13 @@ async def updateRiseiCalculatorInstances():
     infoUpdator.initall()
 
 class RecruitView(discord.ui.View):
-    def __init__(self,timeout=180):
+    def __init__(self,is_global=True,timeout=180):
         super().__init__(timeout=timeout)
         self.jobAndPositionTags = []
         self.eliteTags = []
         self.otherTags = []
-    
+        self.isglobal = is_global
+
     @discord.ui.select(
         cls=discord.ui.Select,
         placeholder="職&位置タグ選択",
@@ -297,7 +298,7 @@ class RecruitView(discord.ui.View):
         selectedList = self.jobAndPositionTags+self.eliteTags+self.otherTags
         if(selectedList):
             await inter.response.defer(thinking=True)
-            msg = recruitment.recruitDoProcess(selectedList,minstar)
+            msg = recruitment.recruitDoProcess(selectedList,minstar,self.isglobal)
             await sendReplyToDiscord.followupToDiscord(inter,msg)
         else:
             await inter.response.defer()
@@ -307,8 +308,12 @@ class RecruitView(discord.ui.View):
     name = "recruitsim",
     description = "公開求人検索 UI画面が出るのでそのままお使いください",
 )
-async def recruitsim(inter:Interaction):
-    await inter.response.send_message(view=RecruitView(),ephemeral=True,delete_after=180.0)
+@app_commands.describe(
+    is_global = "True:グローバル版, False:大陸版"
+)
+async def recruitsim(inter:Interaction,is_global:bool = True):
+    is_global = safeCallChoiceVal(is_global)
+    await inter.response.send_message(view=RecruitView(is_global=is_global),ephemeral=True,delete_after=180.0)
     return
 
 @tree.command(
