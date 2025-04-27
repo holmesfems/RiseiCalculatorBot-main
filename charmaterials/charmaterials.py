@@ -267,7 +267,7 @@ class OperatorCosts:
         return self.name + ":" + str(self.allCost())
     
     def isRecent(self):
-        return (not self.isCNOnly()) and (self.cnName in __customZhToJaDict)
+        return (not self.isCNOnly()) and (self.cnName in __customZhToJaDict.keys())
 
 class AllOperatorsInfo:
     def __init__(self):
