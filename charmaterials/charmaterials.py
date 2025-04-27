@@ -679,7 +679,6 @@ class OperatorCostsCalculator:
             elete_cost = list(eleteCostDict.values())[index_Elete]
             msg += f"昇進消費理性: {elete_cost:.2f}\n"
             msg += f"順位: {index_Elete + 1}/{totalEleteNum}\n"
-            msg += "\n"
             masterCostDict = masterCostDicts.get(value.stars)
             if(not masterCostDict):
                 masterCostDict = OperatorCostsCalculator.operatorInfo.getSortedSkillCostDict(value.stars)
