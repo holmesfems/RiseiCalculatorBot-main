@@ -383,6 +383,9 @@ class AllOperatorsInfo:
             return self.operator.isCNOnly()
         def operatorNameIndex(self):
             return self.operatorName + f"(S{self.index})"
+        
+        def totalRisei(self):
+            return self.totalCost.toRiseiValue(not self.isCNOnly)
 
     def getSortedSkillCostDict(self,star:int):
         operatorCosts = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if value.stars==star}
@@ -392,7 +395,7 @@ class AllOperatorsInfo:
             for skillName, skillCostList in operator.skills:
                 index+=1
                 skillCosts.append(AllOperatorsInfo.SkillCostInfo(skillName,operator,index,sum(skillCostList,ItemCost()),(operator.id,operator.skillIds[index-1])))
-        skillCosts.sort(key=lambda x:x.totalCost.toRiseiValue(not x.isCNOnly),reverse=True)
+        skillCosts.sort(key=lambda x:x.totalRisei(),reverse=True)
         return {item.key: item for item in skillCosts}
 
 class OperatorCostsCalculator:
@@ -638,26 +641,26 @@ class OperatorCostsCalculator:
         msgList = []
         msgList.append(f"総スキル数: {skillNums}\n")
         msgList.append(f"一番消費が重い特化スキル:\n{skillCosts[0].operatorNameIndex()}\n" + skillCosts[0].totalCost.toStrBlock())
-        msgList.append(f"合計理性価値: {skillCosts[0].totalCost.toRiseiValue(False):.2f}\n")
+        msgList.append(f"合計理性価値: {skillCosts[0].totalRisei():.2f}\n")
         msgList.append("消費が重いスキルTop10:")
         msg = "```\n"
         for index in range(10):
             if(index >= skillNums):break
             skillCostItem = skillCosts[index]
-            msg += f"{index+1}.{skillCostItem.operatorNameIndex()}: {skillCostItem.totalCost.toRiseiValue(False):.2f}\n"
+            msg += f"{index+1}.{skillCostItem.operatorNameIndex()}: {skillCostItem.totalRisei():.2f}\n"
         msg += "```\n"
         msgList.append(msg)
         msgList.append(f"一番消費が軽い特化スキル:\n{skillCosts[skillNums-1].operatorNameIndex()}\n" + skillCosts[skillNums-1].totalCost.toStrBlock())
-        msgList.append(f"合計理性価値: {skillCosts[skillNums-1].totalCost.toRiseiValue(False):.2f}\n")
+        msgList.append(f"合計理性価値: {skillCosts[skillNums-1].totalRisei():.2f}\n")
         msgList.append("消費が軽いスキルTop10:")
         msg = "```\n"
         for index in range(skillNums-10,skillNums):
             if(index < 0):continue
             skillCostItem = skillCosts[index]
-            msg += f"{index+1}.{skillCostItem.operatorNameIndex()}: {skillCostItem.totalCost.toRiseiValue(False):.2f}\n"
+            msg += f"{index+1}.{skillCostItem.operatorNameIndex()}: {skillCostItem.totalRisei():.2f}\n"
         msg += "```\n"
         msgList.append(msg)
-        msgList.append(f"平均理性価値: {sum(skillCost.totalCost.toRiseiValue(False) for skillCost in skillCosts)/skillNums:.2f}")
+        msgList.append(f"平均理性価値: {sum(skillCost.totalRisei() for skillCost in skillCosts)/skillNums:.2f}")
 
         return RCReply(embbedTitle=title,embbedContents=msgList)
     
@@ -671,7 +674,7 @@ class OperatorCostsCalculator:
             if(not value.operator.isRecent()): continue
             name = value.operatorNameIndex()
             #print(name,star5Operators[key].totalPhaseCost())
-            riseiValue = value.totalCost.toRiseiValue_OnlyValueTarget(not value.isCNOnly)
+            riseiValue = value.totalRisei()
             #phaseCost = star5Operators[key].totalPhaseCost()
             toPrint.append(f"{index+1}. {name} : {riseiValue:.3f}")
             if(len(toPrint)% 50 == 0):
