@@ -398,7 +398,7 @@ class AllOperatorsInfo:
             for skillName, skillCostList in operator.skills:
                 index+=1
                 skillCosts.append(AllOperatorsInfo.SkillCostInfo(skillName,operator,index,sum(skillCostList,ItemCost()),(operator.id,operator.skillIds[index-1])))
-        skillCosts.sort(key=lambda x:x.totalCost.toRiseiValue(not x.isCNOnly),reverse=True)
+        skillCosts.sort(key=lambda x:x.totalCost.toRiseiValue(not x.isCNOnly))
         return {item.key: item for item in skillCosts}
 
 class OperatorCostsCalculator:
