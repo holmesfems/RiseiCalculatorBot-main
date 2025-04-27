@@ -408,6 +408,7 @@ async def operator_name_autocomplete_formodule(inter:Interaction,current:str)->L
         Choice(name="星6特化統計",value="masterstar6"),
         Choice(name="星5特化統計",value="masterstar5"),
         Choice(name="星4特化統計",value="masterstar4"),
+        Choice(name="直近実装昇進特化統計", value="recentinfo")
     ]
 )
 async def operatorcostlist(inter:Interaction,selection:Choice[str]):
