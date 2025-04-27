@@ -267,7 +267,7 @@ class OperatorCosts:
         return self.name + ":" + str(self.allCost())
     
     def isRecent(self):
-        return (not self.isCNOnly()) and (self.cnName in _customZhToJaDict.keys())
+        return (self.isCNOnly()) or (self.cnName in _customZhToJaDict.keys())
 
 class AllOperatorsInfo:
     def __init__(self):
@@ -369,14 +369,21 @@ class AllOperatorsInfo:
         sortedValueDict = {key:value for key,value in sorted(riseiValueDict.items(),key=lambda x:x[1],reverse=True)}
         return {operatorCosts[key].name:value for key,value in sortedValueDict.items()}
     
+    def getSortedCostDict_ByEliteCost(self,star:int):
+        operatorCosts = {key:value for key,value in self.getAllCostItems().items() if value.stars == star and not value.isPatch}
+        sortedDict = {key:value for key,value in sorted(operatorCosts.items(), key=lambda x: x[1].totalPhaseCost().toRiseiValue_OnlyValueTarget(not x[1].isCNOnly()))}
+        return sortedDict
+    
     @dataclasses.dataclass
     class SkillCostInfo:
         skillName: str
-        operatorName: str
+        operator: OperatorCosts
         index: int
         totalCost: ItemCost
-        key:str
-        isCNOnly:bool
+        key:Tuple[str,str]
+        @property
+        def operatorName(self):
+            return self.operator.name
         def operatorNameIndex(self):
             return self.operatorName + f"(S{self.index})"
 
@@ -387,7 +394,7 @@ class AllOperatorsInfo:
             index = 0
             for skillName, skillCostList in operator.skills:
                 index+=1
-                skillCosts.append(AllOperatorsInfo.SkillCostInfo(skillName,operator.name,index,sum(skillCostList,ItemCost()),f"{operator.id}_{operator.skillIds[index-1]}",operator.isCNOnly()))
+                skillCosts.append(AllOperatorsInfo.SkillCostInfo(skillName,operator,index,sum(skillCostList,ItemCost()),(operator.id,operator.skillIds[index-1])))
         skillCosts.sort(key=lambda x:x.totalCost.toRiseiValue(not x.isCNOnly),reverse=True)
         return {item.key: item for item in skillCosts}
 
@@ -401,7 +408,6 @@ class OperatorCostsCalculator:
         MASTERSTAR6 = enum.auto()
         MASTERSTAR5 = enum.auto()
         MASTERSTAR4 = enum.auto()
-        RECENTINFO = enum.auto()
         
     operatorInfo = AllOperatorsInfo()
 
@@ -482,7 +488,7 @@ class OperatorCostsCalculator:
         skillCostRanking = OperatorCostsCalculator.operatorInfo.getSortedSkillCostDict(costItem.stars)
         try: 
             nums = len(skillCostRanking)
-            index = list(skillCostRanking.keys()).index(f"{costItem.name}_{costItem.skillIds[skillNum-1]}")
+            index = list(skillCostRanking.keys()).index((costItem.id,costItem.skillIds[skillNum-1]))
             msgList.append(f"星{costItem.stars}スキル{nums}個中、第{index+1}位の消費です")
 
         except:
@@ -527,45 +533,45 @@ class OperatorCostsCalculator:
             responseForAI=str(skillItem.jsonForAI())
         )
 
-    def operatorCostList(selection:CostListSelection) -> RCReply:
+    def operatorCostList(selection:CostListSelection, onlyRecent:bool) -> RCReply:
         #OpenAIから呼び出す予定は現状なし、responseForAIは空欄にする
-        def printCostRanking(sortedValueDict):
-            headerMsg = "SoCは以下の計算に含まれません:"
+        def printCostRanking(sortedCostDict:dict[str,OperatorCosts]):
+            headerMsg = f"オペレーター総数:{len(sortedCostDict)}\nSoCは以下の計算に含まれません:"
             msgList = [headerMsg]
             toPrint = []
-            for index,(key,value) in enumerate(sortedValueDict.items()):
-
-                name = key
+            for index,(key,value) in enumerate(sortedCostDict.items()):
+                if(onlyRecent and not value.isRecent()): continue
+                name = value.name
                 #print(name,star5Operators[key].totalPhaseCost())
-                riseiValue = value
+                riseiValue = value.totalPhaseCost().toRiseiValue_OnlyValueTarget(not value.isCNOnly())
                 #phaseCost = star5Operators[key].totalPhaseCost()
                 toPrint.append(f"{index+1}. {name} : {riseiValue:.3f}")
-                if((index + 1)% 50 == 0):
+                if(len(toPrint)% 50 == 0):
                     msgList.append(CalculatorManager.dumpToPrint(toPrint))
                     toPrint = []
             if(toPrint):
                 msgList.append(CalculatorManager.dumpToPrint(toPrint))
             return msgList
         if(selection is OperatorCostsCalculator.CostListSelection.STAR4ELITE):
-            sortedValueDict = OperatorCostsCalculator.operatorInfo.getSortedEliteCostDict(4)
+            sortedCostDict = OperatorCostsCalculator.operatorInfo.getSortedCostDict_ByEliteCost(4)
             title = "★4昇進素材価値表"
             return RCReply(
                 embbedTitle=title,
-                embbedContents=printCostRanking(sortedValueDict)
+                embbedContents=printCostRanking(sortedCostDict)
             )
         elif(selection is OperatorCostsCalculator.CostListSelection.STAR5ELITE):
-            sortedValueDict = OperatorCostsCalculator.operatorInfo.getSortedEliteCostDict(5)
+            sortedCostDict = OperatorCostsCalculator.operatorInfo.getSortedCostDict_ByEliteCost(5)
             title = "★5昇進素材価値表"
             return RCReply(
                 embbedTitle=title,
-                embbedContents=printCostRanking(sortedValueDict)
+                embbedContents=printCostRanking(sortedCostDict)
             )
         elif(selection is OperatorCostsCalculator.CostListSelection.STAR6ELITE):
-            sortedValueDict = OperatorCostsCalculator.operatorInfo.getSortedEliteCostDict(6)
+            sortedCostDict = OperatorCostsCalculator.operatorInfo.getSortedCostDict_ByEliteCost(6)
             title = "★6昇進素材価値表"
             return RCReply(
                 embbedTitle=title,
-                embbedContents=printCostRanking(sortedValueDict)
+                embbedContents=printCostRanking(sortedCostDict)
             )
         
         elif(selection is OperatorCostsCalculator.CostListSelection.COSTOFCNONLY):
@@ -616,20 +622,19 @@ class OperatorCostsCalculator:
                 embbedContents=msgList
             )
         elif(selection is OperatorCostsCalculator.CostListSelection.MASTERSTAR6):
-            return OperatorCostsCalculator.getMasterCostStatistics(6)
+            return OperatorCostsCalculator.getMasterCostStatistics(6,onlyRecent)
         elif(selection is OperatorCostsCalculator.CostListSelection.MASTERSTAR5):
-            return OperatorCostsCalculator.getMasterCostStatistics(5)
+            return OperatorCostsCalculator.getMasterCostStatistics(5,onlyRecent)
         elif(selection is OperatorCostsCalculator.CostListSelection.MASTERSTAR4):
-            return OperatorCostsCalculator.getMasterCostStatistics(4)
-        elif(selection is OperatorCostsCalculator.CostListSelection.RECENTINFO):
-            return OperatorCostsCalculator.getRecentEleteMaster()
+            return OperatorCostsCalculator.getMasterCostStatistics(4,onlyRecent)
         else:
             return RCReply(
                 embbedTitle="エラー",
                 embbedContents=["未知のコマンド:" + str(selection)]
             )
 
-    def getMasterCostStatistics(star:Literal[4,5,6]) -> RCReply:
+    def getMasterCostStatistics(star:Literal[4,5,6],onlyRecent:bool) -> RCReply:
+        if(onlyRecent): return OperatorCostsCalculator.getMasterCostStatistics_OnlyRecent(star)
         skillCosts = list(OperatorCostsCalculator.operatorInfo.getSortedSkillCostDict(star).values())
         skillNums = len(skillCosts)
         title = f"星{star}の特化統計情報"
@@ -659,38 +664,27 @@ class OperatorCostsCalculator:
 
         return RCReply(embbedTitle=title,embbedContents=msgList)
     
-    def getRecentEleteMaster() -> RCReply:
-        recentOperators = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if value.isRecent()}
-        title = "直近実装消費検索"
-        msgList = []
-        eleteCostDicts = {}
-        masterCostDicts = {}
-        if(len(recentOperators) == 0):
-            msgList.append("直近実装のオペレーターは存在しません")
-            return RCReply(embbedContents=msgList,embbedTitle=title)
-        for key,value in recentOperators.items():
-            eleteCostDict = eleteCostDicts.get(value.stars)
-            msg = f"{value.name}:\n```\n"
-            if(not eleteCostDict):
-                eleteCostDict = OperatorCostsCalculator.operatorInfo.getSortedEliteCostDict(value.stars)
-                eleteCostDicts[value.stars] = eleteCostDict
-            index_Elete = list(eleteCostDict.keys()).index(value.name)
-            totalEleteNum = len(eleteCostDict)
-            elete_cost = list(eleteCostDict.values())[index_Elete]
-            msg += f"昇進消費理性: {elete_cost:.2f}\n"
-            msg += f"順位: {index_Elete + 1}/{totalEleteNum}\n"
-            masterCostDict = masterCostDicts.get(value.stars)
-            if(not masterCostDict):
-                masterCostDict = OperatorCostsCalculator.operatorInfo.getSortedSkillCostDict(value.stars)
-                masterCostDicts[value.stars] = masterCostDict
-            totalSkillNum = len(masterCostDict)
-            for index, skillId in enumerate(value.skillIds):
-                index_Master = list(masterCostDict.keys()).index(f"{value.id}_{skillId}")
-                msg += f"S{index+1}特化理性: {masterCostDict.get(f'{value.id}_{skillId}').totalCost.toRiseiValue(not value.isCNOnly()):.2f}\n"
-                msg += f"順位: {index_Master+1}/{totalSkillNum}\n"
-            msg += "```"
-            msgList.append(msg)
+    def getMasterCostStatistics_OnlyRecent(star:Literal[4,5,6]) -> RCReply:
+        skillCosts = OperatorCostsCalculator.operatorInfo.getSortedSkillCostDict(star)
+        skillNums = len(skillCosts)
+        title = f"星{star}の特化統計情報"
+        msgList = [f"スキル総数: {skillNums}"]
+        toPrint = []
+        for index,(key,value) in enumerate(skillCosts.items()):
+            if(not value.operator.isRecent()): continue
+            name = value.operatorNameIndex()
+            #print(name,star5Operators[key].totalPhaseCost())
+            riseiValue = value.totalCost.toRiseiValue_OnlyValueTarget(not value.operator.isCNOnly())
+            #phaseCost = star5Operators[key].totalPhaseCost()
+            toPrint.append(f"{index+1}. {name} : {riseiValue:.3f}")
+            if(len(toPrint)% 50 == 0):
+                msgList.append(CalculatorManager.dumpToPrint(toPrint))
+                toPrint = []
+        if(toPrint):
+            msgList.append(CalculatorManager.dumpToPrint(toPrint))
         return RCReply(embbedTitle=title,embbedContents=msgList)
+
+
 
     def autoCompleteForEliteCost(name:str,limit:int = 25) -> List[Tuple[str,str]]:
         return [(value.name,value.name) for value in OperatorCostsCalculator.operatorInfo.operatorDict.values() if name in value.name and value.stars>=4 and not value.isPatch][:limit]
@@ -745,8 +739,8 @@ class OperatorCostsCalculator:
         msgList.append(headerMsg + blockMsg)
 
         if(not costItem.isPatch and (costItem.stars == 5 or costItem.stars == 6)):
-            sortedValues = OperatorCostsCalculator.operatorInfo.getSortedEliteCostDict(costItem.stars)
-            index = list(sortedValues.keys()).index(costItem.name)
+            sortedValues = OperatorCostsCalculator.operatorInfo.getSortedCostDict_ByEliteCost(costItem.stars)
+            index = list(sortedValues.keys()).index(costItem.id)
             nums = len(sortedValues)
             msgList.append(f"星{costItem.stars}オペレーター{nums}名中、第{index+1}位の消費です")
 

@@ -396,7 +396,8 @@ async def operator_name_autocomplete_formodule(inter:Interaction,current:str)->L
     description="オペレーター消費素材の、いくつか役立つリストを出力します。"
 )
 @app_commands.describe(
-    selection = "表示するリスト選択"
+    selection = "表示するリスト選択",
+    only_recent = "直近実装/将来実装オペレータのみ表示(一部リストに有効)"
 )
 @app_commands.choices(
     selection = [
@@ -408,14 +409,14 @@ async def operator_name_autocomplete_formodule(inter:Interaction,current:str)->L
         Choice(name="星6特化統計",value="masterstar6"),
         Choice(name="星5特化統計",value="masterstar5"),
         Choice(name="星4特化統計",value="masterstar4"),
-        Choice(name="直近実装昇進特化統計", value="recentinfo")
     ]
 )
-async def operatorcostlist(inter:Interaction,selection:Choice[str]):
+async def operatorcostlist(inter:Interaction,selection:Choice[str],only_recent:bool):
     selection = safeCallChoiceVal(selection)
     selection = OperatorCostsCalculator.CostListSelection(selection)
+    only_recent = safeCallChoiceVal(only_recent)
     await inter.response.defer(thinking=True)
-    msg = OperatorCostsCalculator.operatorCostList(selection)
+    msg = OperatorCostsCalculator.operatorCostList(selection,only_recent)
     await sendReplyToDiscord.followupToDiscord(inter,msg)
 
 @tree.command(
