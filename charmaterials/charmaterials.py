@@ -37,7 +37,7 @@ jobIdToName:Dict[str,str] = {
 }
 
 with open("charmaterials/customZhToJa.yaml","rb") as f:
-    __customZhToJaDict:Dict[str,str] = yaml.safe_load(f)
+    _customZhToJaDict:Dict[str,str] = yaml.safe_load(f)
 
 class ItemCost:
     def __init__(self,valueList:List[Dict]=[]):
@@ -267,8 +267,7 @@ class OperatorCosts:
         return self.name + ":" + str(self.allCost())
     
     def isRecent(self):
-        print(self.cnName)
-        return (not self.isCNOnly()) and (self.cnName in __customZhToJaDict.keys())
+        return (not self.isCNOnly()) and (self.cnName in _customZhToJaDict.keys())
 
 class AllOperatorsInfo:
     def __init__(self):
@@ -304,7 +303,7 @@ class AllOperatorsInfo:
                     value["cnName"] = cnName
                 else:
                     value["cnOnly"] = True
-                    jpName = __customZhToJaDict.get(value["name"],None)
+                    jpName = _customZhToJaDict.get(value["name"],None)
                     value["cnName"] = value["name"]
                     if(jpName):
                         cnNameToJaName[value["name"]] = jpName
@@ -322,8 +321,8 @@ class AllOperatorsInfo:
                 candidate = [key for key,value in patchKeyCN.items() if patchKey in value["tmplIds"]]
                 if(candidate): 
                     operator = operatorDict.get(candidate[0])
-                    if(operator): return operator.name
-                return ""
+                    if(operator): return (operator.name, operator.cnName)
+                return ("","")
             for key,value in patchInfoCN.items():
                 #今は前衛アーミヤ一人だけ、今後追加されたらまた調整する必要があるかも
                 #医療アーミヤも追加されました 2024/05/01
@@ -333,7 +332,9 @@ class AllOperatorsInfo:
                     value["cnOnly"] = False
                 else:
                     value["cnOnly"] = True
-                value["name"] = originalOperatorName(key) + "({0})".format(jobIdToName[value["profession"]])
+                originalName, originalCNName = originalOperatorName(key)
+                value["name"] = originalName + "({0})".format(jobIdToName[value["profession"]])
+                value["cnName"] = originalCNName + "({0})".format(jobIdToName[value["profession"]])
                 value["isPatch"] = True
                 operatorDict[key] = OperatorCosts(key,value)
                 nameToId[value["name"]] = key
@@ -351,7 +352,7 @@ class AllOperatorsInfo:
             self.nameToId = nameToId
             self.cnNameToJaName = cnNameToJaName
         except Exception as e:
-            print(e)
+            print(f"error occured in alloperatorInfo.init: {e}")
     
     def getOperatorNames(self):
         return self.nameToId.keys()
@@ -681,13 +682,13 @@ class OperatorCostsCalculator:
             msg += f"昇進必要理性: {elete_cost:.2f}\n"
             msg += f"昇進理性順位: {index_Elete + 1} / {totalEleteNum}\n"
             masterCostDict = masterCostDicts.get(value.stars)
-            totalSkillNum = len(masterCostDict)
             if(not masterCostDict):
                 masterCostDict = OperatorCostsCalculator.operatorInfo.getSortedSkillCostDict(value.stars)
                 masterCostDicts[value.stars] = masterCostDict
+            totalSkillNum = len(masterCostDict)
             for index, skillId in enumerate(value.skillIds):
                 index_Master = list(masterCostDict.keys()).index(skillId)
-                msg += f"S{index+1}特化必要理性: {masterCostDict.get(skillId).totalCost.toRiseiValue(not value.isCNOnly())}\n"
+                msg += f"S{index+1}特化必要理性: {masterCostDict.get(skillId).totalCost.toRiseiValue(not value.isCNOnly()):.2f}\n"
                 msg += f"特化理性順位: {index_Master+1} / {totalSkillNum}\n"
             msg += "```"
             msgList.append(msg)
