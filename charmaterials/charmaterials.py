@@ -384,6 +384,9 @@ class AllOperatorsInfo:
         @property
         def operatorName(self):
             return self.operator.name
+        @property
+        def isCNOnly(self):
+            return self.operator.isCNOnly()
         def operatorNameIndex(self):
             return self.operatorName + f"(S{self.index})"
 
@@ -674,7 +677,7 @@ class OperatorCostsCalculator:
             if(not value.operator.isRecent()): continue
             name = value.operatorNameIndex()
             #print(name,star5Operators[key].totalPhaseCost())
-            riseiValue = value.totalCost.toRiseiValue_OnlyValueTarget(not value.operator.isCNOnly())
+            riseiValue = value.totalCost.toRiseiValue_OnlyValueTarget(not value.isCNOnly)
             #phaseCost = star5Operators[key].totalPhaseCost()
             toPrint.append(f"{index+1}. {name} : {riseiValue:.3f}")
             if(len(toPrint)% 50 == 0):

@@ -411,7 +411,7 @@ async def operator_name_autocomplete_formodule(inter:Interaction,current:str)->L
         Choice(name="星4特化統計",value="masterstar4"),
     ]
 )
-async def operatorcostlist(inter:Interaction,selection:Choice[str],only_recent:bool):
+async def operatorcostlist(inter:Interaction,selection:Choice[str],only_recent:bool=False):
     selection = safeCallChoiceVal(selection)
     selection = OperatorCostsCalculator.CostListSelection(selection)
     only_recent = safeCallChoiceVal(only_recent)
