@@ -388,7 +388,6 @@ class AllOperatorsInfo:
             for skillName, skillCostList in operator.skills:
                 index+=1
                 skillCosts.append(AllOperatorsInfo.SkillCostInfo(skillName,operator.name,index,sum(skillCostList,ItemCost()),f"{operator.id}_{operator.skillIds[index-1]}",operator.isCNOnly()))
-        print(len(skillCosts))
         skillCosts.sort(key=lambda x:x.totalCost.toRiseiValue(not x.isCNOnly),reverse=True)
         return {item.key: item for item in skillCosts}
 
@@ -689,7 +688,7 @@ class OperatorCostsCalculator:
             for index, skillId in enumerate(value.skillIds):
                 index_Master = list(masterCostDict.keys()).index(f"{value.id}_{skillId}")
                 msg += f"S{index+1}特化必要理性: {masterCostDict.get(f'{value.id}_{skillId}').totalCost.toRiseiValue(not value.isCNOnly()):.2f}\n"
-                msg += f"特化理性順位: {index_Master+1}/{totalSkillNum}\n"
+                msg += f"特化理性順位: {index_Master+1}/{totalSkillNum}\n\n"
             msg += "```"
             msgList.append(msg)
         return RCReply(embbedTitle=title,embbedContents=msgList)
