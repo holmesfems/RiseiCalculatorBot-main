@@ -661,7 +661,7 @@ class OperatorCostsCalculator:
     
     def getRecentEleteMaster() -> RCReply:
         recentOperators = {key:value for key,value in OperatorCostsCalculator.operatorInfo.getAllCostItems().items() if value.isRecent()}
-        title = "直近実装昇進検索"
+        title = "直近実装消費検索"
         msgList = []
         eleteCostDicts = {}
         masterCostDicts = {}
@@ -677,8 +677,8 @@ class OperatorCostsCalculator:
             index_Elete = list(eleteCostDict.keys()).index(value.name)
             totalEleteNum = len(eleteCostDict)
             elete_cost = list(eleteCostDict.values())[index_Elete]
-            msg += f"昇進必要理性: {elete_cost:.2f}\n"
-            msg += f"昇進理性順位: {index_Elete + 1}/{totalEleteNum}\n"
+            msg += f"昇進消費理性: {elete_cost:.2f}\n"
+            msg += f"順位: {index_Elete + 1}/{totalEleteNum}\n"
             msg += "\n"
             masterCostDict = masterCostDicts.get(value.stars)
             if(not masterCostDict):
@@ -687,8 +687,8 @@ class OperatorCostsCalculator:
             totalSkillNum = len(masterCostDict)
             for index, skillId in enumerate(value.skillIds):
                 index_Master = list(masterCostDict.keys()).index(f"{value.id}_{skillId}")
-                msg += f"S{index+1}特化必要理性: {masterCostDict.get(f'{value.id}_{skillId}').totalCost.toRiseiValue(not value.isCNOnly()):.2f}\n"
-                msg += f"特化理性順位: {index_Master+1}/{totalSkillNum}\n\n"
+                msg += f"S{index+1}特化理性: {masterCostDict.get(f'{value.id}_{skillId}').totalCost.toRiseiValue(not value.isCNOnly()):.2f}\n"
+                msg += f"順位: {index_Master+1}/{totalSkillNum}\n"
             msg += "```"
             msgList.append(msg)
         return RCReply(embbedTitle=title,embbedContents=msgList)
