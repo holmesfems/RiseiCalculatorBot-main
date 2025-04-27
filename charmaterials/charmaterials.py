@@ -363,15 +363,9 @@ class AllOperatorsInfo:
     def getAllCostItems(self)->Dict[str,OperatorCosts]:
         return self.operatorDict.copy()
     
-    def getSortedEliteCostDict(self,star:int):
-        operatorCosts = {key:value for key,value in self.getAllCostItems().items() if value.stars == star and not value.isPatch}
-        riseiValueDict = {key:value.totalPhaseCost().toRiseiValue_OnlyValueTarget(not value.isCNOnly()) for key,value in operatorCosts.items()}
-        sortedValueDict = {key:value for key,value in sorted(riseiValueDict.items(),key=lambda x:x[1],reverse=True)}
-        return {operatorCosts[key].name:value for key,value in sortedValueDict.items()}
-    
     def getSortedCostDict_ByEliteCost(self,star:int):
         operatorCosts = {key:value for key,value in self.getAllCostItems().items() if value.stars == star and not value.isPatch}
-        sortedDict = {key:value for key,value in sorted(operatorCosts.items(), key=lambda x: x[1].totalPhaseCost().toRiseiValue_OnlyValueTarget(not x[1].isCNOnly()))}
+        sortedDict = {key:value for key,value in sorted(operatorCosts.items(), key=lambda x: x[1].totalPhaseCost().toRiseiValue_OnlyValueTarget(not x[1].isCNOnly()),reverse=True)}
         return sortedDict
     
     @dataclasses.dataclass
@@ -398,7 +392,7 @@ class AllOperatorsInfo:
             for skillName, skillCostList in operator.skills:
                 index+=1
                 skillCosts.append(AllOperatorsInfo.SkillCostInfo(skillName,operator,index,sum(skillCostList,ItemCost()),(operator.id,operator.skillIds[index-1])))
-        skillCosts.sort(key=lambda x:x.totalCost.toRiseiValue(not x.isCNOnly))
+        skillCosts.sort(key=lambda x:x.totalCost.toRiseiValue(not x.isCNOnly),reverse=True)
         return {item.key: item for item in skillCosts}
 
 class OperatorCostsCalculator:
