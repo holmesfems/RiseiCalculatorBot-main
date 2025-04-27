@@ -284,8 +284,6 @@ class AllOperatorsInfo:
             operatorDict:Dict[str,OperatorCosts] = {}
             nameToId:Dict[str,str] = {}
             cnNameToJaName:Dict[str,str] = {}
-            
-
             for key,value in allInfoCN.items():
                 keyRegex = r"([^_]+)_(\d+)_([^_]+)"
                 #print(key)
@@ -389,9 +387,10 @@ class AllOperatorsInfo:
             index = 0
             for skillName, skillCostList in operator.skills:
                 index+=1
-                skillCosts.append(AllOperatorsInfo.SkillCostInfo(skillName,operator.name,index,sum(skillCostList,ItemCost()),operator.skillIds[index-1],operator.isCNOnly()))
+                skillCosts.append(AllOperatorsInfo.SkillCostInfo(skillName,operator.name,index,sum(skillCostList,ItemCost()),f"{operator.id}_{operator.skillIds[index-1]}",operator.isCNOnly()))
+        print(len(skillCosts))
         skillCosts.sort(key=lambda x:x.totalCost.toRiseiValue(not x.isCNOnly),reverse=True)
-        return {item.key:item for item in skillCosts}
+        return {item.key: item for item in skillCosts}
 
 class OperatorCostsCalculator:
     class CostListSelection(StrEnum):
@@ -484,7 +483,7 @@ class OperatorCostsCalculator:
         skillCostRanking = OperatorCostsCalculator.operatorInfo.getSortedSkillCostDict(costItem.stars)
         try: 
             nums = len(skillCostRanking)
-            index = list(skillCostRanking.keys()).index(costItem.skillIds[skillNum-1])
+            index = list(skillCostRanking.keys()).index(f"{costItem.name}_{costItem.skillIds[skillNum-1]}")
             msgList.append(f"星{costItem.stars}スキル{nums}個中、第{index+1}位の消費です")
 
         except:
@@ -680,16 +679,17 @@ class OperatorCostsCalculator:
             totalEleteNum = len(eleteCostDict)
             elete_cost = list(eleteCostDict.values())[index_Elete]
             msg += f"昇進必要理性: {elete_cost:.2f}\n"
-            msg += f"昇進理性順位: {index_Elete + 1} / {totalEleteNum}\n"
+            msg += f"昇進理性順位: {index_Elete + 1}/{totalEleteNum}\n"
+            msg += "\n"
             masterCostDict = masterCostDicts.get(value.stars)
             if(not masterCostDict):
                 masterCostDict = OperatorCostsCalculator.operatorInfo.getSortedSkillCostDict(value.stars)
                 masterCostDicts[value.stars] = masterCostDict
             totalSkillNum = len(masterCostDict)
             for index, skillId in enumerate(value.skillIds):
-                index_Master = list(masterCostDict.keys()).index(skillId)
-                msg += f"S{index+1}特化必要理性: {masterCostDict.get(skillId).totalCost.toRiseiValue(not value.isCNOnly()):.2f}\n"
-                msg += f"特化理性順位: {index_Master+1} / {totalSkillNum}\n"
+                index_Master = list(masterCostDict.keys()).index(f"{value.id}_{skillId}")
+                msg += f"S{index+1}特化必要理性: {masterCostDict.get(f"{value.id}_{skillId}").totalCost.toRiseiValue(not value.isCNOnly()):.2f}\n"
+                msg += f"特化理性順位: {index_Master+1}/{totalSkillNum}\n"
             msg += "```"
             msgList.append(msg)
         return RCReply(embbedTitle=title,embbedContents=msgList)
