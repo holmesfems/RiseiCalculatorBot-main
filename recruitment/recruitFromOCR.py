@@ -22,6 +22,7 @@ with open("recruitment/tagJaToJa.yaml","rb") as f:
         r"上級..一下": "上級エリート",
         r"補助...?": "補助",
         r"狙撃...?": "狙撃",
+        r"前衛...?": "前衛",
         r"COST(O)?": "COST回復",
         r"防御.": "防御",
         r"重装...?": "重装",
