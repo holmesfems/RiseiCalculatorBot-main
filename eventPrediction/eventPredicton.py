@@ -19,12 +19,12 @@ class EventInfo(BaseModel):
     rewardEndTime:int
     displayOnHome:bool
     hasStage:bool
-    templateShopId:str
-    medalGroupId:str
+    templateShopId:str|None
+    medalGroupId:str|None
     ungroupedMedalIds:List[str]
     isReplicate:bool
     needFixedSync:bool
-    trapDomainId:str
+    trapDomainId:str|None
     recType:str
     isPageEntry:bool
     isMagnify:bool
