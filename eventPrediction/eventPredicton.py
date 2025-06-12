@@ -21,7 +21,7 @@ class EventInfo(BaseModel):
     hasStage:bool
     templateShopId:str|None
     medalGroupId:str|None
-    ungroupedMedalIds:List[str]
+    ungroupedMedalIds:List[str]|None
     isReplicate:bool
     needFixedSync:bool
     trapDomainId:str|None
