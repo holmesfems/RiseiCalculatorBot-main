@@ -2,15 +2,14 @@ from __future__ import annotations
 import sys
 sys.path.append('../')
 from typing import List,Dict
-from dataclasses import dataclass
+from pydantic import BaseModel
 from rcutils import netutil,getnow,rcReply
 from datetime import datetime,timedelta
 URL = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData_YoStar/refs/heads/main/ja_JP/gamedata/excel/activity_table.json"
 get_json = netutil.get_json
 CACHE_HOURS = 2
 
-@dataclass
-class EventInfo:
+class EventInfo(BaseModel):
     id:str
     type:str
     displayType:str
@@ -28,6 +27,7 @@ class EventInfo:
     trapDomainId:str
     recType:str
     isPageEntry:bool
+    isMagnify:bool
 
     @property
     def startTime_datetime(self):
@@ -80,7 +80,7 @@ def __initIfNeed():
     now = getnow.getnow()
     if(eventInfoDict and now - lastUpdated <= timedelta(hours=CACHE_HOURS)): return
     basicInfo = get_json(URL)["basicInfo"]
-    eventInfoDict = {key:EventInfo(**value) for key,value in basicInfo.items()}
+    eventInfoDict = {key:EventInfo.model_validate(value) for key,value in basicInfo.items()}
     lastUpdated = getnow.getnow()
 
 def getFutureEvents():
