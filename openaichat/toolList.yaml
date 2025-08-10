@@ -128,3 +128,5 @@
       - target
 
 - type: code_interpreter
+- type: web_search_preview
+- type: image_generation

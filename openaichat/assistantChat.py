@@ -123,7 +123,7 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
     return RCReply(responseForAI=f"Error: function is not implemented: {functionName}")
 
 class ChatSession:
-    MODEL = "gpt-4.1"
+    MODEL = "gpt-5"
     __client = openai.Client(api_key=os.environ["OPENAI_API_KEY"])
     def __init__(self,name:str, timeout = datetime.timedelta(minutes=10)):
         self.timeout = timeout
@@ -224,6 +224,10 @@ class ChatSession:
             if(msgContent.type == "image_file"):
                 image = ChatSession.__client.files.with_raw_response.content(msgContent.image_file.file_id)
                 files.append(ChatFile(image.content,"image.png"))
+                continue
+            if(msgContent.type == "image_generation_call"):
+                image_data = msgContent.result
+                files.append(ChatFile(image_data,"image.png"))
                 continue
             msgValue = msgContent.text.value
             annotations = item.content[0].text.annotations
