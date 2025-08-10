@@ -225,10 +225,10 @@ class ChatSession:
                 image = ChatSession.__client.files.with_raw_response.content(msgContent.image_file.file_id)
                 files.append(ChatFile(image.content,"image.png"))
                 continue
-            if(msgContent.type == "image_generation_call"):
-                image_data = msgContent.result
-                files.append(ChatFile(image_data,"image.png"))
-                continue
+            # if(msgContent.type == "image_generation_call"):
+            #     image_data = msgContent.result
+            #     files.append(ChatFile(image_data,"image.png"))
+            #     continue
             msgValue = msgContent.text.value
             annotations = item.content[0].text.annotations
             citations = []
