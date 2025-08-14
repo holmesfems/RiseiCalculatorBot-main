@@ -1,37 +1,37 @@
-- name: 晶体电子单元
+- name: 聚合剂
   value: 200
   quantity: '2'
 - name: 模组数据块
   value: 120.0
   quantity: '1'
-- name: 异铁块
+- name: 提纯源岩
+  value: 55.0
+  quantity: '3'
+- name: 晶体电路
   value: 80.0
-  quantity: '3'
-- name: 三水锰矿
-  value: 70.0
-  quantity: '3'
-- name: 精炼溶剂
-  value: 65.0
-  quantity: '3'
-- name: 切削原液
-  value: 65.0
   quantity: '3'
 - name: 转质盐聚块
   value: 60.0
   quantity: '3'
-- name: 聚酸酯组
-  value: 15.0
-  quantity: '10'
-- name: 酮凝集组
+- name: 固化纤维板
+  value: 65.0
+  quantity: '3'
+- name: 环烃预制体
+  value: 70.0
+  quantity: '3'
+- name: 异铁组
   value: 20.0
   quantity: '10'
-- name: 扭转醇
-  value: 15.0
+- name: 全新装置
+  value: 25.0
+  quantity: '10'
+- name: 凝胶
+  value: 20.0
+  quantity: '10'
+- name: 炽合金
+  value: 20.0
   quantity: '10'
 - name: 半自然溶剂
-  value: 20.0
-  quantity: '10'
-- name: 化合切削液
   value: 20.0
   quantity: '10'
 - name: 龙门币1000

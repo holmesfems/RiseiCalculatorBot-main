@@ -88,7 +88,7 @@ ValueTarget_new:List[str] = [
 ]
 
 #契約賞金引換証
-__ccNumber = '2'
+__ccNumber = '3'
 class CCExchangeItem:
     def __init__(self,dictItem:dict):
         self.name = dictItem["name"]
