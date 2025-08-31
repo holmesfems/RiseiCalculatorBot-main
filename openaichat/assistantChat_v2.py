@@ -213,12 +213,9 @@ class ChatSession:
                                 if(annotation.type == "container_file_citation"):
                                     containerId = annotation.container_id
                                     fileId = annotation.file_id
-                                    fileUrl = f"https://api.openai.com/v1/containers/{containerId}/files/{fileId}/content"
-                                    file = requests.get(url=fileUrl,headers={
-                                        "Authorization": f"Bearer {ChatSession.__client.api_key}"
-                                    }).content
-                                    files.append(ChatFile(file,annotation.filename))
-                                    
+                                    cited_file = ChatSession.__client.containers.files.content.retrieve(file_id=fileId,container_id=containerId)
+                                    files.append(ChatFile(cited_file.content,annotation.filename))
+
                                 elif(annotation.type == "url_citation"):
                                     ret.append(f"url:[{annotation.title}]({annotation.url})")
 
