@@ -280,11 +280,17 @@ def showHighStars(minStar:int = 4,isGlobal:bool = True) -> RCReply:
     searchList = positionTags + jobTags + otherTags
     allCombineList = createSearchMap(searchList,get_operators(glob=isGlobal),minStar,equals=True,clearRedundant=True)
     chunks = mapToMsgChunksHighStars(allCombineList)
+    listForAI = [
+        {
+            "tags": str(key),
+            "operators": value
+        } for key,value in allCombineList.items()
+    ]
     if(not chunks): chunks = [f"★{minStar}の確定タグはありません"]
     return RCReply(
         embbedTitle="★{0}確定タグ一覧".format(minStar),
         embbedContents=chunks,
-        responseForAI=json.dumps(allCombineList)
+        responseForAI=json.dumps(listForAI)
     )
 
     
