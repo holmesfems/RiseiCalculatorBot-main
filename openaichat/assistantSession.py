@@ -51,7 +51,7 @@ class AssistantSession:
 
     def requestByHistory(self,isUser = True):
         if(isUser): self.responseHistory.clear()
-        response = self.client.responses.create(
+        response = self.client.responses.stream(
             model=self.model,
             input=self.msgHistory,
             tools=self.tools,

@@ -210,12 +210,23 @@ class ChatSession:
                         if(getattr(content,"annotations",None)):
                             annotations: List[AnnotationFileCitation | AnnotationURLCitation | AnnotationContainerFileCitation | AnnotationFilePath] = content.annotations
                             for annotation in annotations:
-                                if(annotation.type == "container_file_citation" or annotation.type == "file_citation"):
+                                if(annotation.type == "container_file_citation"):
+                                    containerId = annotation.container_id
+                                    fileId = annotation.file_id
+                                    fileUrl = f"https://api.openai.com/v1/containers/{containerId}/files/{fileId}/content"
+                                    file = requests.get(url=fileUrl,headers={
+                                        "Authorization": f"Bearer {ChatSession.__client.api_key}"
+                                    }).content
+                                    files.append(ChatFile(file,annotation.filename))
+                                    
+                                elif(annotation.type == "url_citation"):
+                                    ret.append(f"url:[{annotation.title}]({annotation.url})")
+
+                                elif(annotation.type == "file_citation"):
                                     fileId = annotation.file_id
                                     cited_file = ChatSession.__client.files.content(file_id=fileId)
                                     files.append(ChatFile(cited_file.content,annotation.filename))
-                                elif(annotation.type == "url_citation"):
-                                    ret.append(f"url:[{annotation.title}]({annotation.url})")
+
                                 elif(annotation.type == "file_path"):
                                     fileId = annotation.file_id
                                     cited_file = ChatSession.__client.files.content(file_id=fileId)
