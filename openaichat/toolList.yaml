@@ -116,8 +116,14 @@
         type: string
         description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
       skillnum:
-        type: number
-        description: The skill number. 
+        type: string
+        description: The id to specify the skill. It can be omitted if the skill is not specified
+        enum:
+        - "1"
+        - "2"
+        - "3"
+        - "素質1"
+        - "素質2"
     required:
     - target
 
