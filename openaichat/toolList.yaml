@@ -27,6 +27,7 @@
         - Transmuted Salt
         - Fiber
         - Hydrocarbon
+        - Condensation-like nuclei
     required:
     - target
 - type: function
