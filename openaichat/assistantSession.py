@@ -79,7 +79,7 @@ class AssistantSession:
         self.lastID = response.id
         output: List[ResponseOutputMessage | ResponseFileSearchToolCall | ResponseFunctionToolCall | ResponseFunctionWebSearch | ResponseComputerToolCall | ResponseReasoningItem | ImageGenerationCall | ResponseCodeInterpreterToolCall | LocalShellCall | McpCall | McpListTools | McpApprovalRequest | ResponseCustomToolCall]= response.output
         for item in output:
-            if(item.type in ["message","image_generation_call"]):
+            if(item.type in ["message","image_generation_call","code_interpreter_call"]):
                 self.responseHistory.append(item)
             
         self.__updateTime()

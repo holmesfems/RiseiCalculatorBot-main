@@ -9,6 +9,7 @@ import yaml
 import json
 import os
 from typing import Dict,List
+from pathlib import Path
 import datetime
 from dataclasses import dataclass,field
 from discord import Attachment
@@ -22,6 +23,8 @@ from openaichat.assistantSession import AssistantSession,GPTError
 from recruitment.recruitment import showHighStars
 import base64
 import traceback
+from openai.types.responses.response_code_interpreter_tool_call import ResponseCodeInterpreterToolCall
+
 
 with open("openaichat/systemPrompt.txt","r",encoding="utf-8_sig") as f:
     SYSTEM_PROMPT = f.read()
@@ -205,6 +208,7 @@ class ChatSession:
         msgList = session.responseHistory
         ret:List[str] = []
         files:List[ChatFile] = []
+        interpreters:List[ResponseCodeInterpreterToolCall] = []
         for item in msgList:
             if(item.type == "message"):
                 contents = item.content
@@ -240,6 +244,29 @@ class ChatSession:
             elif(item.type == "image_generation_call"):
                 image_base64 = base64.b64decode(item.result)
                 files.append(ChatFile(image_base64,"image.png"))
+            elif(item.type == "code_interpreter_call"):
+                interpreters.append(item)
+        #interpreterのファイルが正しくannotateされなかった場合、ローカルで実行してファイルにする
+        def readFile(path:str):
+            with open(path,"rb") as f:
+                content= f.read()
+            return content
+        def filename(path:str):
+            return os.path.basename(path)
+        if(len(interpreters) > 0 and len(files) == 0):
+            for interpreterItem in interpreters:
+                try:
+                    work_dir = os.path.abspath(f"./{interpreterItem.id}")
+                    Path(work_dir).mkdir(parents=True,exist_ok=True)
+                    code = interpreterItem.code.replace("/mnt/data",work_dir)
+                    g = {"__name__": "__main__"}
+                    exec(compile(code, interpreterItem.id, "exec"),g,g)
+                    for p in Path(work_dir).rglob("*"):
+                        if(p.is_file()):
+                            files.append(ChatFile(readFile(p),filename(p)))
+                except Exception as e:
+                    print(f"error occured while running {interpreterItem.id}: {e}")
+
         return ChatReply(msg = "\n".join(ret), fileList=files)
         
     @staticmethod
