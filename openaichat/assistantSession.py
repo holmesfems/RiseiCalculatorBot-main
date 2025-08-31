@@ -14,7 +14,12 @@ from openai.types.responses.response_reasoning_item import ResponseReasoningItem
 sys.path.append('../')
 import openai
 import os
+import asyncio
 from rcutils.getnow import getnow
+
+class GPTError(Exception):
+    def __init__(self, text=""):
+        self.text = text
 
 class AssistantSession:
     def __init__(self,client:openai.OpenAI,model:str,instruction:str,tools:dict):
@@ -49,15 +54,28 @@ class AssistantSession:
         self.lastID = None
         self.__updateTime()
 
-    def requestByHistory(self,isUser = True):
+    async def requestByHistory(self,isUser = True):
         if(isUser): self.responseHistory.clear()
         response = self.client.responses.create(
             model=self.model,
             input=self.msgHistory,
             tools=self.tools,
             instructions=self.instruction,
-            previous_response_id=self.lastID
+            previous_response_id=self.lastID,
+            background=True
         )
+        waited:int = 0
+        while response.status in {"queued", "in_progress"}:
+            asyncio.sleep(1)
+            waited +=1
+            response=self.client.responses.retrieve(response_id=response.id)
+            if(waited%5==0):
+                print(f"waited for {waited}s, now status = {response.status}")
+        
+        print(f"Final status: {response.status}")
+        if(response.status != "completed"):
+            raise GPTError(f"response is not completed: {response}")
+        
         self.lastID = response.id
         output: List[ResponseOutputMessage | ResponseFileSearchToolCall | ResponseFunctionToolCall | ResponseFunctionWebSearch | ResponseComputerToolCall | ResponseReasoningItem | ImageGenerationCall | ResponseCodeInterpreterToolCall | LocalShellCall | McpCall | McpListTools | McpApprovalRequest | ResponseCustomToolCall]= response.output
         for item in output:

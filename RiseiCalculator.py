@@ -615,7 +615,9 @@ async def on_message(message:discord.Message):
             print("Message moderated")
             return
     if message.channel.id == OPENAI_CHANNELID:
-        await msgForAIChat(message,"public")
+        if(not checkIsMember(message.author)):
+            return
+        await msgForAIChat(message,"publicChannel_d5AZPQXu") #乱数英文字入れてユーザーIDとの衝突を回避
     elif message.channel.id == RECRUIT_CHANNELID:
         if message.reference is not None:
             referenced_message = await message.channel.fetch_message(message.reference.message_id)

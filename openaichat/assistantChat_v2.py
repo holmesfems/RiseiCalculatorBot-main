@@ -22,7 +22,7 @@ from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateM
 from riseicalculator2 import listInfo
 from rcutils.rcReply import RCReply
 from fkDatabase.fkDataSearch import fkInfo
-from openaichat.assistantSession import AssistantSession
+from openaichat.assistantSession import AssistantSession,GPTError
 import base64
 
 with open("openaichat/systemPrompt.txt","r",encoding="utf-8_sig") as f:
@@ -145,47 +145,47 @@ class ChatSession:
     
     __CLEARCOMMANDS = ["reset","clear"]
 
-    async def doChat(self, msg:str, threadName:str, attachments:List[Attachment]) -> ChatReply:
+    async def doChat(self, msg:str, threadName:str, attachments:List[Attachment]):
         session = self.__loadSession(threadName)
         now = getnow()
         if(msg in ChatSession.__CLEARCOMMANDS):
             session.reset()
             return ChatReply(msg="会話履歴をリセットしたわ。")
-        
         # 10分過ぎたら記憶をクリアする
         if(now - session.lastUpdated > self.timeout):
             session.reset()
-
-        content = []
-        content.append({
-            "type": "input_text",
-            "text": msg
-        })
-        
-        restAttachments = []
-        #画像を添付
-        for item in attachments:
-            if(item.width != None):
-                content.append({
-                    "type": "input_image",
-                    "image_url": item.url
-                })
-            else:
-                restAttachments.append(item)
-        #残りのファイルを載せる
-        attachmentIds= ChatSession.__uploadFile(restAttachments)
-        for attachmentId in attachmentIds:
+        try:
+            content = []
             content.append({
-                "type": "input_file",
-                "file_id": attachmentId
+                "type": "input_text",
+                "text": msg
             })
-        
-        session.submitUserMsg(content)
-        rcReplies = await ChatSession.__completeRun(session)
-        
-        ret = await ChatSession.__extractMsg(session)
-        ret.rcReplies = rcReplies
-        return ret
+            restAttachments = []
+            #画像を添付
+            for item in attachments:
+                if(item.width != None):
+                    content.append({
+                        "type": "input_image",
+                        "image_url": item.url
+                    })
+                else:
+                    restAttachments.append(item)
+            #残りのファイルを載せる
+            attachmentIds= ChatSession.__uploadFile(restAttachments)
+            for attachmentId in attachmentIds:
+                content.append({
+                    "type": "input_file",
+                    "file_id": attachmentId
+                })
+            session.submitUserMsg(content)
+            rcReplies = await ChatSession.__completeRun(session)
+            ret = await ChatSession.__extractMsg(session)
+            ret.rcReplies = rcReplies
+            return ret
+        except GPTError as e:
+            return ChatReply(msg=e.text)
+        except Exception as e:
+            return ChatReply(msg=str(e))
     
     @staticmethod
     def __uploadFile(attachments:List[Attachment])->List[str]:
@@ -241,7 +241,7 @@ class ChatSession:
     @staticmethod
     async def __completeRun(session:AssistantSession):
         ret = []
-        response = session.requestByHistory(isUser=True)
+        response = await session.requestByHistory(isUser=True)
         while(True):
             hasFunction = False
             for output in response:
@@ -254,12 +254,13 @@ class ChatSession:
                     ret.append(functionResult)
                     session.submitToolResponse(functionResult.responseForAI,functionId)
             if(hasFunction):
-                response = session.requestByHistory(isUser=False)
+                response = await session.requestByHistory(isUser=False)
             else: break
         return ret
     
 class ChatSessionManager:
     __process = ChatSession("astesia_assistant")
+    @staticmethod
     async def doChat(threadName:str,msg:str,attachments:List[Attachment]):
         reply = await ChatSessionManager.__process.doChat(msg,threadName,attachments)
         return reply
