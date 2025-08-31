@@ -253,17 +253,22 @@ class ChatSession:
             return content
         def filename(path:str):
             return os.path.basename(path)
+        print("expected file annotation, but has no file. try to exec code_interpreter locally")
         if(len(interpreters) > 0 and len(files) == 0):
             for interpreterItem in interpreters:
+                print(f"try interpreter: {interpreterItem.id}")
                 try:
                     work_dir = os.path.abspath(f"./{interpreterItem.id}")
                     Path(work_dir).mkdir(parents=True,exist_ok=True)
                     code = interpreterItem.code.replace("/mnt/data",work_dir)
                     g = {"__name__": "__main__"}
                     exec(compile(code, interpreterItem.id, "exec"),g,g)
+                    foundFiles = []
                     for p in Path(work_dir).rglob("*"):
                         if(p.is_file()):
                             files.append(ChatFile(readFile(p),filename(p)))
+                            foundFiles.append(p.name)
+                    print(f"succeed: files={foundFiles}")
                 except Exception as e:
                     print(f"error occured while running {interpreterItem.id}: {e}")
 
