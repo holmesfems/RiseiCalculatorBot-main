@@ -72,7 +72,7 @@ class AssistantSession:
             if(waited%5==0):
                 print(f"waited for {waited}s, now status = {response.status}")
         
-        print(f"Final status: {response.status}")
+        print(f"response: {response}")
         if(response.status != "completed"):
             raise GPTError(f"response is not completed: {response}")
         

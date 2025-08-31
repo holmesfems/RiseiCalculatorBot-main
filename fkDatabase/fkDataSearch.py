@@ -112,11 +112,16 @@ class FKInfo:
                 responseForAI=f"Please ask user to select a skill from following choices: {skillDict}")
 
         skillInfo = info.skills[0] if info.hasOnlyOneSkill() and skillNum.strip() == "" else info.getSkillFromNum(str(skillNum))
-        if(not skillInfo): return RCReply(
+        if(not skillInfo): 
+            candidates = [{
+                "skillNum": x.skillNum,
+                "skillName": x.skillName
+            } for x in info.skills]
+            return RCReply(
             embbedTitle=title,
-            embbedContents=["指定のスキルのFK情報は見つかりませんでした"],
+            embbedContents=[f"指定のスキルのFK情報は見つかりませんでした。以下の候補がありますので、一つ選択してください: {str(candidates)}"],
             msgType=RCMsgType.ERR,
-            responseForAI="This skill is not a FK skill")
+            responseForAI=f"This skill is not a FK skill. Available skills for this operator is as following: {json.dumps(candidates)}")
         return RCReply(
             embbedTitle=title,
             embbedContents=[
