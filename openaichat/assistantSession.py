@@ -85,7 +85,3 @@ class AssistantSession:
         self.__updateTime()
         self.msgHistory.clear()
         return output
-
-
-
-

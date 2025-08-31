@@ -5,18 +5,14 @@ from openai.types.responses.response_output_text import AnnotationContainerFileC
 sys.path.append('../')
 from rcutils.getnow import getnow
 import openai
-from openai.types.beta.assistant import Assistant
-from openai.types.beta.thread import Thread
-from openai.types.beta.threads import Message,Run
 import yaml
-import asyncio
 import json
 import os
-from typing import Dict,List,Tuple
+from typing import Dict,List
 import datetime
 from dataclasses import dataclass,field
 from discord import Attachment
-import requests,pathlib
+import requests
 from charmaterials.charmaterials import OperatorCostsCalculator
 from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode
 from riseicalculator2 import listInfo
@@ -24,6 +20,7 @@ from rcutils.rcReply import RCReply
 from fkDatabase.fkDataSearch import fkInfo
 from openaichat.assistantSession import AssistantSession,GPTError
 import base64
+import traceback
 
 with open("openaichat/systemPrompt.txt","r",encoding="utf-8_sig") as f:
     SYSTEM_PROMPT = f.read()
@@ -185,7 +182,7 @@ class ChatSession:
         except GPTError as e:
             return ChatReply(msg=e.text)
         except Exception as e:
-            return ChatReply(msg=str(e))
+            return ChatReply(msg=traceback.format_exc())
     
     @staticmethod
     def __uploadFile(attachments:List[Attachment])->List[str]:
@@ -249,6 +246,7 @@ class ChatSession:
                     hasFunction = True
                     functionId = output.call_id
                     functionName = output.name
+                    print(f"function detected: {functionName}, {output.arguments}")
                     functionArgs = json.loads(output.arguments)
                     functionResult = toolCalling(functionName=functionName,functionArgs=functionArgs)
                     ret.append(functionResult)
