@@ -2,9 +2,9 @@ discord.py
 pandas
 scipy
 pyyaml
-openai==1.99.6
+openai==1.102.0
 openpyxl
 StrEnum
-google-cloud-vision==3.7.4
+google-cloud-vision==3.10.2
 aiohttp
 nest_asyncio

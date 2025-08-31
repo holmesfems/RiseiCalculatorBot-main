@@ -7,7 +7,7 @@ from discord.ext import tasks
 import traceback
 from recruitment import recruitment,recruitFromOCR
 import happybirthday.happybirthday as birthday
-from openaichat.assistantChat import ChatSessionManager as chatbot
+from openaichat.assistantChat_v2 import ChatSessionManager as chatbot
 from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateMode,getStageCategoryDict,DEFAULT_CACHE_TIME,DEFAULT_SHOW_MIN_TIMES
 from typing import List,Dict,Literal
 import datetime

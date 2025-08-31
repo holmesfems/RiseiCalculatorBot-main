@@ -1,5 +1,7 @@
 from __future__ import annotations
 import sys
+
+from openai.types.responses.response_output_text import AnnotationContainerFileCitation, AnnotationFileCitation, AnnotationFilePath, AnnotationURLCitation
 sys.path.append('../')
 from rcutils.getnow import getnow
 import openai
@@ -20,9 +22,14 @@ from riseicalculator2.riseicalculatorprocess import CalculatorManager,CalculateM
 from riseicalculator2 import listInfo
 from rcutils.rcReply import RCReply
 from fkDatabase.fkDataSearch import fkInfo
+from openaichat.assistantSession import AssistantSession
+import base64
 
 with open("openaichat/systemPrompt.txt","r",encoding="utf-8_sig") as f:
     SYSTEM_PROMPT = f.read()
+
+with open("openaichat/toolList.yaml","rb") as f:
+    TOOL_LIST = yaml.safe_load(f)
 
 @dataclass
 class ChatFile:
@@ -121,171 +128,127 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
     return RCReply(responseForAI=f"Error: function is not implemented: {functionName}")
 
 class ChatSession:
-    MODEL = "gpt-4.1"
+    MODEL = "gpt-5"
     __client = openai.Client(api_key=os.environ["OPENAI_API_KEY"])
     def __init__(self,name:str, timeout = datetime.timedelta(minutes=10)):
         self.timeout = timeout
         self.name = name
-        self.assistantSession = self.__loadSession()
-        self.threads:Dict[str,Thread] = {}
-        self.lastRepliedTime:Dict[str,datetime.datetime] = {}
+        self.assistantSessionList:Dict[str,AssistantSession] = {}
     
     #セッションを復元
-    def __loadSession(self) -> Assistant:
-        assistantList = ChatSession.__client.beta.assistants.list(order="desc")
-        assistant = next(filter(lambda x: x.name == self.name,assistantList),None)
-
-        with open("openaichat/toolList.yaml","rb") as f:
-            toolList = yaml.safe_load(f)
-
-        if assistant is None:
-            print("create new assistant")
-            return ChatSession.__client.beta.assistants.create(
-                model=ChatSession.MODEL,
-                name=self.name,
-                instructions=SYSTEM_PROMPT,
-                tools=toolList,
-            )
-        print("load existing assistant")
-        ChatSession.__client.beta.assistants.update(
-            assistant_id=assistant.id,
-            model=ChatSession.MODEL,
-            instructions=SYSTEM_PROMPT,
-            tools=toolList
-        )
-        return assistant
-    
-    def __deleteThread(self,threadName:str):
-        if(self.threads.get(threadName)):
-            del self.threads[threadName]
-        if(self.lastRepliedTime.get(threadName)):
-            del self.lastRepliedTime[threadName]
+    def __loadSession(self,sessionId:str) -> AssistantSession:
+        session = self.assistantSessionList.get(sessionId)
+        if(session): return session
+        session = AssistantSession(ChatSession.__client,ChatSession.MODEL,SYSTEM_PROMPT,TOOL_LIST)
+        self.assistantSessionList[sessionId] = session
+        return session
     
     __CLEARCOMMANDS = ["reset","clear"]
 
     async def doChat(self, msg:str, threadName:str, attachments:List[Attachment]) -> ChatReply:
-        if(msg in ChatSession.__CLEARCOMMANDS):
-            self.__deleteThread(threadName)
-            return ChatReply(msg="会話履歴をリセットしたわ。")
-        thread = self.threads.get(threadName,ChatSession.__newThread())
+        session = self.__loadSession(threadName)
         now = getnow()
-        lastReplied = self.lastRepliedTime.get(threadName,now)
-        # 10分過ぎたら記憶をクリアして新しいセッションを始める
-        if(now - lastReplied > self.timeout):
-            thread = self.__newThread()
+        if(msg in ChatSession.__CLEARCOMMANDS):
+            session.reset()
+            return ChatReply(msg="会話履歴をリセットしたわ。")
         
-        #添付ファイルがある場合はそれを載せる
-        message = ChatSession.__client.beta.threads.messages.create(
-            thread_id=thread.id,
-            role = "user",
-            content=msg,
-            attachments=[{"file_id": id, "tools":[{"type":"code_interpreter"}]}
-                          for id in ChatSession.__uploadFile(attachments)]
-        )
-        run = ChatSession.__client.beta.threads.runs.create_and_poll(
-            thread_id=thread.id,
-            assistant_id=self.assistantSession.id
-        )
-        run,rcReplies = await ChatSession.__completeRun(run,thread)
-        if(run.status != "completed"):
-            print(f"status is not completed: {run=}")
-            return ChatReply(msg="failed")
+        # 10分過ぎたら記憶をクリアする
+        if(now - session.lastUpdated > self.timeout):
+            session.reset()
+
+        content = []
+        content.append({
+            "type": "input_text",
+            "text": msg
+        })
         
-        ret = await ChatSession.__extractMsg(thread)
-        self.threads[threadName] = thread
-        self.lastRepliedTime[threadName] = getnow()
+        restAttachments = []
+        #画像を添付
+        for item in attachments:
+            if(item.width != None):
+                content.append({
+                    "type": "input_image",
+                    "image_url": item.url
+                })
+            else:
+                restAttachments.append(item)
+        #残りのファイルを載せる
+        attachmentIds= ChatSession.__uploadFile(restAttachments)
+        for attachmentId in attachmentIds:
+            content.append({
+                "type": "input_file",
+                "file_id": attachmentId
+            })
+        
+        session.submitUserMsg(content)
+        rcReplies = await ChatSession.__completeRun(session)
+        
+        ret = await ChatSession.__extractMsg(session)
         ret.rcReplies = rcReplies
         return ret
     
     @staticmethod
-    def __uploadFile(attachments:List[Attachment]):
+    def __uploadFile(attachments:List[Attachment])->List[str]:
         if not attachments: return []
         print(f"detected attatchments: {attachments=}")
         return [ChatSession.__client.files.create(
             file=requests.get(item.url).content,
-            purpose="assistants",
+            purpose="user_data",
         ).id for item in attachments]
 
     @staticmethod
-    async def __extractMsg(thread:Thread):
-        msgList = ChatSession.__client.beta.threads.messages.list(thread_id=thread.id)
-        messages = msgList.data
-        new_messages:List[Message] = []
-        for item in messages:
-            if(item.role == "user"): break
-            new_messages.append(item)
-        new_messages.reverse()
+    async def __extractMsg(session:AssistantSession):
+        msgList = session.responseHistory
         ret:List[str] = []
         files:List[ChatFile] = []
-        for item in new_messages:
-            msgContent = item.content[0]
-            if(msgContent.type == "image_file"):
-                image = ChatSession.__client.files.with_raw_response.content(msgContent.image_file.file_id)
-                files.append(ChatFile(image.content,"image.png"))
-                continue
-            # if(msgContent.type == "image_generation_call"):
-            #     image_data = msgContent.result
-            #     files.append(ChatFile(image_data,"image.png"))
-            #     continue
-            msgValue = msgContent.text.value
-            annotations = item.content[0].text.annotations
-            citations = []
-            for index, annotation in enumerate(annotations):
-                if (file_citation := getattr(annotation, 'file_citation', None)):
-                    msgValue = msgValue.replace(annotation.text, f' [{index}]')
-                    cited_file = ChatSession.__client.files.retrieve(file_citation.file_id)
-                    citations.append(f'[{index}] {file_citation.quote} from {cited_file.filename}')
-                elif (file_path := getattr(annotation, 'file_path', None)):
-                    cited_file = ChatSession.__client.files.retrieve(file_path.file_id)
-                    file = ChatSession.__client.files.with_raw_response.content(cited_file.id)
-                    msgValue = msgValue.replace(annotation.text, f'{file.url}')
-                    files.append(ChatFile(file.content,pathlib.Path(cited_file.filename).name))
-            ret.append(msgValue + "\n" + "\n".join(citations))
+        for item in msgList:
+            if(item.type == "message"):
+                contents = item.content
+                for content in contents:
+                    if(content.type == "output_text"):
+                        ret.append(content.text)
+                        if(getattr(content,"annotations",None)):
+                            annotations: List[AnnotationFileCitation | AnnotationURLCitation | AnnotationContainerFileCitation | AnnotationFilePath] = content.annotations
+                            for annotation in annotations:
+                                if(annotation.type == "container_file_citation" or annotation.type == "file_citation"):
+                                    fileId = annotation.file_id
+                                    cited_file = ChatSession.__client.files.content(file_id=fileId)
+                                    files.append(ChatFile(cited_file.content,annotation.filename))
+                                elif(annotation.type == "url_citation"):
+                                    ret.append(f"url:[{annotation.title}]({annotation.url})")
+                                elif(annotation.type == "file_path"):
+                                    fileId = annotation.file_id
+                                    cited_file = ChatSession.__client.files.content(file_id=fileId)
+                                    files.append(ChatFile(cited_file.content,"file"))
+                                else:
+                                    print(f"Unknown Annotation:{annotation}")
+                    elif(content.type == "refusal"):
+                        ret.append(content.refusal)
+
+            elif(item.type == "image_generation_call"):
+                image_base64 = base64.b64decode(item.result)
+                files.append(ChatFile(image_base64,"image.png"))
         return ChatReply(msg = "\n".join(ret), fileList=files)
         
     @staticmethod
-    async def __waitRun(run:Run,thread:Thread):
-        i = 0
-        while True:
-            run = ChatSession.__client.beta.threads.runs.retrieve(run.id,thread_id=thread.id)
-            if(i%5 == 0):
-                print(f"waiting, now = {i} seconds")
-            if(run.status not in ["queued", "in_progress"]):
-                break
-            i += 1
-            await asyncio.sleep(1)
-        return run
-
-    @staticmethod
-    async def __completeRun(run:Run,thread:Thread):
+    async def __completeRun(session:AssistantSession):
         ret = []
-        while True:
-            run = await ChatSession.__waitRun(run,thread)
-            if(run.status in ["completed","failed","cancelled","expired"]): break
-            if(run.status == "requires_action"):
-                actions = run.required_action.submit_tool_outputs.tool_calls
-                tool_outputs = []
-                for action in actions:
-                    functionName = action.function.name
-                    functionArgs = json.loads(action.function.arguments)
-                    print(f"function detected: {functionName=}, {functionArgs=}")
-                    functionRes = toolCalling(functionName,functionArgs)
-                    if(not functionRes.isMSGEmpty()):ret.append(functionRes)
-                    print(f"response:{functionRes.responseForAI}")
-                    tool_outputs.append({
-                        "tool_call_id": action.id,
-                        "output": functionRes.responseForAI
-                    })
-                run = ChatSession.__client.beta.threads.runs.submit_tool_outputs(
-                    run.id,
-                    thread_id=run.thread_id,
-                    tool_outputs=tool_outputs
-                )
-        return (run,ret)
-
-    @staticmethod
-    def __newThread() -> Thread:
-        return ChatSession.__client.beta.threads.create()
+        response = session.requestByHistory(isUser=True)
+        while(True):
+            hasFunction = False
+            for output in response:
+                if(output.type == "function_call"):
+                    hasFunction = True
+                    functionId = output.call_id
+                    functionName = output.name
+                    functionArgs = json.loads(output.arguments)
+                    functionResult = toolCalling(functionName=functionName,functionArgs=functionArgs)
+                    ret.append(functionResult)
+                    session.submitToolResponse(functionResult.responseForAI,functionId)
+            if(hasFunction):
+                response = session.requestByHistory(isUser=False)
+            else: break
+        return ret
     
 class ChatSessionManager:
     __process = ChatSession("astesia_assistant")
