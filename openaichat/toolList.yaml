@@ -134,8 +134,10 @@
         - "3"
         - "素質1"
         - "素質2"
+        - ""
     required:
     - target
+    - skillnum
     additionalProperties: false
   strict: true
 
