@@ -71,17 +71,14 @@ class AssistantSession:
             response=self.client.responses.retrieve(response_id=response.id)
             if(waited%5==0):
                 print(f"waited for {waited}s, now status = {response.status}")
-        
+        self.__updateTime()
+        self.msgHistory.clear()
+        self.lastID = response.id
         print(f"response: {response}")
         if(response.status != "completed"):
-            raise GPTError(f"response is not completed: {response}")
-        
-        self.lastID = response.id
+            raise GPTError(f"response is not completed: {response.error.message}")
         output: List[ResponseOutputMessage | ResponseFileSearchToolCall | ResponseFunctionToolCall | ResponseFunctionWebSearch | ResponseComputerToolCall | ResponseReasoningItem | ImageGenerationCall | ResponseCodeInterpreterToolCall | LocalShellCall | McpCall | McpListTools | McpApprovalRequest | ResponseCustomToolCall]= response.output
         for item in output:
             if(item.type in ["message","image_generation_call","code_interpreter_call"]):
                 self.responseHistory.append(item)
-            
-        self.__updateTime()
-        self.msgHistory.clear()
         return output

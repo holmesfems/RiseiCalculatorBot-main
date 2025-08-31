@@ -498,7 +498,8 @@ async def msgForAIChat(message:discord.Message,threadName:str):
         chatReply = await chatbot.doChat(threadName,messageText,message.attachments)
         channel = message.channel
         files = [discord.File(io.BytesIO(file.bytesData),filename=file.filename) for file in chatReply.fileList]
-        await channel.send(content = chatReply.msg,files=files)
+        aiReply = RCReply(chatReply.msg,attatchments=files)
+        await sendReplyToDiscord.sendToDiscord(channel,aiReply)
         for item in chatReply.rcReplies:
             await sendReplyToDiscord.sendToDiscord(channel,item)
 

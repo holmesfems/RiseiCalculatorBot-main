@@ -24,7 +24,7 @@ from recruitment.recruitment import showHighStars
 import base64
 import traceback
 from openai.types.responses.response_code_interpreter_tool_call import ResponseCodeInterpreterToolCall
-
+import shutil
 
 with open("openaichat/systemPrompt.txt","r",encoding="utf-8_sig") as f:
     SYSTEM_PROMPT = f.read()
@@ -192,7 +192,8 @@ class ChatSession:
         except GPTError as e:
             return ChatReply(msg=e.text)
         except Exception as e:
-            return ChatReply(msg=traceback.format_exc())
+            print(traceback.format_exc())
+            return ChatReply(msg=f"ごめんなさい、エラーが発生したみたい。\n{e}")
     
     @staticmethod
     def __uploadFile(attachments:List[Attachment])->List[str]:
@@ -253,8 +254,8 @@ class ChatSession:
             return content
         def filename(path:str):
             return os.path.basename(path)
-        print("expected file annotation, but has no file. try to exec code_interpreter locally")
         if(len(interpreters) > 0 and len(files) == 0):
+            print("expected file annotation, but has no file. try to exec code_interpreter locally")
             for interpreterItem in interpreters:
                 print(f"try interpreter: {interpreterItem.id}")
                 try:
@@ -269,6 +270,8 @@ class ChatSession:
                             files.append(ChatFile(readFile(p),filename(p)))
                             foundFiles.append(p.name)
                     print(f"succeed: files={foundFiles}")
+                    shutil.rmtree(work_dir)
+
                 except Exception as e:
                     print(f"error occured while running {interpreterItem.id}: {e}")
 

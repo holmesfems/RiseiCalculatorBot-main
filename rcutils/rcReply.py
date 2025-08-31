@@ -27,13 +27,37 @@ def arrangementChunks(msgList:List[str], maxLength:int):
             if(len(chunks[-1])+len(item)) <= maxLength:
                 chunks[-1] += item
             else:
-                chunks.append(item)
+                safechunk = chunk_text(item,maxLength)
+                chunks+=safechunk
+    return chunks
+
+def chunk_text(text: str, limit: int):
+    text = text or ""
+    if len(text) <= limit:
+        return [text]
+    chunks = []
+    start = 0
+    n = len(text)
+    while start < n:
+        end = min(n, start + limit)
+        if end < n:
+            split_pos = text.rfind("\n", start, end)
+            if split_pos == -1:
+                split_pos = text.rfind(" ", start, end)
+            if split_pos == -1 or split_pos <= start:
+                split_pos = end
+        else:
+            split_pos = end
+        chunks.append(text[start:split_pos])
+        start = split_pos
+        if start < n and text[start] in ("\n", " "):
+            start += 1
     return chunks
 
 #アステシアちゃんbotの出力に使うデータクラス
 #スパゲッティ化防止のため、いままでDictで応答を出力していたものを全てこれに置き換える
 class RCReply:
-    def __init__(self,plainText:str = "",embbedTitle:str = "",embbedContents:List[str] = [],responseForAI:str = "",attatchments:List[PathLike[Any]] | PathLike[Any] = None,msgType:RCMsgType = RCMsgType.OK):
+    def __init__(self,plainText:str = "",embbedTitle:str = "",embbedContents:List[str] = [],responseForAI:str = "",attatchments:List[PathLike[Any]|bytes|File] | PathLike[Any]|bytes|File = None,msgType:RCMsgType = RCMsgType.OK):
 
         #plainText: 普通に表示するメッセージ
         self.plainText = plainText
@@ -81,9 +105,16 @@ class RCReply:
     def files(self) -> List[File]:
         if not self.attatchments:
             return []
+        def safeConvertToFile(fileItem):
+            if(type(fileItem) is File): return fileItem
+            else: return File(fileItem)
         if(type(self.attatchments) is list):
-            return [File(item) for item in self.attatchments]
-        else: return [File(self.attatchments)]
+            return [safeConvertToFile(item) for item in self.attatchments]
+        else: return [safeConvertToFile(self.attatchments)]
+
+    def msgChunks(self) -> List[str]:
+        MAXLENGTH = 1900
+        return chunk_text(self.plainText,MAXLENGTH)
 
     def isMSGEmpty(self) -> bool:
         return not self.plainText and not self.embbedContents and not self.attatchments
