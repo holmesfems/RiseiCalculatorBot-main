@@ -66,7 +66,7 @@ class AssistantSession:
         )
         waited:int = 0
         while response.status in {"queued", "in_progress"}:
-            asyncio.sleep(1)
+            await asyncio.sleep(1)
             waited +=1
             response=self.client.responses.retrieve(response_id=response.id)
             if(waited%5==0):
