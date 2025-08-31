@@ -609,10 +609,11 @@ moderator:serverModerator = ...
 @client.event
 async def on_message(message:discord.Message):
     if(message.author.id == int(ID)): return
-    moderated = await moderator.moderingMSG(message)
-    if(moderated): 
-        print("Message moderated")
-        return
+    if(moderator is not ...):
+        moderated = await moderator.moderingMSG(message)
+        if(moderated): 
+            print("Message moderated")
+            return
     if message.channel.id == OPENAI_CHANNELID:
         await msgForAIChat(message,"public")
     elif message.channel.id == RECRUIT_CHANNELID:

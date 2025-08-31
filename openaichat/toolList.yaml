@@ -121,6 +121,8 @@
     - target
 
 - type: code_interpreter
+  container:
+    type: auto
 - type: image_generation
 - type: web_search
 #- type: web_search_preview
