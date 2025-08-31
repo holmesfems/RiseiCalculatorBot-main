@@ -1,132 +1,127 @@
 - type: function
-  function:
-    name: riseiMaterials
-    description: Get the information (e.g. sanity efficiency, sanity cost, time efficiency, time cost, etc.) of stages to farm a kind of material in Arknights
-    parameters:
-      type: object
-      properties:
-        target:
-          type: string
-          description: Category of the material
-          enum:
-          #日本語の場合、AIが誤字する場合があったので英語に書き換える
-          - Orirock
-          - Device
-          - Polyester
-          - Sugar
-          - Ori-iron
-          - Aketon
-          - Kohl
-          - Manganese
-          - Grindstone
-          - RMA
-          - Gel
-          - Incandescent Alloy
-          - Crystalline
-          - Solvent
-          - Cutting Fluid
-          - Transmuted Salt
-          - Fiber
-          - Hydrocarbon
-      required:
-      - target
+  name: riseiMaterials
+  description: Get the information (e.g. sanity efficiency, sanity cost, time efficiency, time cost, etc.) of stages to farm a kind of material in Arknights
+  parameters:
+    type: object
+    properties:
+      target:
+        type: string
+        description: Category of the material
+        enum:
+        #日本語の場合、AIが誤字する場合があったので英語に書き換える
+        - Orirock
+        - Device
+        - Polyester
+        - Sugar
+        - Ori-iron
+        - Aketon
+        - Kohl
+        - Manganese
+        - Grindstone
+        - RMA
+        - Gel
+        - Incandescent Alloy
+        - Crystalline
+        - Solvent
+        - Cutting Fluid
+        - Transmuted Salt
+        - Fiber
+        - Hydrocarbon
+    required:
+    - target
 - type: function
-  function:
-    name: riseiStages
-    description: Get the information (e.g. efficiency, sanity cost, time cost, main
-      drop, etc.) of constant stages in Arknights
-    parameters:
-      type: object
-      properties:
-        target:
-          type: string
-          description: The code name of the stage. e.g. 1-7 8-3 GA-8 JT8-2
-      required:
-      - target
+  name: riseiStages
+  description: Get the information (e.g. efficiency, sanity cost, time cost, main
+    drop, etc.) of constant stages in Arknights
+  parameters:
+    type: object
+    properties:
+      target:
+        type: string
+        description: The code name of the stage. e.g. 1-7 8-3 GA-8 JT8-2
+    required:
+    - target
 - type: function
-  function:
-    name: riseiLists
-    description: Get the contents of a table about sanity efficiency
-    parameters:
-      type: object
-      properties:
-        target:
-          type: string
-          description: Name of the table
-          enum:
-          - Base stage table
-          - Sanity-Value table
-          - Commendation Certificate Efficiency table
-          - Distinction Certificate Efficiency table
-          - Special Exchange Order Efficiency table
-          - Contract Bounty Efficiency table
-          - Crystal Exchange Efficiency table
-          - Pinch-out Exchange Efficiency table
-      required:
-      - target
+  name: riseiLists
+  description: Get the contents of a table about sanity efficiency
+  parameters:
+    type: object
+    properties:
+      target:
+        type: string
+        description: Name of the table
+        enum:
+        - Base stage table
+        - Sanity-Value table
+        - Commendation Certificate Efficiency table
+        - Distinction Certificate Efficiency table
+        - Special Exchange Order Efficiency table
+        - Contract Bounty Efficiency table
+        - Crystal Exchange Efficiency table
+        - Pinch-out Exchange Efficiency table
+    required:
+    - target
 - type: function
-  function:
-    name: operatorEliteCost
-    description: Get the material cost list to promote an operator, 
-    parameters:
-      type: object
-      properties:
-        target:
-          type: string
-          description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
-      required:
-      - target
+  name: operatorEliteCost
+  description: Get the material cost list to promote an operator, 
+  parameters:
+    type: object
+    properties:
+      target:
+        type: string
+        description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
+    required:
+    - target
 - type: function
-  function:
-    name: operatorSkillInfo
-    description: Get the material cost list to specialize one of the skill of an operator. Each operator has up to 3 skills.
-    parameters:
-      type: object
-      properties:
-        target:
-          type: string
-          description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
-        skillnum:
-          type: number
-          description: The skill number
-        # infoType:
-        #   type: string
-        #   description: Type of the infomation
-        #   enum:
-        #   - Description
-        #   - Cost list to speciallize
-      required:
-      - target
-      - skillnum
-      # - infoType
+  name: operatorSkillInfo
+  description: Get the material cost list to specialize one of the skill of an operator. Each operator has up to 3 skills.
+  parameters:
+    type: object
+    properties:
+      target:
+        type: string
+        description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
+      skillnum:
+        type: number
+        description: The skill number
+      # infoType:
+      #   type: string
+      #   description: Type of the infomation
+      #   enum:
+      #   - Description
+      #   - Cost list to speciallize
+    required:
+    - target
+    - skillnum
+    # - infoType
 - type: function
-  function:
-    name: operatorModuleCost
-    description: Get the material cost list to unlock or modify the module of an operator
-    parameters:
-      type: object
-      properties:
-        target:
-          type: string
-          description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
-      required:
-      - target
+  name: operatorModuleCost
+  description: Get the material cost list to unlock or modify the module of an operator
+  parameters:
+    type: object
+    properties:
+      target:
+        type: string
+        description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
+    required:
+    - target
 - type: function
-  function:
-    name: operatorFKInfo
-    description: Get the Frame-Kill(FK) info of a skill of the operator.
-    parameters:
-      type: object
-      properties:
-        target:
-          type: string
-          description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
-        skillnum:
-          type: number
-          description: The skill number. 
-      required:
-      - target
+  name: operatorFKInfo
+  description: Get the Frame-Kill(FK) info of a skill of the operator.
+  parameters:
+    type: object
+    properties:
+      target:
+        type: string
+        description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
+      skillnum:
+        type: number
+        description: The skill number. 
+    required:
+    - target
 
 - type: code_interpreter
+- type: image_generation
+- type: web_search
 #- type: web_search_preview
 #- type: image_generation
