@@ -19,6 +19,7 @@ from riseicalculator2 import listInfo
 from rcutils.rcReply import RCReply
 from fkDatabase.fkDataSearch import fkInfo
 from openaichat.assistantSession import AssistantSession,GPTError
+from recruitment.recruitment import showHighStars
 import base64
 import traceback
 
@@ -121,6 +122,12 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
         targetEstimated = operator_typo_correction(targetEstimated)
         return fkInfo.getReply(targetEstimated,number)
     
+    elif(functionName == "getRecruitmentList"):
+        #公開求人タグ検索
+        star = functionArgs.get("star")
+        isGlobal = functionArgs.get(isGlobal)
+        return showHighStars(minStar=star,isGlobal=isGlobal)
+
     #全部ヒットしない場合、メソッド未実装である
     return RCReply(responseForAI=f"Error: function is not implemented: {functionName}")
 

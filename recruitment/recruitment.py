@@ -9,6 +9,7 @@ from datetime import datetime,date
 import sys
 sys.path.append('../')
 from rcutils.getnow import getnow
+import json
 
 class RecruitTag(ABC):
     def __init__(self,tagName):
@@ -282,7 +283,8 @@ def showHighStars(minStar:int = 4,isGlobal:bool = True) -> RCReply:
     if(not chunks): chunks = [f"★{minStar}の確定タグはありません"]
     return RCReply(
         embbedTitle="★{0}確定タグ一覧".format(minStar),
-        embbedContents=chunks
+        embbedContents=chunks,
+        responseForAI=json.dumps(allCombineList)
     )
 
     

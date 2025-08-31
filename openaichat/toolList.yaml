@@ -30,6 +30,8 @@
         - Condensation-like nuclei
     required:
     - target
+    additionalProperties: false
+  strict: true
 - type: function
   name: riseiStages
   description: Get the information (e.g. efficiency, sanity cost, time cost, main
@@ -42,6 +44,8 @@
         description: The code name of the stage. e.g. 1-7 8-3 GA-8 JT8-2
     required:
     - target
+    additionalProperties: false
+  strict: true
 - type: function
   name: riseiLists
   description: Get the contents of a table about sanity efficiency
@@ -62,6 +66,8 @@
         - Pinch-out Exchange Efficiency table
     required:
     - target
+    additionalProperties: false
+  strict: true
 - type: function
   name: operatorEliteCost
   description: Get the material cost list to promote an operator, 
@@ -73,6 +79,8 @@
         description: Name of the operator. e.g. アーミヤ アステシア エイヤフィヤトラ
     required:
     - target
+    additionalProperties: false
+  strict: true
 - type: function
   name: operatorSkillInfo
   description: Get the material cost list to specialize one of the skill of an operator. Each operator has up to 3 skills.
@@ -95,6 +103,8 @@
     - target
     - skillnum
     # - infoType
+    additionalProperties: false
+  strict: true
 - type: function
   name: operatorModuleCost
   description: Get the material cost list to unlock or modify the module of an operator
@@ -126,6 +136,30 @@
         - "素質2"
     required:
     - target
+    additionalProperties: false
+  strict: true
+
+- type: function
+  name: getRecruitmentList
+  description: Get a tag combination that will ensure that only characters of the specified star appear
+  parameters:
+    type: object
+    properties:
+      star:
+        type: number
+        description: The star to specify
+        enum:
+        - 4
+        - 5
+      isGlobal:
+        type: boolean
+        description: True for the Global Server, and false for the CN Server. Default is True.
+    required:
+    - star
+    - isGlobal
+    additionalProperties: false
+  strict: true
+
 
 - type: code_interpreter
   container:
