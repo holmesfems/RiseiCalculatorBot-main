@@ -125,7 +125,7 @@ def toolCalling(functionName:str,functionArgs:Dict[str,str]) -> RCReply:
     elif(functionName == "getRecruitmentList"):
         #公開求人タグ検索
         star = functionArgs.get("star")
-        isGlobal = functionArgs.get(isGlobal)
+        isGlobal = functionArgs.get("isGlobal")
         return showHighStars(minStar=star,isGlobal=isGlobal)
 
     #全部ヒットしない場合、メソッド未実装である
