@@ -283,7 +283,7 @@ def showHighStars(minStar:int = 4,isGlobal:bool = True) -> RCReply:
     listForAI = [
         {
             "tags": str(key),
-            "operators": value
+            "operators": [item.name for item in value]
         } for key,value in allCombineList.items()
     ]
     if(not chunks): chunks = [f"★{minStar}の確定タグはありません"]
