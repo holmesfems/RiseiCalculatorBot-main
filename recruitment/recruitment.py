@@ -290,7 +290,7 @@ def showHighStars(minStar:int = 4,isGlobal:bool = True) -> RCReply:
     return RCReply(
         embbedTitle="★{0}確定タグ一覧".format(minStar),
         embbedContents=chunks,
-        responseForAI=json.dumps(listForAI)
+        responseForAI=json.dumps(listForAI,ensure_ascii=False)
     )
 
     

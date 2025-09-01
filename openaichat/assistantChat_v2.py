@@ -271,6 +271,7 @@ class ChatSession:
                             foundFiles.append(p.name)
                     print(f"succeed: files={foundFiles}")
                     shutil.rmtree(work_dir)
+                    print("temporary files have been deleted.")
 
                 except Exception as e:
                     print(f"error occured while running {interpreterItem.id}: {e}")

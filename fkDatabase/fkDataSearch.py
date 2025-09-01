@@ -135,7 +135,7 @@ class FKInfo:
                 "fkNum": skillInfo.fkNum,
                 "fkErr": skillInfo.fkErr,
                 "detail": skillInfo.detail
-            })
+            },ensure_ascii=False)
         )
     
 fkInfo = FKInfo()
