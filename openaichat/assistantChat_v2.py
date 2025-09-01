@@ -292,6 +292,7 @@ class ChatSession:
                     functionArgs = json.loads(output.arguments)
                     functionResult = toolCalling(functionName=functionName,functionArgs=functionArgs)
                     ret.append(functionResult)
+                    print(f"function result: {functionResult.responseForAI}")
                     session.submitToolResponse(functionResult.responseForAI,functionId)
             if(hasFunction):
                 response = await session.requestByHistory(isUser=False)
