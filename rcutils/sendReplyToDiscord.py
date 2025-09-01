@@ -11,7 +11,7 @@ async def actionToDiscord(func,msg:RCReply):
         chunks = msg.msgChunks()
         if(not chunks): chunks = [""]  # メッセージが空でも最終送信でファイルを添付
         for i, chunk in enumerate(chunks):
-            if(i == len(chunks - 1)):
+            if(i == len(chunks) - 1):
                 await func(content=chunk,files = msg.files())
             else:
                 await func(content=chunk)
