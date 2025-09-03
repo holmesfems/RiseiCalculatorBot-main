@@ -493,7 +493,7 @@ def checkIsMember(user:discord.User) -> bool:
 
 def checkIsAdministrator(user:discord.User) -> bool:
     fserver = client.get_guild(F_SERVER_GUILDID)
-    ADMINISTRATOR_ROLE = int(os.environ("ADMINISTRATOR_ROLEID"))
+    ADMINISTRATOR_ROLE = int(os.environ["ADMINISTRATOR_ROLEID"])
     administrator = fserver.get_role(ADMINISTRATOR_ROLE)
     return userIsInRole(user,administrator)
 

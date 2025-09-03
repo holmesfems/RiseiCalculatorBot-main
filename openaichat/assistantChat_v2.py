@@ -151,6 +151,7 @@ class ChatSession:
         return session
     
     __CLEARCOMMANDS = ["reset","clear"]
+    __RETRYCOMMANDS = ["retry"]
 
     async def doChat(self, msg:str, threadName:str, attachments:List[Attachment]):
         session = self.__loadSession(threadName)
@@ -163,28 +164,29 @@ class ChatSession:
             session.reset()
         try:
             content = []
-            content.append({
-                "type": "input_text",
-                "text": msg
-            })
-            restAttachments = []
-            #画像を添付
-            for item in attachments:
-                if(item.width != None):
-                    content.append({
-                        "type": "input_image",
-                        "image_url": item.url
-                    })
-                else:
-                    restAttachments.append(item)
-            #残りのファイルを載せる
-            attachmentIds= ChatSession.__uploadFile(restAttachments)
-            for attachmentId in attachmentIds:
+            if(msg not in ChatSession.__RETRYCOMMANDS):
                 content.append({
-                    "type": "input_file",
-                    "file_id": attachmentId
+                    "type": "input_text",
+                    "text": msg
                 })
-            session.submitUserMsg(content)
+                restAttachments = []
+                #画像を添付
+                for item in attachments:
+                    if(item.width != None):
+                        content.append({
+                            "type": "input_image",
+                            "image_url": item.url
+                        })
+                    else:
+                        restAttachments.append(item)
+                #残りのファイルを載せる
+                attachmentIds= ChatSession.__uploadFile(restAttachments)
+                for attachmentId in attachmentIds:
+                    content.append({
+                        "type": "input_file",
+                        "file_id": attachmentId
+                    })
+                session.submitUserMsg(content)
             rcReplies = await ChatSession.__completeRun(session)
             ret = await ChatSession.__extractMsg(session)
             ret.rcReplies = rcReplies
