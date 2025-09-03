@@ -7,7 +7,7 @@ from rcutils.getnow import getnow,JST
 from typing import Union
 import re
 
-def __hasEveryone(text:str):
+def _hasEveryone(text:str):
     return "@everyone" in text
 
 # http/https、www、裸ドメイン(例: example.com/path)を検出
@@ -20,7 +20,7 @@ _URL_RE = re.compile(r"""
 )
 """, re.IGNORECASE | re.VERBOSE)
 
-def __contains_link(text: str) -> bool:
+def _contains_link(text: str) -> bool:
     if not text:
         return False
     return bool(_URL_RE.search(text))
@@ -74,8 +74,8 @@ class serverModerator:
     async def autoNotice(self,message:discord.Message) -> bool:
         #人間もしゃべる可能性があるので、誤検出しても良いようにBANまではしない。いったん報告だけ
         text = message.content
-        if(not __hasEveryone(text)): return False #@everyoneを含むメッセージのみフィルターする
-        if __contains_link(text): #リンクを含む場合は報告。管理者以外がeveryone使うのはおかしいので、banしてもいいかも
+        if(not _hasEveryone(text)): return False #@everyoneを含むメッセージのみフィルターする
+        if _contains_link(text): #リンクを含む場合は報告。管理者以外がeveryone使うのはおかしいので、banしてもいいかも
             await self.createReport("スパムメッセージを検出しました、対処をお願いします",message)
             return True
         return False
