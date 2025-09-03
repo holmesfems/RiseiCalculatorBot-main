@@ -5,13 +5,33 @@ from rcutils.rcReply import RCReply
 from rcutils.sendReplyToDiscord import sendToDiscord
 from rcutils.getnow import getnow,JST
 from typing import Union
+import re
+
+def __hasEveryone(text:str):
+    return "@everyone" in text
+
+# http/https、www、裸ドメイン(例: example.com/path)を検出
+_URL_RE = re.compile(r"""
+(?<![A-Za-z0-9])(
+    (?:https?://|ftp://)[^\s<>'"]+              # スキーム付き
+  | (?:www\.)[^\s<>'"]+                         # www.で始まるもの
+  | (?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)+ # 裸ドメイン
+    (?:[A-Za-z]{2,})(?:/[^\s<>'"]*)?            # TLDと任意のパス
+)
+""", re.IGNORECASE | re.VERBOSE)
+
+def __contains_link(text: str) -> bool:
+    if not text:
+        return False
+    return bool(_URL_RE.search(text))
+
 class serverModerator:
     def __init__(self, reportChannel:discord.TextChannel) -> None:
         self.reportChannel = reportChannel
 
-    async def moderingMSG(self,message:discord.Message):
+    async def moderingMSG(self,message:discord.Message,userIsAdmin:bool):
         #指定したチャンネルは、追加したメッセージをすべて削除
-        autoDeleted = await self.autoDeletion(message)
+        autoDeleted = await self.autoDeletion(message,userIsAdmin)
         autoAnniversaried = await self.autoAnniversary(message)
         #良さげなBANワードを思いついてないので、autoBanは一旦機能オフにする
         # if(not doneAny): doneAny = await self.autoBan(message)
@@ -19,7 +39,7 @@ class serverModerator:
         messageNeedDiscard = autoDeleted
         return messageNeedDiscard
 
-    async def autoDeletion(self,message:discord.Message) -> bool:
+    async def autoDeletion(self,message:discord.Message,userIsAdmin:bool) -> bool:
         TARGET_CHANNNEL_IDS = [
             int(os.environ["AUTODEL_1"]),
             int(os.environ["AUTODEL_2"]),
@@ -28,11 +48,13 @@ class serverModerator:
             int(os.environ["AUTODEL_5"]),
             int(os.environ["AUTODEL_6"])
         ]
+        if(userIsAdmin): return False #管理者はチェックを免除
         if message.channel.id in TARGET_CHANNNEL_IDS:
             await message.delete()
             await self.autoBan_inAutoDeletion(message)
             return True
-        return False
+        else:
+            return await self.autoNotice(message)
     
     async def autoBan_inAutoDeletion(self,message:discord.Message) -> bool:
         #このチャンネルは人間がしゃべることを想定していないので、ここで誤検出は恐れなくてよい。
@@ -49,17 +71,12 @@ class serverModerator:
             return True
         return False
 
-    async def autoBan(self,message:discord.Message) -> bool:
-        #人間もしゃべる可能性があるので、誤検出は避けたい
-        #最低限のBANワードを入れる
-        BANWORDS = [
-            "discord.gg/sexycontent",
-            "onlyfan leaks",
-            "onlyfans leaks"
-        ]
-        if any(word in message.content.lower() for word in BANWORDS):
-            await message.author.ban(delete_message_days=7)
-            await self.createReport("スパムメッセージを検出したので、自動BANを実行しました。",message)
+    async def autoNotice(self,message:discord.Message) -> bool:
+        #人間もしゃべる可能性があるので、誤検出しても良いようにBANまではしない。いったん報告だけ
+        text = message.content
+        if(not __hasEveryone(text)): return False #@everyoneを含むメッセージのみフィルターする
+        if __contains_link(text): #リンクを含む場合は報告。管理者以外がeveryone使うのはおかしいので、banしてもいいかも
+            await self.createReport("スパムメッセージを検出しました、対処をお願いします",message)
             return True
         return False
     
@@ -94,5 +111,6 @@ class serverModerator:
         content = f"{report}\n"
         if(message):
             content += f"author:{message.author.name}\n"
-            content += f"content:```{message.content.replace('.','_').replace('http','ht tp')}```"
+            content += f"content:```{message.content.replace('.','_').replace('http','ht tp')}```\n"
+            content += f"channel:{message.channel.jump_url}"
         await sendToDiscord(self.reportChannel,RCReply(plainText=content))

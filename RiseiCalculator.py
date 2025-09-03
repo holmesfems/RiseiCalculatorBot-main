@@ -479,16 +479,23 @@ async def checkBirtyday():
         channel = client.get_channel(CHANNEL_ID_HAPPYBIRTHDAY)
         await sendReplyToDiscord.sendToDiscord(channel,msg)
 
-MEMBERGUILD = int(os.environ["F_GUILDID"])
+def userIsInRole(user:discord.User,role:discord.Role):
+    return user.id in [member.id for member in role.members]
+
+F_SERVER_GUILDID = int(os.environ["F_GUILDID"])
 def checkIsMember(user:discord.User) -> bool:
-    fserver = client.get_guild(MEMBERGUILD)
+    fserver = client.get_guild(F_SERVER_GUILDID)
     YOUTUBEMEMBER_ROLE = int(os.environ["YOUTUBE_ROLEID"])
     youtubeMember = fserver.get_role(YOUTUBEMEMBER_ROLE)
     SERVERBOOSTER_ROLE = int(os.environ["BOOSTER_ROLEID"])
     serverBooster = fserver.get_role(SERVERBOOSTER_ROLE)
-    def userIsInRole(user:discord.User,role:discord.Role):
-        return user.id in [member.id for member in role.members]
     return userIsInRole(user,serverBooster) or userIsInRole(user,youtubeMember)
+
+def checkIsAdministrator(user:discord.User) -> bool:
+    fserver = client.get_guild(F_SERVER_GUILDID)
+    ADMINISTRATOR_ROLE = int(os.environ("ADMINISTRATOR_ROLEID"))
+    administrator = fserver.get_role(ADMINISTRATOR_ROLE)
+    return userIsInRole(user,administrator)
 
 OPENAI_CHANNELID = int(os.environ["OPENAI_CHANNELID"])
 async def msgForAIChat(message:discord.Message,threadName:str):
@@ -611,7 +618,7 @@ moderator:serverModerator = ...
 async def on_message(message:discord.Message):
     if(message.author.id == int(ID)): return
     if(moderator is not ...):
-        moderated = await moderator.moderingMSG(message)
+        moderated = await moderator.moderingMSG(message,checkIsAdministrator(message.author))
         if(moderated): 
             print("Message moderated")
             return
