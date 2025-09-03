@@ -74,7 +74,6 @@ class AssistantSession:
         self.__updateTime()
         self.msgHistory.clear()
         self.lastID = response.id
-        print(f"response: {response}")
         if(response.status != "completed"):
             raise GPTError(f"response is not completed: {response.error.message}")
         output: List[ResponseOutputMessage | ResponseFileSearchToolCall | ResponseFunctionToolCall | ResponseFunctionWebSearch | ResponseComputerToolCall | ResponseReasoningItem | ImageGenerationCall | ResponseCodeInterpreterToolCall | LocalShellCall | McpCall | McpListTools | McpApprovalRequest | ResponseCustomToolCall]= response.output
