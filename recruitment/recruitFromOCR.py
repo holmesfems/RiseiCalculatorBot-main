@@ -27,7 +27,8 @@ with open("recruitment/tagJaToJa.yaml","rb") as f:
         r"防御.": "防御",
         r"重装...?": "重装",
         r"上級エリード": "上級エリート",
-        r"エリード": "エリート"
+        r"エリード": "エリート",
+        r"特殊..?.?": "特殊"
     }
 
 #英語版認識用
@@ -51,7 +52,7 @@ def matchTagCoreProcess(result:List[str],baseDict:Dict[str,str],extraDict:Option
         if value in ret: continue
         if(any((key == text or key in text.split(" ")) for text in result)):
             ret.add(value)
-    if(not extraDict): return ret
+    if(not extraDict or len(ret)==5): return ret
     #一部誤字するやつがあるので、in検索で結果を補正
     #上級エリート、エリートの識別に難があったので、より自由度の高い正規表現マッチングをする
     for key,value in extraDict.items():
