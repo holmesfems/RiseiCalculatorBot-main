@@ -65,8 +65,9 @@ class serverModerator:
             "everyone",
             "peach"
         ]
-        if any(word in message.content.lower() for word in BANWORDS):
-            await message.author.ban(delete_message_days=7)
+        haslink = _contains_link(message.content)
+        if haslink or any(word in message.content.lower() for word in BANWORDS):
+            await message.author.ban(delete_message_days=7,reason="Auto-banned by the Astesia bot for sending spam messages")
             await self.createReport("スパムメッセージを検出したので、自動BANを実行しました。",message)
             return True
         return False
