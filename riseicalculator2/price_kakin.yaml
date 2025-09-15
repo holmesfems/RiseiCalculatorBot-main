@@ -208,17 +208,24 @@
 #     データ補完マシン: 20
 #     データ補完チップ: 60
 
-# イベント招集ミニパック:
-#   price: 160
-#   isConstant: false
-#   contents:
-#     イベントスカウト券: 2
+イベント招集ミニパック:
+  price: 160
+  isConstant: false
+  contents:
+    イベントスカウト券: 2
 
-# イベント招集パック:
-#   price: 1100
-#   isConstant: false
-#   contents:
-#     イベント10回スカウト券: 1
+イベント招集パック:
+  price: 1100
+  isConstant: false
+  contents:
+    イベント10回スカウト券: 1
+
+霧色の到来/時巡る花園パック:
+  price: 650
+  isConstant: false
+  contents:
+    合成玉: 1600
+    プロファイルテーマ: 1
 
 職業訓練パック:
   price: 650
