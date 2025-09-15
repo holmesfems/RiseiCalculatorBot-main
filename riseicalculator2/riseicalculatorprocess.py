@@ -1092,6 +1092,7 @@ class CalculatorManager:
                 stagesToShow = mainLandCalculator.searchMainStage(targetStage,showMinTimes)
                 msgHeader += "\nグロ版未実装につき、大陸版ステージを表示します"
                 calculator = mainLandCalculator
+                isGlobal = False
 
         if(not stagesToShow):
             return RCReply(
