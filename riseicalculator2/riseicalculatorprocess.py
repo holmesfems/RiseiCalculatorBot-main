@@ -1081,7 +1081,6 @@ class CalculatorManager:
 
     @staticmethod
     def riseistages(targetStage:str,isGlobal:bool,mode:CalculateMode,baseMinTimes:int = 3000, cache_minutes:float = DEFAULT_CACHE_TIME,showMinTimes:int = 1000,maxItems:int = 15,toCsv = False) -> RCReply:
-        riseiValues:RiseiOrTimeValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         calculator:Calculator = CalculatorManager.selectCalculator(isGlobal)
         mainLandCalculator:Calculator = CalculatorManager.selectCalculator(False)
         stagesToShow = calculator.searchMainStage(targetStage,showMinTimes)
@@ -1102,6 +1101,7 @@ class CalculatorManager:
                 responseForAI=f"Error: Invalid stage: {targetStage}"
             )
         
+        riseiValues:RiseiOrTimeValues = CalculatorManager.getValues(isGlobal,mode,baseMinTimes,cache_minutes)
         #名前順でソート
         stagesToShow.sort(key = lambda x:x.name)
         msgChunks = [msgHeader]
