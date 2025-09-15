@@ -1087,13 +1087,12 @@ class CalculatorManager:
         stagesToShow = calculator.searchMainStage(targetStage,showMinTimes)
         title = "通常ステージ検索" + ("(大陸版)" if not isGlobal else "")
         msgHeader = "検索内容 = " + targetStage
-        nowGlobal = isGlobal
         if(not stagesToShow):
             if(isGlobal):
                 stagesToShow = mainLandCalculator.searchMainStage(targetStage,showMinTimes)
                 msgHeader += "\nグロ版未実装につき、大陸版ステージを表示します"
-                nowGlobal = False
-        
+                calculator = mainLandCalculator
+
         if(not stagesToShow):
             return RCReply(
                 embbedTitle=title,
@@ -1115,7 +1114,7 @@ class CalculatorManager:
                 ["総合{1}効率    : {0:.1%}".format(stage.getEfficiency(riseiValues),str(mode))],
                 ["99%信頼区間(3σ): {0:.1%}".format(calculator.getStageDev(stage,riseiValues)*3)],
             ]
-            dropCategoryList = calculator.stageInfo.stageToCategory(stage) if(nowGlobal == isGlobal) else mainLandCalculator.stageInfo.stageToCategory(stage)
+            dropCategoryList = calculator.stageInfo.stageToCategory(stage)
             if len(dropCategoryList) == 0:
                 toPrint.append(["主ドロップ情報未登録"])
             else:
