@@ -44,7 +44,7 @@ new_zone:List[str] = [
     # 'permanent_sidestory_14_zone1', #LE
     # 'permanent_sidestory_15_zone1', #DV
     # 'permanent_sub_5_zone1', #CW
-    'main_15' #15章
+    # 'main_15' #15章
 ]
 
 @dataclass
