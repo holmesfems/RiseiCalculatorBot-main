@@ -22,7 +22,7 @@ UNI_EQ_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData_Y
 PATCH_CHAR_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData_YoStar/main/ja_JP/gamedata/excel/char_patch_table.json"
 PATCH_CHAR_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/char_patch_table.json"
 
-EPSILON = 1e-4
+EPSILON = 1e-6
 get_json = netutil.get_json
 
 jobIdToName:Dict[str,str] = {
@@ -396,7 +396,7 @@ class AllOperatorsInfo:
                 index+=1
                 skillCosts.append(AllOperatorsInfo.SkillCostInfo(skillName,operator,index,sum(skillCostList,ItemCost()),(operator.id,operator.skillIds[index-1])))
         skillCosts.sort(key=lambda x:x.totalRisei(),reverse=True)
-        return {item.key: item for item in skillCosts}
+        return {item.key: item for item in skillCosts if item.totalRisei() > EPSILON}
 
 class OperatorCostsCalculator:
     class CostListSelection(StrEnum):
@@ -544,6 +544,7 @@ class OperatorCostsCalculator:
                 name = value.name
                 #print(name,star5Operators[key].totalPhaseCost())
                 riseiValue = value.totalPhaseCost().toRiseiValue_OnlyValueTarget(not value.isCNOnly())
+                if(not riseiValue > EPSILON): continue
                 #phaseCost = star5Operators[key].totalPhaseCost()
                 toPrint.append(f"{index+1}. {name} : {riseiValue:.3f}")
                 if(len(toPrint)% 50 == 0):
