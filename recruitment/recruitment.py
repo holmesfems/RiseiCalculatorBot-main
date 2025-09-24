@@ -237,7 +237,7 @@ def searchMapToStringChunks(searchMap):
         chunks.append(chunk)
         aiChunk = keyMsg + " -> ★{0}".format(minStarValue)
         if(minStarValue >= 5):
-            aiChunk += f" {" ".join([op.name for op in valueSortedByStar])}"
+            aiChunk += f"\n{" ".join([op.name for op in valueSortedByStar])}"
         aiChunk += "\n"
         toAIChunks.append(aiChunk)
     return (chunks,toAIChunks)
