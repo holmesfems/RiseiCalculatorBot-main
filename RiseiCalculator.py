@@ -512,7 +512,6 @@ async def msgForAIChat(message:discord.Message,threadName:str):
             await sendReplyToDiscord.sendToDiscord(channel,item)
 
 RECRUIT_CHANNELID = int(os.environ["RECRUIT_CHANNELID"])
-RECRUIT_TEXT_CHANNELID = int(os.environ["RECRUIT_TEXT_CHANNELID"])
 async def msgForOCR(message:discord.Message):
     attachment = message.attachments
     if(not attachment): #テキスト識別モード
@@ -634,7 +633,7 @@ async def on_message(message:discord.Message):
         if(not checkIsMember(message.author)):
             return
         await msgForAIChat(message,"publicChannel_d5AZPQXu") #乱数英文字入れてユーザーIDとの衝突を回避
-    elif message.channel.id in [RECRUIT_CHANNELID, RECRUIT_TEXT_CHANNELID]:
+    elif message.channel.id in [RECRUIT_CHANNELID]:
         if message.reference is not None:
             referenced_message = await message.channel.fetch_message(message.reference.message_id)
             if(referenced_message.author != client.user):
