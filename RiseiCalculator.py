@@ -20,8 +20,8 @@ import infoFromOuterSource.updator as infoUpdator
 from eventPrediction import eventPredicton
 
 TOKEN = os.environ["BOT_TOKEN"]
-ID = os.environ["BOT_ID"]
-url_botCommands = f"https://discord.com/api/v8/applications/{ID}/commands"
+SELF_ID = os.environ["BOT_ID"]
+url_botCommands = f"https://discord.com/api/v8/applications/{SELF_ID}/commands"
 intents=discord.Intents.all()
 client = discord.Client(intents=intents,command_prefix = '/')
 t_delta = datetime.timedelta(hours=9)  # 9時間
@@ -511,9 +511,16 @@ async def msgForAIChat(message:discord.Message,threadName:str):
             await sendReplyToDiscord.sendToDiscord(channel,item)
 
 RECRUIT_CHANNELID = int(os.environ["RECRUIT_CHANNELID"])
+RECRUIT_TEXT_CHANNELID = int(os.environ["RECRUIT_TEXT_CHANNELID"])
 async def msgForOCR(message:discord.Message):
     attachment = message.attachments
-    if(not attachment): return
+    if(not attachment): #テキスト識別モード
+        tagText = message.content
+        tagMatch = recruitFromOCR.matchTag(tagText)
+        if(tagMatch.isEmpty()): return
+        msg = recruitment.recruitDoProcess(tagMatch.matches,4,isGlobal=tagMatch.isGlobal)
+        await sendReplyToDiscord.replyToDiscord(message,msg)
+        return
     for file in attachment:
         if(not file.width or not file.height): return
         image = file.url
@@ -616,7 +623,7 @@ moderator:serverModerator = ...
 
 @client.event
 async def on_message(message:discord.Message):
-    if(message.author.id == int(ID)): return
+    if(message.author.id == int(SELF_ID)): return
     if(moderator is not ...):
         moderated = await moderator.moderingMSG(message,checkIsAdministrator(message.author))
         if(moderated): 
@@ -626,7 +633,7 @@ async def on_message(message:discord.Message):
         if(not checkIsMember(message.author)):
             return
         await msgForAIChat(message,"publicChannel_d5AZPQXu") #乱数英文字入れてユーザーIDとの衝突を回避
-    elif message.channel.id == RECRUIT_CHANNELID:
+    elif message.channel.id in [RECRUIT_CHANNELID, RECRUIT_TEXT_CHANNELID]:
         if message.reference is not None:
             referenced_message = await message.channel.fetch_message(message.reference.message_id)
             if(referenced_message.author != client.user):
@@ -634,8 +641,6 @@ async def on_message(message:discord.Message):
             async with message.channel.typing():
                 await msgForOCRReply(message,referenced_message)
         else:
-            attachment = message.attachments
-            if(not attachment): return
             async with message.channel.typing():
                 await msgForOCR(message)
     elif message.channel.type is discord.ChannelType.private:

@@ -79,6 +79,9 @@ class MatchTagResponseData:
     def isIllegal(self):
         return len(self.matches) != 5
     
+    def isEmpty(self):
+        return len(self.matches) == 0
+    
     def __repr__(self) -> str:
         return f"{self.matches=}, {self.isGlobal=}"
 
