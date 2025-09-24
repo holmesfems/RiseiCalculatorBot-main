@@ -659,6 +659,7 @@ async def on_ready():
 from http.server import HTTPServer,BaseHTTPRequestHandler
 from urllib.parse import urlparse
 from urllib.parse import parse_qs
+from threading import Thread
 
 def executeHTTPFunction(path,params):
     if(path == "recruitment"):
@@ -682,9 +683,17 @@ class CustomHTTPRequestHandler(BaseHTTPRequestHandler):
 
 server_address = ('0.0.0.0',8000)
 
-async def startServer():
+def startServer():
     httpd = HTTPServer(server_address,CustomHTTPRequestHandler)
     print("server_started")
     httpd.serve_forever()
 
-client.run(TOKEN) 
+def startDiscordClient():
+    client.run(TOKEN)
+
+thread1 = Thread(target=startDiscordClient)
+thread2 = Thread(target=startServer)
+thread1.start()
+thread2.start()
+thread1.join()
+thread2.join()
