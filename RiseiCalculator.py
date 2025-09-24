@@ -653,7 +653,7 @@ async def on_ready():
     await tree.sync()
     moderator = serverModerator(client.get_channel(int(os.environ["REPORT_CHANNEL_ID"])))
     checkBirtyday.start()
-    asyncio.ensure_future(startServer())
+    #asyncio.ensure_future(startServer())
     print('Botでログインしました')
 
 from http.server import HTTPServer,BaseHTTPRequestHandler
