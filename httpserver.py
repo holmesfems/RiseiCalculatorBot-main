@@ -15,9 +15,9 @@ def doRecruitment():
     #text = request.args.get("text")
     print(text)
     matchTag = recruitFromOCR.matchTag(text)
-    if(matchTag.isEmpty()): return "タグがありません"
+    if(matchTag.isEmpty()): return {"reply":"タグがありません","title":"エラー"}
     reply = recruitment.recruitDoProcess(matchTag.matches,4,matchTag.isGlobal)
-    return {"reply":reply.getEmbbedText(),"title":reply.embbedTitle}
+    return {"reply":reply.responseForAI, "title":reply.embbedTitle}
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=port)

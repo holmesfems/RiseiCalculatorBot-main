@@ -219,8 +219,9 @@ def allAinBnotEq(a:tuple,b:tuple):
 
 def searchMapToStringChunks(searchMap):
     if(not searchMap):
-        return []
+        return ([],[])
     chunks = []
+    toAIChunks = []
     keyLenSorted = sorted(searchMap.items(),key=lambda x:len(x[0]),reverse=True)
     valueLenSorted = sorted(keyLenSorted,key=lambda x:len(x[1]))
     maxstarSorted = sorted(valueLenSorted,key=lambda x:maxStar(x[1]),reverse=True)
@@ -234,7 +235,12 @@ def searchMapToStringChunks(searchMap):
         valueMsg = ",".join(valueStrList)
         chunk = keyMsg + " -> ★{0}".format(minStarValue) + "```\n" + valueMsg+"```\n"
         chunks.append(chunk)
-    return chunks
+        aiChunk = keyMsg + " -> ★{0}".format(minStarValue)
+        if(minStarValue >= 5):
+            aiChunk += f" ({valueMsg})"
+        aiChunk += "\n"
+        toAIChunks.append(aiChunk)
+    return (chunks,toAIChunks)
             
 def recruitDoProcess(inputTagList:Iterable[str],minStar:Optional[int]=None,isGlobal:bool=True) -> RCReply:
     #OpenAIから呼び出す予定なし
@@ -245,11 +251,11 @@ def recruitDoProcess(inputTagList:Iterable[str],minStar:Optional[int]=None,isGlo
     showRobot = False
     if(minStar == 4): showRobot = True
     searchMap = createSearchMap(inputList,get_operators(glob=isGlobal),minStar,showRobot=showRobot)
-    chunks = searchMapToStringChunks(searchMap)
+    (chunks,aiChunks) = searchMapToStringChunks(searchMap)
     if(not chunks): chunks = [f"★{minStar}以上になる組み合わせはありません"]
     title = " ".join(inputList)
     if(not isGlobal): title += "(大陸版)"
-    return RCReply(embbedTitle=title,embbedContents=chunks)
+    return RCReply(embbedTitle=title,embbedContents=chunks,responseForAI="".join(aiChunks))
 
 def compareTagKey(tag:str):
     return tagNameList.index(tag) if tag in tagNameList else -1
