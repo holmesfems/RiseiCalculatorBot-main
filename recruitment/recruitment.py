@@ -252,7 +252,9 @@ def recruitDoProcess(inputTagList:Iterable[str],minStar:Optional[int]=None,isGlo
     if(minStar == 4): showRobot = True
     searchMap = createSearchMap(inputList,get_operators(glob=isGlobal),minStar,showRobot=showRobot)
     (chunks,aiChunks) = searchMapToStringChunks(searchMap)
-    if(not chunks): chunks = [f"★{minStar}以上になる組み合わせはありません"]
+    if(not chunks): 
+        chunks = [f"★{minStar}以上になる組み合わせはありません"]
+        aiChunks = chunks
     title = " ".join(inputList)
     if(not isGlobal): title += "(大陸版)"
     return RCReply(embbedTitle=title,embbedContents=chunks,responseForAI="".join(aiChunks))
