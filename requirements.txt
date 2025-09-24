@@ -8,3 +8,4 @@ StrEnum
 google-cloud-vision==3.10.2
 aiohttp
 nest_asyncio
+flask
