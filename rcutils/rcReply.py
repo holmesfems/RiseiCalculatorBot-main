@@ -118,3 +118,6 @@ class RCReply:
 
     def isMSGEmpty(self) -> bool:
         return not self.plainText and not self.embbedContents and not self.attatchments
+    
+    def getEmbbedText(self):
+        return "".join(self.embbedContents)
