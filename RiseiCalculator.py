@@ -681,7 +681,7 @@ class CustomHTTPRequestHandler(BaseHTTPRequestHandler):
         path = parsed.path.replace('/','')
         self.wfile.write(f'{executeHTTPFunction(path,params)}'.encode())
 
-server_address = ('0.0.0.0',443)
+server_address = ('0.0.0.0',80)
 
 def startServer():
     httpd = HTTPServer(server_address,CustomHTTPRequestHandler)
