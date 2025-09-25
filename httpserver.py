@@ -13,7 +13,7 @@ app = Flask(__name__)
 def doRecruitment():
     text= json.loads(request.data.decode("utf-8"))["text"]
     #text = request.args.get("text")
-    print(text)
+    #print(text)
     matchTag = recruitFromOCR.matchTag(text)
     if(matchTag.isEmpty()): return {"reply":"タグがありません","title":"エラー"}
     reply = recruitment.recruitDoProcess(matchTag.matches,4,matchTag.isGlobal)
