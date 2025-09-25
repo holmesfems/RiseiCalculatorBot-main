@@ -16,7 +16,11 @@ def doRecruitment():
     #print(text)
     matchTag = recruitFromOCR.matchTag(text)
     if(matchTag.isEmpty()): return {"reply":"タグがありません","title":"エラー"}
-    reply = recruitment.recruitDoProcess(matchTag.matches,4,matchTag.isGlobal)
+    matches = matchTag.matches
+    if(len(matches) > 8):
+        matches = list(matches)[:8]
+
+    reply = recruitment.recruitDoProcess(matches,4,matchTag.isGlobal)
     return {"reply":reply.responseForAI, "title":reply.embbedTitle}
 
 if __name__ == '__main__':
