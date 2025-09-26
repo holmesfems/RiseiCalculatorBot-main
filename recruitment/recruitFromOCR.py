@@ -29,7 +29,8 @@ with open("recruitment/tagJaToJa.yaml","rb") as f:
         r"重装...?": "重装",
         r"上級エリード": "上級エリート",
         r"エリード": "エリート",
-        r"特殊..?.?": "特殊"
+        r"特殊..?.?": "特殊",
+        r"551t": "弱化"
     }
 #誤字修正用辞書
 replacedict = {
