@@ -17,7 +17,7 @@ with open("recruitment/tagJaToJa.yaml","rb") as f:
     __jaExtraDict = {
         r"範囲攻." : "範囲攻撃",
         r"範圍攻擊": "範囲攻撃",
-        r"範围攻擊": "範囲攻撃",
+        r"範围攻.": "範囲攻撃",
         r"(?!上級)(..?)?一下" : "エリート",
         r"医療...?": "医療",
         r"上級..一下": "上級エリート",
@@ -31,6 +31,18 @@ with open("recruitment/tagJaToJa.yaml","rb") as f:
         r"エリード": "エリート",
         r"特殊..?.?": "特殊"
     }
+#誤字修正用辞書
+replacedict = {
+    r"工": "エ", #工学の「工」をカタカナの「エ」に エリート
+    r"夕": "タ", #夕日の夕をカタカナの「タ」に ○○タイプ
+    r"一": "ー", #数字の「一」を伸ばし棒に エリート
+    r"卜": "ト", #漢字の「卜」(うらない)をカタカナの「ト」に エリート
+    r"り": "リ", #ひらがなのりをカタカナのリに エリート
+    r"ブ": "プ", # ○○タイプ
+    r"カ": "力", #カタカナの「カ」を漢字の「力」に 火力、爆発力
+    r"口": "ロ", #漢字の「口」をカタカナの「ロ」に ロボットなど
+
+}
 
 #英語版認識用
 with open("recruitment/tagEnToJa.yaml","rb") as f:
@@ -87,9 +99,11 @@ class MatchTagResponseData:
         return f"{self.matches=}, {self.isGlobal=}"
 
 def matchTag(result:str) -> MatchTagResponseData:
-    clearRegex = r"[.,·・´`‧˙。¸Ⓡ【®:]+|^[-]+"
+    clearRegex = r"[.,·・´`‧˙。¸Ⓡ【®:]+|^[-]+|[-]+$"
+    for(key,value) in replacedict:
+        result = re.sub(key,value,result)
     listResult = re.split("\n",result)
-    listResult = [re.sub(clearRegex,"",item).replace('ブ',"プ").strip() for item in listResult] #塵の影響を除去..?
+    listResult = [re.sub(clearRegex,"",item).strip() for item in listResult] #塵の影響を除去..?
 
     #localeの判断は当てにならないので(大体undになる)、順番にマッチを試す
     #そこまでコストの高い計算でもないので、現状これでいいでしょう
