@@ -100,7 +100,7 @@ class MatchTagResponseData:
 
 def matchTag(result:str) -> MatchTagResponseData:
     clearRegex = r"[.,·・´`‧˙。¸Ⓡ【®:]+|^[-]+|[-]+$"
-    for(key,value) in replacedict:
+    for(key,value) in replacedict.items():
         result = re.sub(key,value,result)
     listResult = re.split("\n",result)
     listResult = [re.sub(clearRegex,"",item).strip() for item in listResult] #塵の影響を除去..?
