@@ -227,15 +227,16 @@ def searchMapToStringChunks(searchMap):
     maxstarSorted = sorted(valueLenSorted,key=lambda x:maxStar(x[1]),reverse=True)
     minstarSorted = sorted(maxstarSorted,key=lambda x:minStar(x[1]),reverse=True)
     for (key,value) in minstarSorted:
-        valueSortedByStar = sorted(value,key=lambda x:x.stars,reverse=True)
+        valueSortedByStar = sorted(value,key=lambda x:x.stars,reverse=False)
         minStarValue = minStar(valueSortedByStar)
+        starSet = set([item.stars for item in valueSortedByStar])
         keyStrList = toStrList(key)
         valueStrList = toStrList(valueSortedByStar)
         keyMsg = "+".join(keyStrList)
         valueMsg = ",".join(valueStrList)
         chunk = keyMsg + " -> ★{0}".format(minStarValue) + "```\n" + valueMsg+"```\n"
         chunks.append(chunk)
-        aiChunk = keyMsg + " -> ★{0}".format(minStarValue)
+        aiChunk = keyMsg + " -> " + ", ".join(["★{0}".format(star) for star in starSet])
         if(minStarValue >= 5):
             aiChunk += f"\n{" ".join([op.name for op in valueSortedByStar])}"
         aiChunk += "\n"
