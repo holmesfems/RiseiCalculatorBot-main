@@ -1,13 +1,17 @@
 from recruitment import recruitment,recruitFromOCR
 from fastapi import FastAPI
-from pydantic import BaseModel
+from pydantic import BaseModel,Field
 
 app = FastAPI()
 
 class OCRRawData(BaseModel):
-    text: str
+    text: str = Field(description="The raw data of OCR result. Each tag should be separated by line breaks")
 
-@app.post('/recruitment/')
+class TagReplyData(BaseModel):
+    title: str = Field(description="The recognized tags")
+    reply: str = Field(description="The result to be displayed on screen")
+
+@app.post('/recruitment/',response_model=TagReplyData,description="Extract tags of arknights public recruitment from raw OCR data, and calculate high-rare tag combination")
 def doRecruitment(data:OCRRawData):
     text= data.text
     matchTag = recruitFromOCR.matchTag(text)
