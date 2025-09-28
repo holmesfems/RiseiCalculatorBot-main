@@ -4,11 +4,11 @@ from pydantic import BaseModel
 
 app = FastAPI()
 
-class TagData(BaseModel):
+class OCRRawData(BaseModel):
     text: str
 
 @app.post('/recruitment/')
-def doRecruitment(data:TagData):
+def doRecruitment(data:OCRRawData):
     text= data.text
     matchTag = recruitFromOCR.matchTag(text)
     if(matchTag.isEmpty()): return {"reply":"タグがありません","title":"エラー"}
