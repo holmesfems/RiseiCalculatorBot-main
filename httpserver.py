@@ -2,7 +2,26 @@ from recruitment import recruitment,recruitFromOCR
 from fastapi import FastAPI
 from pydantic import BaseModel,Field
 
-app = FastAPI()
+description = """
+現在開放中の機能は以下の通り:
+- 公開求人検索(recruitment)
+"""
+
+app = FastAPI(
+    title="F鯖アステシアちゃんbot 外部API",
+    description=description,
+    summary="F鯖アステシアちゃんbotの外部用API。",
+    version="0.0.1",
+    contact={
+        "name": "ふぉめ holmesfems",
+        "url": "https://youtube.com/@holmesfems",
+        "email": "holmesfems@gmail.com"
+    },
+    license_info={
+        "name": "MIT License",
+        "url": "https://opensource.org/license/mit",
+    },
+)
 
 class OCRRawData(BaseModel):
     text: str = Field(description="The raw data of OCR result. Each tag should be separated by line breaks")
