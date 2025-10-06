@@ -54,6 +54,9 @@ class AssistantSession:
         self.lastID = None
         self.__updateTime()
 
+    def touch(self):
+        self.__updateTime()
+
     async def requestByHistory(self,isUser = True):
         if(isUser): self.responseHistory.clear()
         response = self.client.responses.create(

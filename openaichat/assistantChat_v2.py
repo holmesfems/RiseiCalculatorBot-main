@@ -152,6 +152,7 @@ class ChatSession:
     
     __CLEARCOMMANDS = ["reset","clear"]
     __RETRYCOMMANDS = ["retry"]
+    __CONTINUECOMMANDS = ["continue"]
 
     async def doChat(self, msg:str, threadName:str, attachments:List[Attachment]):
         session = self.__loadSession(threadName)
@@ -159,6 +160,9 @@ class ChatSession:
         if(msg in ChatSession.__CLEARCOMMANDS):
             session.reset()
             return ChatReply(msg="会話履歴をリセットしたわ。")
+        elif(msg in ChatSession.__CONTINUECOMMANDS):
+            session.touch()
+            return ChatReply(msg="会話を延長したわ。")
         # 10分過ぎたら記憶をクリアする
         if(now - session.lastUpdated > self.timeout):
             session.reset()
