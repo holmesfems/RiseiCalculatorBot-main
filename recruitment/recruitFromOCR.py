@@ -101,11 +101,11 @@ class MatchTagResponseData:
 
 def matchTag(result:str) -> MatchTagResponseData:
     clearRegex = r"[•་.,·・´`‧˙。¸Ⓡ【®:]+|^[-]+|[-]+$"
+    result = re.sub(clearRegex,"",result) #塵の影響を除去..?
     for(key,value) in replacedict.items():
         result = re.sub(key,value,result)
-    listResult = re.split("\n",result)
-    listResult = [re.sub(clearRegex,"",item).strip() for item in listResult] #塵の影響を除去..?
-
+    listResult = [item.strip() for item in re.split("\n",result)]
+    
     #localeの判断は当てにならないので(大体undになる)、順番にマッチを試す
     #そこまでコストの高い計算でもないので、現状これでいいでしょう
     jpMatch = matchJaTag(listResult)
