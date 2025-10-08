@@ -100,7 +100,7 @@ class MatchTagResponseData:
         return f"{self.matches=}, {self.isGlobal=}"
 
 def matchTag(result:str) -> MatchTagResponseData:
-    clearRegex = r"[་.,·・´`‧˙。¸Ⓡ【®:]+|^[-]+|[-]+$"
+    clearRegex = r"[•་.,·・´`‧˙。¸Ⓡ【®:]+|^[-]+|[-]+$"
     for(key,value) in replacedict.items():
         result = re.sub(key,value,result)
     listResult = re.split("\n",result)
