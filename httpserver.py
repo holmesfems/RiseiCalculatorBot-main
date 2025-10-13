@@ -38,7 +38,7 @@ def doRecruitment(data:OCRRawData):
     matches = matchTag.matches
     if(len(matches) > 8):
         matches = list(matches)[:8]
-    reply = recruitment.recruitDoProcess(matches,4,matchTag.isGlobal)
+    reply = recruitment.recruitDoProcess(matches,4,matchTag.isGlobal,showTagLoss=True)
     return TagReplyData(title=reply.embbedTitle,reply=reply.responseForAI)
 
 print("Server started")

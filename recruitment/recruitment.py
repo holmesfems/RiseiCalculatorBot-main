@@ -288,7 +288,7 @@ def searchMapToStringChunks(tagMatchResult:TagMatchResult):
         toAIChunks.append(aiChunk)
     return (chunks,toAIChunks)
             
-def recruitDoProcess(inputTagList:Iterable[str],minStar:Optional[int]=None,isGlobal:bool=True) -> RCReply:
+def recruitDoProcess(inputTagList:Iterable[str],minStar:Optional[int]=None,isGlobal:bool=True,showTagLoss=False) -> RCReply:
     #OpenAIから呼び出す予定なし
     inputList = set(inputTagList)
     inputList = list(filter(lambda x:x is not None and x in tagNameList,inputList))
@@ -299,12 +299,12 @@ def recruitDoProcess(inputTagList:Iterable[str],minStar:Optional[int]=None,isGlo
     tagMatchResult = calculateTagMatchResult(inputList,isGlobal,minStar,showRobot=showRobot)
     title = " ".join(inputList)
     if(not isGlobal): title += " (大陸版)"
+    if(showTagLoss and len(inputList)<5): title+="(タグ欠損)"
+    if(showTagLoss and len(inputList)>5): title+="(タグ過多)"
     if(tagMatchResult.isEmpty()): 
         chunks = [f"★{minStar}以上になる組み合わせはありません"]
         return RCReply(embbedTitle=title,embbedContents=chunks,responseForAI=chunks[0])
     (chunks,aiChunks) = searchMapToStringChunks(tagMatchResult)
-    title = " ".join(inputList)
-    if(not isGlobal): title += " (大陸版)"
     return RCReply(embbedTitle=title,embbedContents=chunks,responseForAI="".join(aiChunks))
 
 def compareTagKey(tag:str):
