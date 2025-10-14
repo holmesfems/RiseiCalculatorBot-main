@@ -299,7 +299,7 @@ def recruitDoProcess(inputTagList:Iterable[str],minStar:Optional[int]=None,isGlo
     tagMatchResult = calculateTagMatchResult(inputList,isGlobal,minStar,showRobot=showRobot)
     title = " ".join(inputList)
     if(not isGlobal): title += " (大陸版)"
-    if(showTagLoss and len(inputList)<5): title+="(タグ欠損)"
+    if(showTagLoss and len(inputList)<5): title+="(タグ不足)"
     if(showTagLoss and len(inputList)>5): title+="(タグ過多)"
     if(tagMatchResult.isEmpty()): 
         chunks = [f"★{minStar}以上になる組み合わせはありません"]
