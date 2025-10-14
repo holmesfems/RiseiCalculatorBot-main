@@ -54,6 +54,10 @@ with open("recruitment/tagEnToJa.yaml","rb") as f:
 #大陸版認識用
 with open("recruitment/tagZhToJa.yaml","rb") as f:
     __zhTagDict = yaml.safe_load(f)
+    #補正用データ
+    __zhExtraDict = {
+        r"費用回复": "COST回復"
+    }
 
 def filterNotNone(_list:list) -> list:
     return list(filter(lambda x: x is not None,_list))
@@ -85,7 +89,7 @@ def matchEnTag(result:List[str]) -> Set[str]:
     return matchTagCoreProcess(result,__enTagDict)
 
 def matchZhTag(result:List[str]) -> Set[str]:
-    return matchTagCoreProcess(result,__zhTagDict)
+    return matchTagCoreProcess(result,__zhTagDict,__zhExtraDict)
 
 class MatchTagResponseData:
     def __init__(self,matches:Set[str],isGlobal:bool):
