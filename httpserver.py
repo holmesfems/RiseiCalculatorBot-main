@@ -1,6 +1,7 @@
 from recruitment import recruitment,recruitFromOCR
 from fastapi import FastAPI
 from pydantic import BaseModel,Field
+from typing import List
 
 description = """
 現在開放中の機能は以下の通り:
@@ -25,6 +26,7 @@ app = FastAPI(
 
 class OCRRawData(BaseModel):
     text: str = Field(description="The raw data of OCR result. Each tag should be separated by line breaks")
+    pickupOperators: List[str]|None = Field(default=None,description="Specify some operators to always show in the recruitment result")
 
 class TagReplyData(BaseModel):
     title: str = Field(description="The recognized tags")

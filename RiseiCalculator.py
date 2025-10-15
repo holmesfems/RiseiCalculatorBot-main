@@ -514,15 +514,15 @@ async def msgForAIChat(message:discord.Message,threadName:str):
 RECRUIT_CHANNELID = int(os.environ["RECRUIT_CHANNELID"])
 async def msgForOCR(message:discord.Message):
     attachment = message.attachments
-    if(not attachment): #テキスト識別モード
-        tagText = message.content
-        tagMatch = recruitFromOCR.matchTag(tagText)
-        if(tagMatch.isEmpty()): return
-        msg = recruitment.recruitDoProcess(tagMatch.matches,4,isGlobal=tagMatch.isGlobal)
-        await sendReplyToDiscord.replyToDiscord(message,msg)
-        return
+    # if(not attachment): #テキスト識別モード
+    #     tagText = message.content
+    #     tagMatch = recruitFromOCR.matchTag(tagText)
+    #     if(tagMatch.isEmpty()): return
+    #     msg = recruitment.recruitDoProcess(tagMatch.matches,4,isGlobal=tagMatch.isGlobal)
+    #     await sendReplyToDiscord.replyToDiscord(message,msg)
+    #     return
     for file in attachment:
-        if(not file.width or not file.height): return
+        if(not file.width or not file.height): continue
         image = file.url
         tagMatch = recruitFromOCR.taglistFromImage(image)
         if(tagMatch == None):

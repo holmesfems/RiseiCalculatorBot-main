@@ -11,13 +11,9 @@ sys.path.append('../')
 from rcutils.getnow import getnow,JST
 import json
 
-class RecruitTag(ABC):
-    def __init__(self,tagName:str):
-        self.name = tagName
-    
-    @property
-    @abstractmethod
-    def type(self)->str:...
+class RecruitTag(BaseModel,ABC):
+    name:str
+    tagType:str
 
     @abstractmethod
     def containedIn(operator:Operator)->bool:...
@@ -30,10 +26,7 @@ class RecruitTag(ABC):
 
 class EliteTag(RecruitTag):
     def __init__(self,tagName:str):
-        RecruitTag.__init__(self,tagName) 
-    
-    @property
-    def type(self): return "elite"
+        super().__init__(name=tagName,tagType="elite") 
 
     def containedIn(self,operator:Operator):
         stars = operator.stars
@@ -45,10 +38,7 @@ class EliteTag(RecruitTag):
     
 class JobTag(RecruitTag):
     def __init__(self,tagName:str):
-        RecruitTag.__init__(self,tagName)
-    
-    @property
-    def type(self): return "job"
+        super().__init__(name=tagName,tagType="job")
 
     def containedIn(self,operator:Operator):
         if(operator.job == self.name):
@@ -57,10 +47,7 @@ class JobTag(RecruitTag):
 
 class PositionAndOtherTag(RecruitTag):
     def __init__(self,tagName:str):
-        RecruitTag.__init__(self,tagName)
-    
-    @property
-    def type(self): return "other"
+        super().__init__(name=tagName,tagType="other")
     
     def containedIn(self,operator:Operator):
         if(self.name in operator.tags):
@@ -148,12 +135,14 @@ class OperatorList(BaseModel):
     operators:List[Operator] = Field(default=[])
     minStar:int = 0
     starSet:Set[int] = Field(default=set())
+    nameList:List[str] = Field(default=[])
     def __init__(self,operators:List[Operator]):
         sortedByStar = sorted(operators,key=lambda x:x.stars,reverse=False)
         super().__init__(operators = sortedByStar)
         if(sortedByStar):
             self.minStar = minStar(sortedByStar)
             self.starSet = set(item.stars for item in sortedByStar)
+            self.nameList = [item.name for item in sortedByStar]
     def showNameWithStar(self):
         return ",".join(toStrList(self.operators))
     def showName(self):
@@ -168,6 +157,8 @@ class OperatorList(BaseModel):
         return len(self.operators)==0
     def filterByStar(self,star:int) -> OperatorList:
         return OperatorList([operator for operator in self.operators if operator.stars==star])
+    def contains(self,name:str):
+        return name in self.nameList
 
 class TagToOperatorMap:
     def __init__(self,data:Dict[Tuple[str],OperatorList]):
@@ -183,13 +174,13 @@ def satisfyTags(operator:Operator,tagClassList:Tuple[RecruitTag]):
     for tag in tagClassList:
         if(not tag.containedIn(operator)):
             return False
-        if tag.type == "elite":
+        if tag.tagType == "elite":
             hasElite = True
     if needElite and not hasElite:
         return False
     return True
 
-def createTagMap(tagList:List[str],operators:List[Operator]):
+def createTagMap(operators:List[Operator]):
     tagClasses = recruitTagDict.values()
     tagCombinations:List[Tuple[RecruitTag]] = list()
     for i in range(3):
@@ -198,7 +189,8 @@ def createTagMap(tagList:List[str],operators:List[Operator]):
     for combination in tagCombinations:
         satisfies = [operator for operator in operators if satisfyTags(operator,combination)]
         if(satisfies):
-            searchMap[combination] = OperatorList(operators=satisfies)
+            tagNameCombine = tuple(item.name for item in combination)
+            searchMap[tagNameCombine] = OperatorList(operators=satisfies)
     return TagToOperatorMap(searchMap)
 
 def createCombinations(tagClassList:List[RecruitTag],number:int):
@@ -210,14 +202,12 @@ def createTagStrCombinations(tagStrList:Iterable[str]):
         ret += list(tuple(x) for x in itertools.combinations(tagStrList,i+1))
     return ret
 
-GlobalTagMap = createTagMap(tagNameList,operators_JP)
-MainlandTagMap = createTagMap(tagNameList,operators_New)
-FutureTagMap  = createTagMap(tagNameList,operators_Future)
+GlobalTagMap = createTagMap(operators_JP)
+MainlandTagMap = createTagMap(operators_New)
+FutureTagMap  = createTagMap(operators_Future)
 
 def isIndependent(key:tuple,keyList:List[tuple]):
     return all(not allAinBnotEq(item,key) for item in keyList)
-
-
 
 def toStrList(list):
     return [str(x) for x in list]
@@ -227,29 +217,35 @@ def allAinBnotEq(a:tuple,b:tuple):
         return False
     return all(item in b for item in a)
 
-class TagMatchResult:
-    def __init__(self, result:List[Tuple[Tuple[RecruitTag],OperatorList]]):
-        self.result = result
+class TagMatchItem(BaseModel):
+    combine:List[RecruitTag]
+    operatorList:OperatorList
+    containsPickup:bool=Field(default=False)
+    pickupTarget:List[str]=Field(default=[])
+
+class TagMatchResult(BaseModel):
+    result:List[TagMatchItem]
     def isEmpty(self):
         return len(self.result) == 0
     def keys(self):
-        return [x[0] for x in self.result]
+        return [x.combine for x in self.result]
 
 #星〇確定タグの組み合わせリストを出力する
 #equals: ジャスト星〇確定なのか
 #showRobot: ロボット確定タグでオペレーターを表示する
 
-def calculateTagMatchResult(tagList:Iterable[str],isGlobal:bool,minStar:int,equals = False,showRobot = False):
+def calculateTagMatchResult(tagList:Iterable[str],isGlobal:bool,minStar:int,equals = False,showRobot = False,pickupOperators:Optional[Iterable[str]]=None):
     tagClasses = createTagList(tagList)
     tagCombinations:List[Tuple[RecruitTag]] = []
     for i in range(3):
         tagCombinations += createCombinations(tagClasses,i+1)
-    result: List[Tuple[Tuple[RecruitTag],OperatorList]]  = []
+    result: List[TagMatchItem]  = []
     nowTime = getnow().timestamp()
     for combine in tagCombinations:
-        operators = GlobalTagMap.getOrEmpty(combine)
-        if(not isGlobal): operators = operators + MainlandTagMap.getOrEmpty(combine)
-        future = FutureTagMap.getOrEmpty(combine)
+        tagNameCombine = tuple((item.name for item in combine))
+        operators = GlobalTagMap.getOrEmpty(tagNameCombine)
+        if(not isGlobal): operators = operators + MainlandTagMap.getOrEmpty(tagNameCombine)
+        future = FutureTagMap.getOrEmpty(tagNameCombine)
         if(not future.isEmpty()):
             if(isGlobal):
                 operators = operators + future.getAvailableList(nowTime)
@@ -257,13 +253,15 @@ def calculateTagMatchResult(tagList:Iterable[str],isGlobal:bool,minStar:int,equa
                 operators = operators + future
         if(not operators.isEmpty()):
             if(not equals):
-                if(operators.minStar == 1 and showRobot):
-                    result.append((combine,operators))
+                if(pickupOperators!=None and len(puList:=[target for target in pickupOperators if operators.contains(target)])>0):
+                    result.append(TagMatchItem(combine=combine,operatorList=operators,containsPickup=True,pickupTarget=puList))
+                elif(operators.minStar == 1 and showRobot):
+                    result.append(TagMatchItem(combine=combine,operatorList=operators))
                 elif(operators.minStar >= minStar):
-                    result.append((combine,operators))
+                    result.append(TagMatchItem(combine=combine,operatorList=operators))
             else:
                 if(operators.minStar == minStar):
-                    result.append((combine,operators.filterByStar(minStar)))
+                    result.append(TagMatchItem(combine=combine,operatorList=operators.filterByStar(minStar)))
     return TagMatchResult(result=result)
 
 def searchMapToStringChunks(tagMatchResult:TagMatchResult):
@@ -271,24 +269,28 @@ def searchMapToStringChunks(tagMatchResult:TagMatchResult):
         return ([],[])
     chunks = []
     toAIChunks = []
-    keyLenSorted = sorted(tagMatchResult.result,key=lambda x:len(x[0]),reverse=True)
-    valueLenSorted = sorted(keyLenSorted,key=lambda x:len(x[1].operators))
-    maxstarSorted = sorted(valueLenSorted,key=lambda x:max(x[1].starSet),reverse=True)
-    minstarSorted = sorted(maxstarSorted,key=lambda x:x[1].minStar,reverse=True)
-    for (key,value) in minstarSorted:
-        keyStrList = toStrList(key)
+    keyLenSorted = sorted(tagMatchResult.result,key=lambda x:len(x.combine),reverse=True)
+    valueLenSorted = sorted(keyLenSorted,key=lambda x:len(x.operatorList.operators))
+    maxstarSorted = sorted(valueLenSorted,key=lambda x:max(x.operatorList.starSet),reverse=True)
+    minstarSorted = sorted(maxstarSorted,key=lambda x:x.operatorList.minStar,reverse=True)
+    hasContainsSorted = sorted(minstarSorted,key=lambda x:x.containsPickup,reverse=True)
+    
+    for matchItem in hasContainsSorted:
+        keyStrList = toStrList(matchItem.combine)
         keyMsg = "+".join(keyStrList)
-        valueMsg = value.showNameWithStar()
-        chunk = keyMsg + " -> ★{0}".format(value.minStar) + "```\n" + valueMsg+"```\n"
+        valueMsg = matchItem.operatorList.showNameWithStar()
+        chunk = keyMsg + " -> ★{0}".format(matchItem.operatorList.minStar) + "```\n" + valueMsg+"```\n"
         chunks.append(chunk)
-        aiChunk = keyMsg + " -> " + ", ".join(["★{0}".format(star) for star in value.starSet])
-        if(value.minStar >= 5 or value.minStar == 1):
-            aiChunk += f"\n{value.showName()}"
+        aiChunk = keyMsg + " ->★" + ",".join(["{0}".format(star) for star in matchItem.operatorList.starSet])
+        if(matchItem.operatorList.minStar >= 5 or matchItem.operatorList.minStar == 1):
+            aiChunk += f"\n{matchItem.operatorList.showName()}"
+        elif(matchItem.containsPickup):
+            aiChunk += f"\n{','.join(matchItem.pickupTarget)}"
         aiChunk += "\n"
         toAIChunks.append(aiChunk)
     return (chunks,toAIChunks)
             
-def recruitDoProcess(inputTagList:Iterable[str],minStar:Optional[int]=None,isGlobal:bool=True,showTagLoss=False) -> RCReply:
+def recruitDoProcess(inputTagList:Iterable[str],minStar:Optional[int]=None,isGlobal:bool=True,showTagLoss=False,pickupOperators:Optional[Iterable[str]]=None) -> RCReply:
     #OpenAIから呼び出す予定なし
     inputList = set(inputTagList)
     inputList = list(filter(lambda x:x is not None and x in tagNameList,inputList))
@@ -296,7 +298,7 @@ def recruitDoProcess(inputTagList:Iterable[str],minStar:Optional[int]=None,isGlo
     if(minStar is None): minStar = 1
     showRobot = False
     if(minStar == 4): showRobot = True
-    tagMatchResult = calculateTagMatchResult(inputList,isGlobal,minStar,showRobot=showRobot)
+    tagMatchResult = calculateTagMatchResult(inputList,isGlobal,minStar,showRobot=showRobot,pickupOperators=pickupOperators)
     title = " ".join(inputList)
     if(not isGlobal): title += " (大陸版)"
     if(showTagLoss and len(inputList)<5): title+="(タグ不足)"
@@ -322,8 +324,9 @@ def mapToMsgChunksHighStars(combineList:TagMatchResult):
     if(combineList.isEmpty()):
         return []
     chunks = []
-    keySorted = sorted(combineList.result,key=lambda x:compareTagTupleKey(x[0]))
-    for (key,value) in keySorted:
+    keySorted = sorted(combineList.result,key=lambda x:compareTagTupleKey(x.combine))
+    for matchItem in keySorted:
+        key,value = (matchItem.combine,matchItem.operatorList)
         keyStrList = toStrList(key)
         keyMsg = "+".join(keyStrList)
         valueStr = str(value.operators[0])
@@ -333,7 +336,7 @@ def mapToMsgChunksHighStars(combineList:TagMatchResult):
 
 def clearSearchMap(matchResult:TagMatchResult):
     keys = matchResult.keys()
-    return TagMatchResult([(key,value) for (key,value) in matchResult.result if isIndependent(key,keys)])
+    return TagMatchResult(result=[item for item in matchResult.result if isIndependent(item.combine,keys)])
 
 def showHighStars(minStar:int = 4,isGlobal:bool = True) -> RCReply:
     #最低の星が満たすやつを探す
@@ -343,9 +346,9 @@ def showHighStars(minStar:int = 4,isGlobal:bool = True) -> RCReply:
     chunks = mapToMsgChunksHighStars(clearedSearchMap)
     listForAI = [
         {
-            "tags": str(key),
-            "operators": value.showName()
-        } for key,value in allCombineList.result
+            "tags": str(matchItem.combine),
+            "operators": matchItem.operatorList.showName()
+        } for matchItem in allCombineList.result
     ]
     if(not chunks): chunks = [f"★{minStar}の確定タグはありません"]
     return RCReply(
