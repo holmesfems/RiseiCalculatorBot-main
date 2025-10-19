@@ -285,7 +285,10 @@ def searchMapToStringChunks(tagMatchResult:TagMatchResult):
         if(matchItem.operatorList.minStar >= 5 or matchItem.operatorList.minStar == 1):
             aiChunk += f"\n{matchItem.operatorList.showName()}"
         elif(matchItem.containsPickup):
-            aiChunk += f"\n{','.join(matchItem.pickupTarget)}"
+            puOperators = [item for item in matchItem.operatorList.operators if item.name in matchItem.pickupTarget]
+            puStars = [item.stars for item in puOperators]
+            otherTarget = [item.name for item in matchItem.operatorList.operators if item.stars in puStars and item.name not in matchItem.pickupTarget]
+            aiChunk += f"\n{','.join(matchItem.pickupTarget+otherTarget)}"
         aiChunk += "\n"
         toAIChunks.append(aiChunk)
     return (chunks,toAIChunks)
