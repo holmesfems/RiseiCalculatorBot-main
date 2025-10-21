@@ -267,8 +267,8 @@ def calculateTagMatchResult(tagList:Iterable[str],isGlobal:bool,minStar:int,equa
 def searchMapToStringChunks(tagMatchResult:TagMatchResult):
     if(tagMatchResult.isEmpty()):
         return ([],[])
-    chunks = []
-    toAIChunks = []
+    chunks:List[str] = []
+    toAIChunks:List[str] = []
     keyLenSorted = sorted(tagMatchResult.result,key=lambda x:len(x.combine),reverse=True)
     valueLenSorted = sorted(keyLenSorted,key=lambda x:len(x.operatorList.operators))
     maxstarSorted = sorted(valueLenSorted,key=lambda x:max(x.operatorList.starSet),reverse=True)
@@ -285,10 +285,14 @@ def searchMapToStringChunks(tagMatchResult:TagMatchResult):
         if(matchItem.operatorList.minStar >= 5 or matchItem.operatorList.minStar == 1):
             aiChunk += f"\n{matchItem.operatorList.showName()}"
         elif(matchItem.containsPickup):
-            puOperators = [item for item in matchItem.operatorList.operators if item.name in matchItem.pickupTarget]
-            puStars = [item.stars for item in puOperators]
-            otherTarget = [item.name for item in matchItem.operatorList.operators if item.stars in puStars and item.name not in matchItem.pickupTarget]
-            aiChunk += f"\n{','.join(matchItem.pickupTarget+otherTarget)}"
+            puStars = set(item.stars for item in matchItem.operatorList.operators if item.name in matchItem.pickupTarget)
+            puChunkItems:List[str] = []
+            for star in puStars:
+                puOperators = [item.name for item in matchItem.operatorList.operators if item.name in matchItem.pickupTarget and item.stars == star]
+                allOperatorCount= len([item for item in matchItem.operatorList.operators if item.stars==star])
+                otherCount = allOperatorCount-len(puOperators)
+                puChunkItems.append(','.join(puOperators)+f"(他★{star}が{otherCount}名)" if otherCount > 0 else "")
+            aiChunk += f"\n{','.join(puChunkItems)}"
         aiChunk += "\n"
         toAIChunks.append(aiChunk)
     return (chunks,toAIChunks)
