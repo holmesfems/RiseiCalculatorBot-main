@@ -291,7 +291,7 @@ def searchMapToStringChunks(tagMatchResult:TagMatchResult):
                 puOperators = [item.name for item in matchItem.operatorList.operators if item.name in matchItem.pickupTarget and item.stars == star]
                 allOperatorCount= len([item for item in matchItem.operatorList.operators if item.stars==star])
                 otherCount = allOperatorCount-len(puOperators)
-                puChunkItems.append(','.join(puOperators)+f"(他★{star}が{otherCount}人)" if otherCount > 0 else "")
+                puChunkItems.append(','.join(puOperators)+(f"(他★{star}が{otherCount}人)" if otherCount > 0 else ""))
             aiChunk += f"\n{','.join(puChunkItems)}"
         aiChunk += "\n"
         toAIChunks.append(aiChunk)
