@@ -53,7 +53,7 @@
     純正源石: 13
     龍門幣1000: 300
 
-新約エクシアの鞄:
+新約エクシアの鞄/ロドス資金パック:
   price: 1200
   isConstant: false
   contents:
@@ -97,13 +97,12 @@
     純正源石: 36
     ★6特訓招待状: 1
 
-# 炉辺奇譚特訓パック:
-#   price: 2600
-#   isConstant: false
-#   contents:
-#     ★6特訓招待状: 1
-#     ★5特訓招待状: 1
-#     ★4特訓招待状: 2
+上級特訓パック:
+  price: 2600
+  isConstant: false
+  contents:
+    ★6特訓招待状: 1
+    ★5特訓招待状: 2
 
 # 5.5周年育成パック:
 #   price: 1200
@@ -121,12 +120,12 @@
 #     ★6特訓装置: 1
 #     ★5特訓装置: 2
 
-# セレクトスカウトパック:
-#   price: 2600
-#   isConstant: false
-#   contents:
-#     純正源石: 9
-#     10回スカウト券: 2
+セレクトスカウトパック:
+  price: 2600
+  isConstant: false
+  contents:
+    純正源石: 9
+    10回スカウト券: 2
 
 # 2025音律聯覚記念パック:
 #   price: 160
@@ -333,19 +332,19 @@
 #   contents:
 #     10回中堅スカウト券: 1
 
-# 協心競技データパック:
-#   price: 650
-#   isConstant: false
-#   contents:
-#     モジュールデータ: 12
+ロドスデータパック:
+  price: 650
+  isConstant: false
+  contents:
+    モジュールデータ: 12
 
-# 協心競技データボックス:
-#   price: 1200
-#   isConstant: false
-#   contents:
-#     モジュールデータ: 24
-#     データ補完マシン: 30
-#     データ補完チップ: 90
+ロドスデータボックス:
+  price: 1200
+  isConstant: false
+  contents:
+    モジュールデータ: 24
+    データ補完マシン: 30
+    データ補完チップ: 90
 
 #constant
 10000円恒常パック:
