@@ -107,7 +107,7 @@ class MatchTagResponseData:
         return f"{self.matches=}, {self.isGlobal=}"
 
 def matchTag(result:str) -> MatchTagResponseData:
-    clearRegex = r"[．•་.,·・´`‧˙。¸Ⓡ【®:「]+|^[-]+|[-]+$"
+    clearRegex = r"[．•་.,·・´`‧˙。¸Ⓡ【®:「、]+|^[-]+|[-]+$"
     listResult = [item.strip() for item in re.split("\n",result)] #改行で分割 20文字以上のタグは存在しないためこれで軽くふるい落とす
     listResult = [re.sub(clearRegex,"",item) for item in listResult] #塵の影響を除去..?
     for(key,value) in replacedict.items():
