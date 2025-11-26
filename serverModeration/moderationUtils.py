@@ -54,7 +54,7 @@ class serverModerator:
             await self.autoBan_inAutoDeletion(message)
             return True
         else:
-            return await self.autoNotice(message)
+            return await self.autoNoticeAndBan(message)
     
     async def autoBan_inAutoDeletion(self,message:discord.Message) -> bool:
         #このチャンネルは人間がしゃべることを想定していないので、ここで誤検出は恐れなくてよい。
@@ -72,12 +72,14 @@ class serverModerator:
             return True
         return False
 
-    async def autoNotice(self,message:discord.Message) -> bool:
-        #人間もしゃべる可能性があるので、誤検出しても良いようにBANまではしない。いったん報告だけ
+    async def autoNoticeAndBan(self,message:discord.Message) -> bool:
+        #運用の結果、誤検出そこまでなさそうなため、BANをする
         text = message.content
-        if(not _hasEveryone(text)): return False #@everyoneを含むメッセージのみフィルターする
-        if _contains_link(text): #リンクを含む場合は報告。管理者以外がeveryone使うのはおかしいので、banしてもいいかも
-            await self.createReport("スパムメッセージを検出しました、対処をお願いします",message)
+        if(_hasEveryone(text) and _contains_link(text)):
+            #@everyoneを含み、リンクがあるメッセージはBANします。
+            #ここを通る時点で管理者出ないことが確定して、管理者以外がeveryone使うのはおかしい
+            await message.author.ban(delete_message_days=7,reason="Auto-banned by the Astesia bot for sending spam messages")
+            await self.createReport("通常チャットでスパムメッセージを検出しました。自動BANを実行しました",message)
             return True
         return False
     
