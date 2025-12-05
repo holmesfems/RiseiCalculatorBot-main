@@ -15,7 +15,7 @@ with open("recruitment/tagJaToJa.yaml","rb") as f:
     __jaTagDict = yaml.safe_load(f)
     #補正用データ
     __jaExtraDict = {
-        r"範[围圍囲困匯]攻[擊撃]": "範囲攻撃",
+        r"範[围圍囲困匯田]攻[擊撃]": "範囲攻撃",
         r"(?!上級)(..?)?ー下" : "エリート",
         r"医療...?": "医療",
         r"上級..ー下": "上級エリート",
