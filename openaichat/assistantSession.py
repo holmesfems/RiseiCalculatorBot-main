@@ -30,6 +30,7 @@ class AssistantSession:
         self.responseHistory:List[ResponseOutputMessage|ResponseCodeInterpreterToolCall|ImageGenerationCall] = list()
         self.lastID:str = None
         self.client = client
+        self.vector_store_ids = list()
         self.lastUpdated = getnow()
 
     def __updateTime(self):
@@ -48,9 +49,13 @@ class AssistantSession:
             "content": content
         })
 
+    def submitVectorStoreId(self,vector_store_id:str):
+        self.vector_store_ids.append(vector_store_id)
+
     def reset(self):
         self.msgHistory.clear()
         self.responseHistory.clear()
+        self.vector_store_ids.clear()
         self.lastID = None
         self.__updateTime()
 
@@ -62,7 +67,10 @@ class AssistantSession:
         response = self.client.responses.create(
             model=self.model,
             input=self.msgHistory,
-            tools=self.tools,
+            tools=self.tools + [{
+                "type": "file_search",
+                "vector_store_ids": self.vector_store_ids
+            }] if self.vector_store_ids else [],
             instructions=self.instruction,
             previous_response_id=self.lastID,
             background=True

@@ -25,12 +25,38 @@ import base64
 import traceback
 from openai.types.responses.response_code_interpreter_tool_call import ResponseCodeInterpreterToolCall
 import shutil
+import mimetypes
 
 with open("openaichat/systemPrompt.txt","r",encoding="utf-8_sig") as f:
     SYSTEM_PROMPT = f.read()
 
 with open("openaichat/toolList.yaml","rb") as f:
     TOOL_LIST = yaml.safe_load(f)
+
+AVAILABLE_FOR_FILESEARCH = [
+    "text/x-c",
+    "text/x-c++",
+    "text/x-csharp",
+    "text/css",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "text/x-golang",
+    "text/html",
+    "text/x-java",
+    "text/javascript",
+    "application/json",
+    "text/markdown",
+    "application/pdf",
+    "text/x-php",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "text/x-python",
+    "text/x-script.python",
+    "text/x-ruby",
+    "application/x-sh",
+    "text/x-tex",
+    "application/typescript",
+    "text/plain"
+]
 
 @dataclass
 class ChatFile:
@@ -173,23 +199,25 @@ class ChatSession:
                     "type": "input_text",
                     "text": msg
                 })
-                restAttachments = []
-                #画像を添付
+                vector_store = None
                 for item in attachments:
+                    #画像を添付
                     if(item.width != None):
                         content.append({
                             "type": "input_image",
                             "image_url": item.url
                         })
-                    else:
-                        restAttachments.append(item)
-                #残りのファイルを載せる
-                attachmentIds= ChatSession.__uploadFile(restAttachments)
-                for attachmentId in attachmentIds:
-                    content.append({
-                        "type": "input_file",
-                        "file_id": attachmentId
-                    })
+                    elif(mimetypes.guess_type(item.filename) in AVAILABLE_FOR_FILESEARCH):
+                        fileId = ChatSession.__uploadFile([item],purpose="assistants")[0]
+                        if(not vector_store):
+                            vector_store= ChatSession.__client.vector_stores.create()
+                        ChatSession.__client.vector_stores.files.create(
+                            vector_store_id=vector_store.id,
+                            file_id=fileId
+                        )
+                        continue
+                    print(f"attatchment {item.filename} is not available for filesearch, skipped")
+                
                 session.submitUserMsg(content)
             rcReplies = await ChatSession.__completeRun(session)
             ret = await ChatSession.__extractMsg(session)
@@ -202,12 +230,12 @@ class ChatSession:
             return ChatReply(msg=f"ごめんなさい、エラーが発生したみたい。\n{e}")
     
     @staticmethod
-    def __uploadFile(attachments:List[Attachment])->List[str]:
+    def __uploadFile(attachments:List[Attachment],purpose:str)->List[str]:
         if not attachments: return []
         print(f"detected attatchments: {attachments=}")
         return [ChatSession.__client.files.create(
             file=requests.get(item.url).content,
-            purpose="user_data",
+            purpose=purpose,
         ).id for item in attachments]
 
     @staticmethod
@@ -236,8 +264,9 @@ class ChatSession:
 
                                 elif(annotation.type == "file_citation"):
                                     fileId = annotation.file_id
-                                    cited_file = ChatSession.__client.files.content(file_id=fileId)
-                                    files.append(ChatFile(cited_file.content,annotation.filename))
+                                    if(ChatSession.__client.files.retrieve(file_id=fileId).purpose != "assistants"):
+                                        cited_file = ChatSession.__client.files.content(file_id=fileId)
+                                        files.append(ChatFile(cited_file.content,annotation.filename))
 
                                 elif(annotation.type == "file_path"):
                                     fileId = annotation.file_id
