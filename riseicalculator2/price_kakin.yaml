@@ -46,63 +46,64 @@
 #     SoC強化剤: 2
 #     中級作戦記録: 30
 
-ダック卿の小銭入れ:
-  price: 1000
-  isConstant: false
-  contents:
-    純正源石: 13
-    龍門幣1000: 300
+# ダック卿の小銭入れ:
+#   price: 1000
+#   isConstant: false
+#   contents:
+#     純正源石: 13
+#     龍門幣1000: 300
 
-新約エクシアの鞄/ロドス資金パック:
-  price: 1200
-  isConstant: false
-  contents:
-    純正源石: 16
-    龍門幣1000: 700
+# 新約エクシアの鞄/ロドス資金パック:
+#   price: 1200
+#   isConstant: false
+#   contents:
+#     純正源石: 16
+#     龍門幣1000: 700
 
-特別訓練パック:
-  price: 1200
-  isConstant: false
-  contents:
-    純正源石: 11
-    ★5特訓装置: 1
+# 特別訓練パック:
+#   price: 1200
+#   isConstant: false
+#   contents:
+#     純正源石: 11
+#     ★5特訓装置: 1
 
-上級特別訓練パック:
-  price: 2000
-  isConstant: false
-  contents:
-    純正源石: 19
-    ★6特訓装置: 1
+# 上級特別訓練パック:
+#   price: 2000
+#   isConstant: false
+#   contents:
+#     純正源石: 19
+#     ★6特訓装置: 1
 
-指南集総合パック:
-  price: 1500
-  isConstant: false
-  contents:
-    純正源石: 12
-    ★6スキル指南集: 1
-    ★5スキル指南集: 1
-    ★4スキル指南集: 1
+# 指南集総合パック:
+#   price: 1500
+#   isConstant: false
+#   contents:
+#     純正源石: 12
+#     ★6スキル指南集: 1
+#     ★5スキル指南集: 1
+#     ★4スキル指南集: 1
 
-昇進特訓パック:
-  price: 1500
+# 昇進特訓パック:
+#   price: 1500
+#   isConstant: false
+#   contents:
+#     純正源石: 24
+#     ★5特訓招待状: 1
+
+# 上級昇進特訓パック:
+#   price: 2600
+#   isConstant: false
+#   contents:
+#     純正源石: 36
+#     ★6特訓招待状: 1
+
+浩然なる雷雲パック:
+  price: 2600
   isConstant: false
   contents:
-    純正源石: 24
+    ★6特訓招待状: 1
     ★5特訓招待状: 1
-
-上級昇進特訓パック:
-  price: 2600
-  isConstant: false
-  contents:
-    純正源石: 36
-    ★6特訓招待状: 1
-
-上級特訓パック:
-  price: 2600
-  isConstant: false
-  contents:
-    ★6特訓招待状: 1
-    ★5特訓招待状: 2
+    ★4特訓招待状: 2
 
 # 5.5周年育成パック:
 #   price: 1200
@@ -120,12 +121,12 @@
 #     ★6特訓装置: 1
 #     ★5特訓装置: 2
 
-セレクトスカウトパック:
-  price: 2600
-  isConstant: false
-  contents:
-    純正源石: 9
-    10回スカウト券: 2
+# セレクトスカウトパック:
+#   price: 2600
+#   isConstant: false
+#   contents:
+#     純正源石: 9
+#     10回スカウト券: 2
 
 # 2025音律聯覚記念パック:
 #   price: 160
@@ -135,33 +136,33 @@
 #     プロファイルアイコン「スペシャルゲスト」: 1
 #     プロファイルアイコン「2025音律聯覚」: 1
 
-感謝祭支援パック:
-  price: 3000
-  isConstant: false
-  contents:
-    純正源石: 24
-    10回スカウト券: 2
-    龍門幣1000: 200
-    上級作戦記録: 20
-    中級作戦記録: 30
-    SoC強化剤: 2
-    T4素材交換券: 4
-    T3素材交換券: 6
+# 感謝祭支援パック:
+#   price: 3000
+#   isConstant: false
+#   contents:
+#     純正源石: 24
+#     10回スカウト券: 2
+#     龍門幣1000: 200
+#     上級作戦記録: 20
+#     中級作戦記録: 30
+#     SoC強化剤: 2
+#     T4素材交換券: 4
+#     T3素材交換券: 6
 
-感謝祭物資パック:
-  price: 4900
-  isConstant: false
-  contents:
-    純正源石: 90
-    コーデ交換券: 1
-    10回スカウト券: 1
-    10回中堅スカウト券: 1
-    龍門幣1000: 260
-    上級作戦記録: 30
-    SoC強化剤: 4
-    モジュールデータ: 6
-    データ補完マシン: 30
-    データ補完チップ: 90
+# 感謝祭物資パック:
+#   price: 4900
+#   isConstant: false
+#   contents:
+#     純正源石: 90
+#     コーデ交換券: 1
+#     10回スカウト券: 1
+#     10回中堅スカウト券: 1
+#     龍門幣1000: 260
+#     上級作戦記録: 30
+#     SoC強化剤: 4
+#     モジュールデータ: 6
+#     データ補完マシン: 30
+#     データ補完チップ: 90
 
 # 5.5周年記念パック・白:
 #   price: 3000
@@ -179,27 +180,27 @@
 #   contents:
 #     10回スカウト券: 1
 
-感謝祭中堅スカウトパック:
-  price: 1200
-  isConstant: false
-  contents:
-    10回中堅スカウト券: 1
-    中堅スカウト券: 5
+# 感謝祭中堅スカウトパック:
+#   price: 1200
+#   isConstant: false
+#   contents:
+#     10回中堅スカウト券: 1
+#     中堅スカウト券: 5
 
-招聘指名パック:
-  price: 3000
-  isConstant: false
-  contents:
-    感謝祭記念★6招聘指名券: 1
-    10回スカウト券: 1
+# 招聘指名パック:
+#   price: 3000
+#   isConstant: false
+#   contents:
+#     感謝祭記念★6招聘指名券: 1
+#     10回スカウト券: 1
 
-中堅招聘指名パック:
-  price: 3000
-  isConstant: false
-  contents:
-    中堅★6招聘指名券: 1
-    10回スカウト券: 1
-    10回中堅スカウト券: 1
+# 中堅招聘指名パック:
+#   price: 3000
+#   isConstant: false
+#   contents:
+#     中堅★6招聘指名券: 1
+#     10回スカウト券: 1
+#     10回中堅スカウト券: 1
 
 # 感謝祭物資パック:
 #   price: 4900
@@ -281,33 +282,33 @@
 #     アーツ学Ⅲ: 8
 #     龍門幣1000: 50
 
-冬隠帰路パック(復刻):
-  price: 3000
-  isConstant: false
-  contents:
-    10回スカウト券: 1
-    ★6特訓装置: 1
-    ★5特訓装置: 1
-    18石コーデ: 1
+# 冬隠帰路パック(復刻):
+#   price: 3000
+#   isConstant: false
+#   contents:
+#     10回スカウト券: 1
+#     ★6特訓装置: 1
+#     ★5特訓装置: 1
+#     18石コーデ: 1
 
-黎明前奏パック(復刻):
-  price: 3000
-  isConstant: false
-  contents:
-    10回スカウト券: 1
-    龍門幣1000: 200
-    上級作戦記録: 60
-    アーツ学Ⅲ: 20
-    18石コーデ: 1
+# 黎明前奏パック(復刻):
+#   price: 3000
+#   isConstant: false
+#   contents:
+#     10回スカウト券: 1
+#     龍門幣1000: 200
+#     上級作戦記録: 60
+#     アーツ学Ⅲ: 20
+#     18石コーデ: 1
 
-焔燼曙明パック:
-  price: 3000
-  isConstant: false
-  contents:
-    10回スカウト券: 1
-    ★6特訓装置: 1
-    ★5特訓装置: 1
-    18石コーデ: 1
+# 焔燼曙明パック:
+#   price: 3000
+#   isConstant: false
+#   contents:
+#     10回スカウト券: 1
+#     ★6特訓装置: 1
+#     ★5特訓装置: 1
+#     18石コーデ: 1
 
 # 探索者の素材パック:
 #   price: 1000
@@ -332,13 +333,13 @@
 #   contents:
 #     10回中堅スカウト券: 1
 
-ロドスデータパック:
+統合戦略データパック:
   price: 650
   isConstant: false
   contents:
     モジュールデータ: 12
 
-ロドスデータボックス:
+統合戦略データボックス:
   price: 1200
   isConstant: false
   contents:
