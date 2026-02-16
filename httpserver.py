@@ -2,6 +2,7 @@ from recruitment import recruitment,recruitFromOCR
 from fastapi import FastAPI
 from pydantic import BaseModel,Field
 from typing import List
+from htmlResources.WLBatterySimulator.router import router as WLBatteryRouter
 
 description = """
 現在開放中の機能は以下の通り:
@@ -23,6 +24,8 @@ app = FastAPI(
         "url": "https://opensource.org/license/mit",
     },
 )
+
+app.include_router(WLBatteryRouter)
 
 class OCRRawData(BaseModel):
     text: str = Field(description="The raw data of OCR result. Each tag should be separated by line breaks")

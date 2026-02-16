@@ -1,0 +1,120 @@
+:root {
+  --bg: #0f1220;
+  --card: #171a2b;
+  --text: #f2f4ff;
+  --muted: #a7add6;
+  --accent: #7aa2ff;
+  --error: #ff6b6b;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.container { max-width: 1100px; margin: 0 auto; padding: 18px; }
+h1, h2, h3 { margin: 0 0 10px; }
+.muted { color: var(--muted);}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.full { grid-column: 1 / -1; }
+
+.card {
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.form { display: grid; gap: 12px; }
+input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+  color: var(--text);
+}
+button {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 0;
+  background: var(--accent);
+  color: #0b1020;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 8px; /* 下に余白 */
+}
+.error {
+  margin-top: 12px;
+  color: var(--text);
+  background: rgba(255, 107, 107, 0.12);
+  border: 1px solid rgba(255, 107, 107, 0.35);
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+.blueprint {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
+}
+
+@media (max-width: 900px) {
+  .grid { grid-template-columns: 1fr; }
+  .full { grid-column: auto; }
+}
+
+.code-row{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.copy-btn{
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 0;
+  background: var(--accent);
+  color: #0b1020;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* トースト */
+/* トースト（右上） */
+.toast{
+  position: fixed;
+  right: 16px;
+  top: 16px;          /* ← bottom ではなく top */
+  /* bottom: 16px;    ← これは削除 */
+
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(11,16,32,0.92);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  box-shadow: 0 10px 30px rgba(0,0,0,.25);
+
+  opacity: 0;
+  transform: translateY(-8px); /* 上からスッと出る感じに */
+  pointer-events: none;
+  transition: opacity .18s ease, transform .18s ease;
+}
+
+.toast.show{
+  opacity: 1;
+  transform: translateY(0);
+}

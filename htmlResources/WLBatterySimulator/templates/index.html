@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>武陵高精度発電制御</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header class="container">
+    <h1>武陵発電制御計算機</h1>
+    <p class="muted">必要電力（5〜1595 / 5刻み）を入力すると、最適な設定値とチャートを表示します。</p>
+  </header>
+
+  <main class="container grid">
+    <section class="card">
+      <h2>必要発電量</h2>
+      <form method="post" action="/WLBatterySimulator/calculate" class="form">
+        <label>現在の消費電力 - 常在発電量を入力してください</label>
+        <input name="required_power" type="number" min="5" max="1595" step="5" required
+                placeholder="例: 250" value="{{ required_power if required_power is not none else '' }}"/>
+        
+        <label>残電量マージン</label>
+        <input name="storage_margin" type="number" min="0" max="100000" step="1000"  required
+                placeholder="例: 10000" value="{{ storage_margin if storage_margin is not none else '10000' }}"/>
+
+        <button type="submit">最適設定を計算</button>
+      </form>
+
+      {% if error %}
+      <div class="error">
+        <strong>入力エラー:</strong> {{ error }}
+      </div>
+      {% endif %}
+      {% if result %}
+      <div class="result">
+        <h3>計算結果</h3>
+        <ul>
+          <li>電力: <strong>{{ result.required_power }}</strong> ➡ 発電必要量: <strong>{{ result.setting_value }}</strong>,
+             最小残電量: <strong>{{result.lowest_storage}}</strong></li>
+          <li>Bit = <strong>{{result.tobit}}</strong></li>
+        </ul>
+      </div>
+      {% endif %}
+    </section>
+
+    <section class="card">
+      <h2>制御回路図</h2>
+      <div class="code-row">
+        <label class="muted">
+          コード: <span id="codeValue">EFO01iUIAE8OIE29i72U4</span>
+        </label>
+        <button type="button" class="copy-btn" id="copyBtn">コピー</button>
+      </div>
+      <div id="toast" class="toast" role="status" aria-live="polite">コピー完了しました</div>
+      <script>
+        const codeValue = document.getElementById("codeValue");
+        const copyBtn = document.getElementById("copyBtn");
+        const toast = document.getElementById("toast");
+        let toastTimer;
+
+        function showToast(message = "コピー完了しました") {
+          toast.textContent = message;
+          toast.classList.add("show");
+
+          clearTimeout(toastTimer);
+          toastTimer = setTimeout(() => {
+            toast.classList.remove("show");
+          }, 1400);
+        }
+
+        copyBtn.addEventListener("click", async () => {
+          const text = codeValue.textContent.trim(); // ←「コード: 」抜きでここだけ
+          await navigator.clipboard.writeText(text);
+          showToast("コピー完了しました");
+        });
+      </script>
+      <img class="blueprint" src="/static/blueprint.png" alt="発電制御器 設計図" />
+    </section>
+
+    <section class="card full">
+      <h2>チャート（時間 / 残電量）</h2>
+      {% if result %}
+        <canvas id="chart" height="90"></canvas>
+        <script>
+          const labels = {{ result.time_series | tojson }};
+          const data = {{ result.remaining_series | tojson }};
+
+          const ctx = document.getElementById('chart');
+          new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels,
+              datasets: [{
+                label: '残電量',
+                data,
+                borderWidth: 2,
+                tension: 0.25,
+                pointRadius: 0
+              }]
+            },
+            options: {
+              responsive: true,
+              scales: {
+                x: { title: { display: true, text: '時間（分）' } },
+                y: { title: { display: true, text: '残電量' }, beginAtZero: true }
+              }
+            }
+          });
+        </script>
+      {% else %}
+        <p class="muted">計算後に表示されます。</p>
+      {% endif %}
+    </section>
+  </main>
+
+  <footer class="container muted">
+    <small>© 2026 holmesfems. MIT License:
+      <a class="muted" href="https://licenses.opensource.jp/MIT/MIT.html" target="_blank" rel="noopener noreferrer">
+        https://licenses.opensource.jp/MIT/MIT.html
+      </a></small>
+  </footer>
+</body>
+</html>
