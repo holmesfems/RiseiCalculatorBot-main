@@ -10,6 +10,7 @@ class OptimizationResult(BaseModel):
     remaining_series: List[float]   # 例: 残電量(任意単位)
     tobit: str
     lowest_storage: int
+    use_margin_under_5: bool
 
 
 def validate_required_power(x: int) -> None:
@@ -17,9 +18,9 @@ def validate_required_power(x: int) -> None:
         raise ValueError("必要電力は 5〜1595 の 5刻み整数で入力してください。")
 
 
-def optimize(required_power: int, storage_margin:int) -> OptimizationResult:
+def optimize(required_power: int, storage_margin:int, use_margin_under_5:bool) -> OptimizationResult:
     validate_required_power(required_power)
-    fitPlan = searchFitPlan(requiredPower=required_power,storageMargin=storage_margin)
+    fitPlan = searchFitPlan(requiredPower=required_power,storageMargin=storage_margin,useMarginUnder5=use_margin_under_5)
     setting = fitPlan.needPower
     ts, rs = (fitPlan.simResult.time,fitPlan.simResult.value)
     return OptimizationResult(
@@ -28,5 +29,6 @@ def optimize(required_power: int, storage_margin:int) -> OptimizationResult:
         time_series=ts,
         remaining_series=rs,
         tobit = fitPlan.bitStr,
-        lowest_storage=numpy.min(fitPlan.simResult.value)
+        lowest_storage=numpy.min(fitPlan.simResult.value),
+        use_margin_under_5 = use_margin_under_5
     )

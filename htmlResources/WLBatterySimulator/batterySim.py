@@ -65,6 +65,9 @@ class PowerControllerWuling():
             if(onOff): result += "1"
             else: result +="0"
         return result
+    
+    def isUnder5(self):
+        return numpy.any(self.switchOnOff[6:])
 
 class BatterySimResult(BaseModel):
     time: List[int]
@@ -77,7 +80,6 @@ def simulate(requiredPower:int, controller:PowerControllerWuling):
     t = []
     v = []
     nowt = 0
-    #一週目
     def doOnce():
         nonlocal nowt,powerRemain
         isAccept = controller.next()
@@ -93,11 +95,8 @@ def simulate(requiredPower:int, controller:PowerControllerWuling):
         v.append(powerRemain)
         return powerRemain > 0
 
-    for i in range(period):
-        if( not doOnce()):
-            return BatterySimResult(time=t,value=v,isValid=False)
-    #二周目
-    for i in range(period):
+    #二周期分シミュレートする
+    for i in range(2*period):
         if( not doOnce()):
             return BatterySimResult(time=t,value=v,isValid=False)
     return BatterySimResult(time=t,value=v,isValid=True)
@@ -107,13 +106,14 @@ class FitPlan(BaseModel):
     bitStr: str
     simResult: BatterySimResult
 
-def searchFitPlan(requiredPower:int,storageMargin:int):
+def searchFitPlan(requiredPower:int,storageMargin:int,useMarginUnder5:bool):
     controller = PowerControllerWuling()
     controller.fit(requiredPower=requiredPower)
     while True:
         simResult = simulate(requiredPower,controller)
         if(simResult.isValid):
-            if(numpy.min(simResult.value) >= storageMargin):
+
+            if((useMarginUnder5 and not controller.isUnder5()) or numpy.min(simResult.value) >= storageMargin ):
                 return FitPlan(needPower=controller.nowPower(),bitStr=controller.toBit(),simResult=simResult)
         controller.increasePower()
         if(controller.isMax()):

@@ -24,9 +24,16 @@
         <label>残電量マージン</label>
         <input name="storage_margin" type="number" min="0" max="100000" step="1000"  required
                 placeholder="例: 10000" value="{{ storage_margin if storage_margin is not none else '10000' }}"/>
+        <!-- 追加：5分割以下のみマージン適用トグル -->
+        <label class="toggle">
+          <span class="toggle-label">5分割以下のみマージン適用</span>
 
+          <input type="checkbox" name="use_margin_under_5" {% if use_margin_under_5 %}checked{% endif %}/>
+          <span class="toggle-track" aria-hidden="true">
+            <span class="toggle-thumb"></span>
+          </span>
+        </label>
         <button type="submit">最適設定を計算</button>
-      </form>
 
       {% if error %}
       <div class="error">

@@ -118,3 +118,76 @@ button {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* ===== Toggle Switch ===== */
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  user-select: none;
+}
+
+.toggle-label {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* アクセシブルに隠す */
+.toggle input[type="checkbox"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.toggle-track {
+  width: 52px;
+  height: 26px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.15);
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease;
+}
+
+.toggle-thumb {
+  width: 24px;
+  height: 20px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.90);
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  transform: translateY(-50%);
+  transition: left .18s ease, background .18s ease;
+  box-shadow: 0 6px 18px rgba(0,0,0,.25);
+}
+
+/* ON */
+.toggle input[type="checkbox"]:checked + .toggle-track {
+  background: color-mix(in srgb, var(--accent) 55%, rgba(255,255,255,0.10));
+  border-color: rgba(122,162,255,0.65);
+}
+.toggle input[type="checkbox"]:checked + .toggle-track .toggle-thumb {
+  left: 23px;
+  background: #fff;
+}
+
+/* フォーカス（キーボード操作） */
+.toggle input[type="checkbox"]:focus-visible + .toggle-track {
+  outline: 2px solid rgba(122,162,255,0.85);
+  outline-offset: 3px;
+}
+
+/* 無効状態 */
+.toggle input[type="checkbox"]:disabled + .toggle-track {
+  opacity: .5;
+  cursor: not-allowed;
+}
