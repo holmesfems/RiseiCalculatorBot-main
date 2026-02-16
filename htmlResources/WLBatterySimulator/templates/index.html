@@ -44,10 +44,10 @@
       <div class="result">
         <h3>計算結果</h3>
         <ul>
-          <li>電力: <strong>{{ result.required_power }}</strong> ➡ 発電必要量: <strong>{{ result.setting_value }}</strong>,
-             最小残電量: <strong>{{result.lowest_storage}}</strong></li>
+          <li>電力: <strong>{{ result.required_power }}</strong> ➡ 必要発電量: <strong>{{ result.setting_value }}</strong>,
+             蓄電最小値: <strong>{{result.lowest_storage}}</strong></li>
           <li>Bit = <strong>{{result.tobit}}</strong></li>
-          <li>電池節約量: <strong>{{result.save_battery}}</strong>/日</li>
+          <li>電池節約: <strong>{{result.save_battery}}</strong>/日</li>
         </ul>
       </div>
       {% endif %}
