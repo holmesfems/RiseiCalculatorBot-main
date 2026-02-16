@@ -11,6 +11,7 @@ class OptimizationResult(BaseModel):
     tobit: str
     lowest_storage: int
     use_margin_under_5: bool
+    save_battery: float
 
 
 def validate_required_power(x: int) -> None:
@@ -23,6 +24,7 @@ def optimize(required_power: int, storage_margin:int, use_margin_under_5:bool) -
     fitPlan = searchFitPlan(requiredPower=required_power,storageMargin=storage_margin,useMarginUnder5=use_margin_under_5)
     setting = fitPlan.needPower
     ts, rs = (fitPlan.simResult.time,fitPlan.simResult.value)
+    save_battery = 1.5*60*24*(1 - fitPlan.needPower/fitPlan.maxPower)
     return OptimizationResult(
         required_power=required_power,
         setting_value=setting,
@@ -30,5 +32,6 @@ def optimize(required_power: int, storage_margin:int, use_margin_under_5:bool) -
         remaining_series=rs,
         tobit = fitPlan.bitStr,
         lowest_storage=numpy.min(fitPlan.simResult.value),
-        use_margin_under_5 = use_margin_under_5
+        use_margin_under_5 = use_margin_under_5,
+        save_battery=save_battery
     )

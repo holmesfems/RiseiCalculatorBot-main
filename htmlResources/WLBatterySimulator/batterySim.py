@@ -103,6 +103,7 @@ def simulate(requiredPower:int, controller:PowerControllerWuling):
 
 class FitPlan(BaseModel):
     needPower: int
+    maxPower: int
     bitStr: str
     simResult: BatterySimResult
 
@@ -114,7 +115,7 @@ def searchFitPlan(requiredPower:int,storageMargin:int,useMarginUnder5:bool):
         if(simResult.isValid):
 
             if((useMarginUnder5 and not controller.isUnder5()) or numpy.min(simResult.value) >= storageMargin ):
-                return FitPlan(needPower=controller.nowPower(),bitStr=controller.toBit(),simResult=simResult)
+                return FitPlan(needPower=controller.nowPower(),bitStr=controller.toBit(),simResult=simResult, maxPower=controller.maxPower)
         controller.increasePower()
         if(controller.isMax()):
-            return FitPlan(needPower=controller.nowPower(),bitStr=controller.toBit(),simResult=simResult)
+            return FitPlan(needPower=controller.nowPower(),bitStr=controller.toBit(),simResult=simResult, maxPower=controller.maxPower)
