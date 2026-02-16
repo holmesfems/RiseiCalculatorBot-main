@@ -1,5 +1,6 @@
 from recruitment import recruitment,recruitFromOCR
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel,Field
 from typing import List
 from htmlResources.WLBatterySimulator.router import router as WLBatteryRouter
@@ -26,6 +27,12 @@ app = FastAPI(
 )
 
 app.include_router(WLBatteryRouter)
+
+app.mount(
+    "/WLBatterySimulator/static",
+    StaticFiles(directory="htmlResources/WLBatterySimulator/static"),
+    name="WLBatterySimulator_static",
+)
 
 class OCRRawData(BaseModel):
     text: str = Field(description="The raw data of OCR result. Each tag should be separated by line breaks")

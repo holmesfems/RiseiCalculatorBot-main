@@ -1,6 +1,5 @@
 from fastapi import FastAPI, Request, Form, APIRouter
 from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
 
@@ -10,12 +9,6 @@ BASE_DIR = Path(__file__).resolve().parent
 router = APIRouter(prefix="/WLBatterySimulator", tags=["WLBatterySimulator"])
 
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
-
-router.mount(
-    "/static",
-    StaticFiles(directory=str(BASE_DIR / "static")),
-    name="site-a-static",
-)
 
 @router.get("/", response_class=HTMLResponse)
 def index(request: Request):
