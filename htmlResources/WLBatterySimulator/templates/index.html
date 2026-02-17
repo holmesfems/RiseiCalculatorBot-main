@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>武陵高精度発電制御</title>
   <link rel="stylesheet" href="/WLBatterySimulator/static/style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.30.0/plotly.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
 <body>
@@ -83,77 +83,52 @@
       <img class="blueprint" src="/WLBatterySimulator/static/blueprint.png" alt="発電制御器 設計図" />
     </section>
     <script>
-      async function renderBatteryChart(cardEl) {
-        const chartDiv = cardEl.querySelector('#chart');
+      let chartInstance = null;
 
-        // result が無いときは何もしない（chart.html が <p> のみ等）
-        if (!chartDiv) return;
-
-        const labels = JSON.parse(chartDiv.dataset.labels || '[]');
-        const values = JSON.parse(chartDiv.dataset.values || '[]');
-
-        // Plotlyのデータ
-        const data = [{
-          x: labels,
-          y: values,
-          type: 'scatter',
-          mode: 'lines',
-          line: { width: 2 },
-          hovertemplate: '時間（秒）=%{x}<br>残電量=%{y}<extra></extra>',
-        }];
-
-        const brightText = 'rgba(255,255,255,0.92)';  // 文字（明るく）
-        const brightText2 = 'rgba(255,255,255,0.75)'; // 補助（少し薄く）
-        const grid = 'rgba(255,255,255,0.10)';        // 薄いグリッド
-
-        const layout = {
-        margin: { l: 60, r: 20, t: 10, b: 60 },
-
-        // 背景を透明に（カードの背景に馴染ませる）
-        paper_bgcolor: 'rgba(0,0,0,0)',
-        plot_bgcolor: 'rgba(0,0,0,0)',
-
-        font: {
-          color: brightText2,
-          size: 13,
-        },
-
-        // 軸ラベル
-        xaxis: {
-          title: { text: '時間（秒）' },
-
-          // 枠線っぽさを消す
-          showline: false,      // 軸の太線（下線）を消す
-          zeroline: false,      // ゼロ線を消す
-          showgrid: true,       // グリッドは薄く出す（不要なら false）
-          gridcolor: 'rgba(0,0,0,0.08)',
-          ticks: 'outside',
-          tickcolor: 'rgba(0,0,0,0.15)',
-        },
-
-        yaxis: {
-          title: { text: '残電量' },
-          rangemode: 'tozero',
-          showline: false,
-          zeroline: false,
-          showgrid: true,
-          gridcolor: 'rgba(0,0,0,0.08)',
-          ticks: 'outside',
-          tickcolor: 'rgba(0,0,0,0.15)',
-        },
-      };
-
-      const config = {
-        responsive: true,
-        displayModeBar: false, // 右上のツールバーを消してスッキリ
-      };
-        if (chartDiv._fullLayout) {
-          Plotly.purge(chartDiv);
+      function renderBatteryChart(cardEl) {
+        const canvas = cardEl.querySelector('#chart');
+        if (!canvas) {
+          // result が無いときは <p> だけなので何もしない
+          if (chartInstance) {
+            chartInstance.destroy();
+            chartInstance = null;
+          }
+          return;
         }
-      await Plotly.newPlot(chartDiv, data, layout, config);
-    }
-          
 
+        const labels = JSON.parse(canvas.dataset.labels || '[]');
+        const data = JSON.parse(canvas.dataset.values || '[]');
+        // 既存のチャートがあれば破棄（重複描画防止）
+        if (chartInstance) {
+          chartInstance.destroy();
+          chartInstance = null;
+
+        }
+        
+        const ctx = canvas.getContext('2d');
+        chartInstance = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [{
+              label: '残電量',
+              data,
+              borderWidth: 2,
+              tension: 0.25,
+              pointRadius: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { title: { display: true, text: '時間（秒）' } },
+              y: { title: { display: true, text: '残電量' }, beginAtZero: true }
+            }
+          }
+        });
+        
+      }
     // 初回表示時
     document.addEventListener('DOMContentLoaded', () => {
       const card = document.querySelector('#tvChart');

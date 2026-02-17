@@ -192,3 +192,6 @@ button {
   cursor: not-allowed;
 }
 
+.chartBox {
+  height: 300px;   /* ここが重要 */
+}
