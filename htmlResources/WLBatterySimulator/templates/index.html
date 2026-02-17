@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>武陵高精度発電制御</title>
   <link rel="stylesheet" href="/WLBatterySimulator/static/style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/plotly.js-dist-min@2.30.0/plotly.min.js"></script>
+  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
 <body>
   <header class="container">
@@ -16,7 +17,11 @@
   <main class="container grid">
     <section class="card">
       <h2>発電値計算</h2>
-      <form method="post" action="/WLBatterySimulator/calculate" class="form">
+      <form class="form"
+        hx-post = "/WLBatterySimulator/calculate"
+        hx-swap = "none"
+        hx-encoding = "multipart/form-data"
+      >
         <label>必要な発電量を入力してください</label>
         <input name="required_power" type="number" min="5" max="1595" step="5" required
                 placeholder="例: 250" value="{{ required_power if required_power is not none else '' }}"/>
@@ -34,25 +39,16 @@
           </span>
         </label>
         <button type="submit">最適設定を計算</button>
+      </form>
+      <div id="error" class="error" hidden="true">
+        {% include "/error.html" %}
+      </div>
 
-      {% if error %}
-      <div class="error">
-        <strong>入力エラー:</strong> {{ error }}
+      <div id="result" class="result" hidden = "true">
+        {% include "/result.html" %}
       </div>
-      {% endif %}
-      {% if result %}
-      <div class="result">
-        <h3>計算結果</h3>
-        <ul>
-          <li>電力: <strong>{{ result.required_power }}</strong> ➡ 必要発電量: <strong>{{ result.setting_value }}</strong>,
-             蓄電最小値: <strong>{{result.lowest_storage}}</strong></li>
-          <li>Bit = <strong>{{result.tobit}} (中央左から、0=合流器、1=交差器)</strong></li>
-          <li>電池節約: <strong>{{result.save_battery}}</strong>/日</li>
-        </ul>
-      </div>
-      {% endif %}
+
     </section>
-
     <section class="card">
       <h2>制御回路図(入力1.5/min)</h2>
       <div class="code-row">
@@ -86,41 +82,96 @@
       </script>
       <img class="blueprint" src="/WLBatterySimulator/static/blueprint.png" alt="発電制御器 設計図" />
     </section>
+    <script>
+      async function renderBatteryChart(cardEl) {
+        const chartDiv = cardEl.querySelector('#chart');
 
-    <section class="card full">
-      <h2>チャート（時間 / 残電量）</h2>
-      {% if result %}
-        <canvas id="chart" height="90"></canvas>
-        <script>
-          const labels = {{ result.time_series | tojson }};
-          const data = {{ result.remaining_series | tojson }};
+        // result が無いときは何もしない（chart.html が <p> のみ等）
+        if (!chartDiv) return;
 
-          const ctx = document.getElementById('chart');
-          new Chart(ctx, {
-            type: 'line',
-            data: {
-              labels,
-              datasets: [{
-                label: '残電量',
-                data,
-                borderWidth: 2,
-                tension: 0.25,
-                pointRadius: 0
-              }]
-            },
-            options: {
-              responsive: true,
-              scales: {
-                x: { title: { display: true, text: '時間（分）' } },
-                y: { title: { display: true, text: '残電量' }, beginAtZero: true }
-              }
-            }
-          });
-        </script>
-      {% else %}
-        <p class="muted">計算後に表示されます。</p>
-      {% endif %}
-    </section>
+        const labels = JSON.parse(chartDiv.dataset.labels || '[]');
+        const values = JSON.parse(chartDiv.dataset.values || '[]');
+
+        // Plotlyのデータ
+        const data = [{
+          x: labels,
+          y: values,
+          type: 'scatter',
+          mode: 'lines',
+          line: { width: 2 },
+          hovertemplate: '時間（分）=%{x}<br>残電量=%{y}<extra></extra>',
+        }];
+
+        const brightText = 'rgba(255,255,255,0.92)';  // 文字（明るく）
+        const brightText2 = 'rgba(255,255,255,0.75)'; // 補助（少し薄く）
+        const grid = 'rgba(255,255,255,0.10)';        // 薄いグリッド
+
+        const layout = {
+        margin: { l: 60, r: 20, t: 10, b: 60 },
+
+        // 背景を透明に（カードの背景に馴染ませる）
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
+
+        font: {
+          color: brightText2,
+          size: 13,
+        },
+
+        // 軸ラベル
+        xaxis: {
+          title: { text: '時間（分）' },
+
+          // 枠線っぽさを消す
+          showline: false,      // 軸の太線（下線）を消す
+          zeroline: false,      // ゼロ線を消す
+          showgrid: true,       // グリッドは薄く出す（不要なら false）
+          gridcolor: 'rgba(0,0,0,0.08)',
+          ticks: 'outside',
+          tickcolor: 'rgba(0,0,0,0.15)',
+        },
+
+        yaxis: {
+          title: { text: '残電量' },
+          rangemode: 'tozero',
+          showline: false,
+          zeroline: false,
+          showgrid: true,
+          gridcolor: 'rgba(0,0,0,0.08)',
+          ticks: 'outside',
+          tickcolor: 'rgba(0,0,0,0.15)',
+        },
+      };
+
+      const config = {
+        responsive: true,
+        displayModeBar: false, // 右上のツールバーを消してスッキリ
+      };
+        if (chartDiv._fullLayout) {
+          Plotly.purge(chartDiv);
+        }
+      await Plotly.newPlot(chartDiv, data, layout, config);
+    }
+          
+
+    // 初回表示時
+    document.addEventListener('DOMContentLoaded', () => {
+      const card = document.querySelector('#tvChart');
+      if (card) renderBatteryChart(card);
+    });
+
+    // htmx による部分更新後
+    document.body.addEventListener('htmx:afterSettle', (evt) => {
+      const swapped = evt.target;
+      if (swapped.id === 'tvChart') {
+        renderBatteryChart(swapped);
+      }
+    });
+  </script>
+  <section id="tvChart" class="card full">
+    {% include "/chart.html" %}
+  </section>
+
   </main>
 
   <footer class="container muted">

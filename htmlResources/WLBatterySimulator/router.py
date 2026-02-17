@@ -34,16 +34,33 @@ def calculate(request: Request, required_power: int = Form(...), storage_margin:
     except Exception as e:
         result = None
         error = str(e)
-    print(f"{use_margin_under_5=}")
-
-    return templates.TemplateResponse(
-        "index.html",
-        {
+        errResponse = templates.TemplateResponse("error.html",{
             "request": request,
-            "result": result,
-            "error": error,
-            "required_power": required_power,
-            "storage_margin": storage_margin,
-            "use_margin_under_5": use_margin_under_5
-        },
-    )
+            "error": error
+        })
+        return HTMLResponse(f"""
+            <div id="error" class="error" hx-swap-oob="outerHTML">
+                {errResponse.body.decode("utf-8")}
+            </div>
+        """, status_code=500)
+    
+
+    resultResponse = templates.TemplateResponse("result.html",{
+        "request": request,
+        "result": result
+    })
+    chartResponse = templates.TemplateResponse("chart.html",{
+        "request": request,
+        "result": result
+    })
+
+    return HTMLResponse(content=f"""
+      <div id="error" class="error" hx-swap-oob="outerHTML" hidden="true">
+      </div>
+      <div id="result" class="result" hx-swap-oob="outerHTML">
+        {resultResponse.body.decode("utf-8")}
+      </div>
+      <section id="tvChart" class="card full" hx-swap-oob="outerHTML">
+        {chartResponse.body.decode("utf-8")}
+      </section>
+    """)

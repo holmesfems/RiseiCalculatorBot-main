@@ -1,0 +1,11 @@
+<h2>チャート（時間 / 残電量）</h2>
+{% if result %}
+<div class="chartBox">  <!-- ここが高さ確定 -->
+    <div id="chart" style="width:100%; height:360px"
+        data-labels='{{ result.time_series | tojson }}'
+        data-values='{{ result.remaining_series | tojson }}'></div>
+</div>
+
+{% else %}
+  <p class="muted">計算後に表示されます。</p>
+{% endif %}
