@@ -42,7 +42,7 @@ def calculate(request: Request, required_power: int = Form(...), storage_margin:
             <div id="error" class="error" hx-swap-oob="outerHTML">
                 {errResponse.body.decode("utf-8")}
             </div>
-        """, status_code=500)
+        """)
     
 
     resultResponse = templates.TemplateResponse("result.html",{

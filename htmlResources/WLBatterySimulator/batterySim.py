@@ -1,6 +1,7 @@
 import numpy
 from pydantic import BaseModel
 from typing import List
+from abc import ABC, abstractmethod
 
 maxStorage = 100000
 
@@ -10,20 +11,32 @@ def last_true_index(lst: list[bool]) -> int:
             return i
     return -1  # Trueが一つもない場合
 
-class PowerControllerWuling():
+class PowerController(ABC):
+    def __init__(self):
+        self.switchOnOff: list[bool] = ...
+        self.switchState: list[int] = ...
+        self.maxPower: int = ...
+        self.switchValue: list[float] = ...
+
+    def fit(self,requiredPower:int):
+        result = [False]*len(self.switchValue)
+        remain = requiredPower
+        for i in range(len(self.switchValue)):
+            if(remain >= self.switchValue[i]):
+                remain -= self.switchValue[i]
+                result[i] = True
+            if(remain == 0): break
+        if(remain > 0): result[-1] = True
+        self.switchOnOff = result
+
+class PowerControllerWuling(PowerController):
     switchValue = [800,400,200,100,50,25,5,5,5,5,5]
     def __init__(self):
-        self.switchOnOff = [False]*len(PowerControllerWuling.switchValue)
         self.switchState = [0,0,0,0,0,0,0]
+        self.switchValue = [800,400,200,100,50,25,5,5,5,5,5]
+        self.switchOnOff = [False]*len(self.switchValue)
         self.maxPower = 1600
-    def fit(self,requiredPower:int):
-        result = [False]*len(PowerControllerWuling.switchValue)
-        remain = requiredPower
-        for i in range(len(PowerControllerWuling.switchValue)):
-            if(remain >= PowerControllerWuling.switchValue[i]):
-                remain -= PowerControllerWuling.switchValue[i]
-                result[i] = True
-        self.switchOnOff = result
+
     def resetState(self): 
         self.switchState = [0,0,0,0,0,0,0]
     def increasePower(self):
