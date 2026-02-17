@@ -99,7 +99,7 @@
           type: 'scatter',
           mode: 'lines',
           line: { width: 2 },
-          hovertemplate: '時間（分）=%{x}<br>残電量=%{y}<extra></extra>',
+          hovertemplate: '時間（秒）=%{x}<br>残電量=%{y}<extra></extra>',
         }];
 
         const brightText = 'rgba(255,255,255,0.92)';  // 文字（明るく）
@@ -120,7 +120,7 @@
 
         // 軸ラベル
         xaxis: {
-          title: { text: '時間（分）' },
+          title: { text: '時間（秒）' },
 
           // 枠線っぽさを消す
           showline: false,      // 軸の太線（下線）を消す
