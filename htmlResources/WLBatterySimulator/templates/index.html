@@ -15,13 +15,13 @@
 
   <main class="container grid">
     <section class="card">
-      <h2>必要発電量</h2>
+      <h2>発電値計算</h2>
       <form method="post" action="/WLBatterySimulator/calculate" class="form">
-        <label>現在の消費電力 - 常在発電量を入力してください</label>
+        <label>必要な発電量を入力してください</label>
         <input name="required_power" type="number" min="5" max="1595" step="5" required
                 placeholder="例: 250" value="{{ required_power if required_power is not none else '' }}"/>
         
-        <label>残電量マージン</label>
+        <label>残電量安全マージン</label>
         <input name="storage_margin" type="number" min="0" max="100000" step="1000"  required
                 placeholder="例: 10000" value="{{ storage_margin if storage_margin is not none else '10000' }}"/>
         <!-- 追加：5分割以下のみマージン適用トグル -->
