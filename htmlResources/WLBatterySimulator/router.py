@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request, Form, APIRouter
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse,RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
 from typing import Optional
@@ -25,6 +25,9 @@ def index(request: Request):
         },
     )
 
+@router.get("/calculate")
+def calculate_get(request: Request):
+    return RedirectResponse("https://discordbot-riseicalculator.herokuapp.com/WLBatterySimulator/")
 
 @router.post("/calculate", response_class=HTMLResponse)
 def calculate(request: Request, required_power: int = Form(...), storage_margin: int = Form(...), use_margin_under_5:Optional[bool] =Form(False)):
