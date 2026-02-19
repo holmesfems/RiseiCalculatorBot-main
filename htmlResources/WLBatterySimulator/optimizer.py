@@ -30,7 +30,7 @@ def optimize(required_power: int, storage_margin:int, use_margin_under_5:bool) -
         setting_value=setting,
         time_series=ts,
         remaining_series=rs,
-        tobit = fitPlan.bitStr,
+        tobit = fitPlan.bitStr.replace('0','<img src="/WLBatterySimulator/static/merger.png"/>').replace('1','<img src="/WLBatterySimulator/static/crosser.png"/>'),
         lowest_storage=numpy.min(fitPlan.simResult.value),
         use_margin_under_5 = use_margin_under_5,
         save_battery=save_battery

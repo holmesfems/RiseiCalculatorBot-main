@@ -2,6 +2,6 @@
     <ul>
         <li>電力: <strong>{{ result.required_power }}</strong> ➡ 必要発電量: <strong>{{ result.setting_value }}</strong>,
             蓄電最小値: <strong>{{result.lowest_storage}}</strong></li>
-        <li>Bit = <strong>{{result.tobit}} (中央左から、0=合流器、1=交差器)</strong></li>
+        <li style="margin-top: .4em;"><img src="/WLBatterySimulator/static/battery.png"/>{{result.tobit|safe}}</li>
         <li>電池節約: <strong>{{result.save_battery}}</strong>/日</li>
     </ul>

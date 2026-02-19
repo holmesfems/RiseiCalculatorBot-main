@@ -18,6 +18,7 @@ class PowerController(ABC):
         self.maxPower: int = ...
         self.switchValue: list[float] = ...
 
+    @abstractmethod
     def fit(self,requiredPower:int):
         result = [False]*len(self.switchValue)
         remain = requiredPower
@@ -32,13 +33,22 @@ class PowerController(ABC):
 class PowerControllerWuling(PowerController):
     switchValue = [800,400,200,100,50,25,5,5,5,5,5]
     def __init__(self):
-        self.switchState = [0,0,0,0,0,0,0]
+        super().__init__()
+        self.switchState = [0,0,0,0,0,0,4]
         self.switchValue = [800,400,200,100,50,25,5,5,5,5,5]
         self.switchOnOff = [False]*len(self.switchValue)
         self.maxPower = 1600
 
+        self.fiveLoop = [0,4,3,1,2]
+        self.fivePriority = [0,3,2,4,1]
+    def fit(self,requiredPower:int):
+        super().fit(requiredPower)
+        fiveOnOff = self.switchOnOff[6:].copy()
+        for i in range(5):
+            self.switchOnOff[6+self.fivePriority[i]] = fiveOnOff[i]
+
     def resetState(self): 
-        self.switchState = [0,0,0,0,0,0,0]
+        self.switchState = [0,0,0,0,0,0,4]
     def increasePower(self):
         power = self.nowPower()
         power = power+5
@@ -53,8 +63,8 @@ class PowerControllerWuling(PowerController):
             else:
                 self.switchState[i] = 0
         #5分割部分
-        result = self.switchOnOff[6+self.switchState[6]]
-        self.switchState[6] = (self.switchState[6] + 3)%5
+        result = self.switchOnOff[6+self.fiveLoop[self.switchState[6]]]
+        self.switchState[6] = (self.switchState[6] + 1)%5
         return result
     
     def period(self):
