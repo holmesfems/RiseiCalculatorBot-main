@@ -17,6 +17,7 @@ class PowerController(ABC):
         self.switchState: list[int] = ...
         self.maxPower: int = ...
         self.switchValue: list[float] = ...
+        self.delay: list[int] = ...
 
     @abstractmethod
     def fit(self,requiredPower:int):
@@ -34,8 +35,9 @@ class PowerControllerWuling(PowerController):
     switchValue = [800,400,200,100,50,25,5,5,5,5,5]
     def __init__(self):
         super().__init__()
-        self.switchState = [0,0,0,0,0,0,4]
+        self.switchState = [0,0,0,0,0,0,0]
         self.switchValue = [800,400,200,100,50,25,5,5,5,5,5]
+        self.delay = [0,0,0,0,0,0,16,12,12,8,16]
         self.switchOnOff = [False]*len(self.switchValue)
         self.maxPower = 1600
 
@@ -48,7 +50,7 @@ class PowerControllerWuling(PowerController):
             self.switchOnOff[6+self.fivePriority[i]] = fiveOnOff[i]
 
     def resetState(self): 
-        self.switchState = [0,0,0,0,0,0,4]
+        self.switchState = [0,0,0,0,0,0,0]
     def increasePower(self):
         power = self.nowPower()
         power = power+5
@@ -59,13 +61,15 @@ class PowerControllerWuling(PowerController):
         for i in range(6):
             if(self.switchState[i] == 0):
                 self.switchState[i] = 1
-                return self.switchOnOff[i]
+                return (self.switchOnOff[i],self.delay[i])
             else:
                 self.switchState[i] = 0
         #5分割部分
-        result = self.switchOnOff[6+self.fiveLoop[self.switchState[6]]]
+        index = 6+self.fiveLoop[self.switchState[6]]
+        result = self.switchOnOff[index]
+        delay = self.delay[index]
         self.switchState[6] = (self.switchState[6] + 1)%5
-        return result
+        return (result,delay)
     
     def period(self):
         switchDepth = last_true_index(self.switchOnOff)
@@ -100,26 +104,51 @@ class BatterySimResult(BaseModel):
 def simulate(requiredPower:int, controller:PowerControllerWuling):
     powerRemain = maxStorage
     period = controller.period()
+    clock = 40
     t = []
     v = []
     nowt = 0
+    nowd = 0
+    isFirst = True
     def doOnce():
-        nonlocal nowt,powerRemain
-        isAccept = controller.next()
-        nowt += 40
-        if( isAccept):
+        nonlocal nowt,powerRemain,isFirst,nowd
+        (isAccept,delay) = controller.next()
+        if(isFirst): 
+            t.append(nowt)
+            v.append(powerRemain)
+        if(isFirst and delay):
+            t.append(nowt+delay)
+            powerRemain = powerRemain - requiredPower*delay #ここでpowerが死ぬわけないのでチェックをスキップ
+            v.append(powerRemain)
+            nowd = delay
+        nowt += clock
+        isFirst = False
+        if(isAccept):
+            #遅延を考慮したシミュレーション
+            if(nowd >= delay):
+                delay = nowd
+            else:
+                t.append(nowt+delay-clock)
+                powerRemain = powerRemain - requiredPower * (delay-nowd)
+                if(powerRemain < 0): powerRemain = 0
+                v.append(powerRemain)
+                if(powerRemain==0): return False
+            t.append(nowt+delay)
             powerRemain = powerRemain + (controller.maxPower - requiredPower)*40
             if(powerRemain > maxStorage): powerRemain = maxStorage
+            v.append(powerRemain)
+            nowd = delay
         else:
-            powerRemain = powerRemain - requiredPower * 40
+            powerRemain = powerRemain - requiredPower * (40-nowd)
             if(powerRemain < 0): powerRemain = 0
-
-        t.append(nowt)
-        v.append(powerRemain)
-        return powerRemain > 0
+            nowd = 0
+            t.append(nowt)
+            v.append(powerRemain)
+            if(powerRemain == 0): return False
+        return True
 
     #二周期分シミュレートする
-    for i in range(2*period):
+    for i in range(2*period+1):
         if( not doOnce()):
             return BatterySimResult(time=t,value=v,isValid=False)
     return BatterySimResult(time=t,value=v,isValid=True)
