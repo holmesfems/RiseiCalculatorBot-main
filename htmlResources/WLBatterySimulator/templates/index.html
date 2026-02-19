@@ -150,10 +150,21 @@
   </main>
 
   <footer class="container muted">
-    <small>© 2026 holmesfems. MIT License:
-      <a class="muted" href="https://licenses.opensource.jp/MIT/MIT.html" target="_blank" rel="noopener noreferrer">
-        https://licenses.opensource.jp/MIT/MIT.html
-      </a></small>
+    <small>
+      <a class="muted" href="https://github.com/holmesfems/RiseiCalculatorBot-main/tree/main/htmlResources/WLBatterySimulator"
+        target="_blank" rel="noopener noreferrer">
+        GitHub
+      </a>
+      © <span id="year"></span> holmesfems. Licensed under the MIT License:
+      <a class="muted" href="https://opensource.org/license/mit/"
+        target="_blank" rel="noopener noreferrer">
+        https://opensource.org/license/mit/
+      </a>
+    </small>
   </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
