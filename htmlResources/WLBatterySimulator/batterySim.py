@@ -152,8 +152,10 @@ class BatterySimResult(BaseModel):
     time: List[int]
     value: List[int]
     isValid: bool
+    def minValue(self)->int:
+        return numpy.min(self.value)
 
-def simulate(requiredPower:int, controller:PowerControllerWuling):
+def simulate(requiredPower:int, controller:PowerControllerWuling)->BatterySimResult:
     powerRemain = maxStorage
     period = controller.period()
     clock = 40
@@ -198,10 +200,14 @@ def simulate(requiredPower:int, controller:PowerControllerWuling):
     for i in range(2*period+1):
         if( not doOnce()):
             return BatterySimResult(time=t,value=v,isValid=False)
+    thisSimulate = BatterySimResult(time=t,value=v,isValid=True)
     if(controller.needRetry()):
         controller.retry()
-        return simulate(requiredPower,controller)
-    return BatterySimResult(time=t,value=v,isValid=True)
+        nextSimulate = simulate(requiredPower,controller)
+        #最悪状況の結果を返すようにする
+        if(nextSimulate.minValue() <= thisSimulate.minValue()):
+            return nextSimulate
+    return thisSimulate
 
 class FitPlan(BaseModel):
     needPower: int
