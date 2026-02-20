@@ -87,7 +87,7 @@ class PowerControllerWuling(PowerController):
                 [3,1,2,0,4],
                 [3,1,4,0,2],
                 [4,1,2,0,3],
-                [4,1,3,1,2],
+                [4,1,3,0,2],
             ]
             for loop in allLoop:
                 self.remainLoop.put(PowerControllerWuling.LoopIndex(loop))
