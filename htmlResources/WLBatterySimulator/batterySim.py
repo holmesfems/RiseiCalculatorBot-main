@@ -2,6 +2,7 @@ import numpy
 from pydantic import BaseModel
 from typing import List
 from abc import ABC, abstractmethod
+from queue import Queue
 
 maxStorage = 100000
 
@@ -33,21 +34,71 @@ class PowerController(ABC):
 
 class PowerControllerWuling(PowerController):
     switchValue = [800,400,200,100,50,25,5,5,5,5,5]
+    class LoopIndex:
+        def __init__(self, loop:List[int]):
+            self.loop = loop
+        def __getitem__(self, index:int):
+            return self.loop[index]
+
     def __init__(self):
         super().__init__()
         self.switchState = [0,0,0,0,0,0,0]
         self.switchValue = [800,400,200,100,50,25,5,5,5,5,5]
-        self.delay = [0,0,0,0,0,0,16,12,12,8,16]
+        self.delay = [0,0,0,0,0,0,16,12,12,8,8]
         self.switchOnOff = [False]*len(self.switchValue)
         self.maxPower = 1600
+        self.loopbackDelay = 8
+        self.loopbackTarget = 0
+        self.loopIndex:PowerControllerWuling.LoopIndex = ...
+        self.remainLoop:Queue[PowerControllerWuling.LoopIndex] = Queue()
 
-        self.fiveLoop = [0,4,3,1,2]
-        self.fivePriority = [0,3,2,4,1]
     def fit(self,requiredPower:int):
         super().fit(requiredPower)
-        fiveOnOff = self.switchOnOff[6:].copy()
-        for i in range(5):
-            self.switchOnOff[6+self.fivePriority[i]] = fiveOnOff[i]
+        fiveOnOff = self.switchOnOff[6:]
+        onNum = len([x for x in fiveOnOff if x])
+        self.remainLoop = Queue()
+        if(onNum <= 2):
+            self.switchOnOff[6:] = [self.switchOnOff[7],self.switchOnOff[6],False,False,False]
+            self.loopIndex = PowerControllerWuling.LoopIndex([2,0,3,1,4])
+        elif(onNum==3): #2の部分は順序が影響を与えない
+            self.switchOnOff[6:] = [False,False,True,True,True]
+            allLoop = [
+                [2,0,3,1,4],
+                [2,0,4,1,3],
+                [3,0,2,1,4],
+                [3,0,4,1,2],
+                [4,0,2,1,3],
+                [4,0,3,1,2]
+            ]
+            for loop in allLoop:
+                self.remainLoop.put(PowerControllerWuling.LoopIndex(loop))
+            self.loopIndex = self.remainLoop.get()
+        elif(onNum >= 4):
+            self.switchOnOff[6:] = [self.switchOnOff[10], self.switchOnOff[9], True,True,True]
+            allLoop = [
+                [2,0,3,1,4],
+                [2,0,4,1,3],
+                [3,0,2,1,4],
+                [3,0,4,1,2],
+                [4,0,2,1,3],
+                [4,0,3,1,2],
+                [2,1,3,0,4],
+                [2,1,4,0,3],
+                [3,1,2,0,4],
+                [3,1,4,0,2],
+                [4,1,2,0,3],
+                [4,1,3,1,2],
+            ]
+            for loop in allLoop:
+                self.remainLoop.put(PowerControllerWuling.LoopIndex(loop))
+            self.loopIndex = self.remainLoop.get()
+
+    def needRetry(self):
+        return not self.remainLoop.empty()
+    
+    def retry(self):
+        self.loopIndex = self.remainLoop.get()
+        self.resetState()
 
     def resetState(self): 
         self.switchState = [0,0,0,0,0,0,0]
@@ -65,9 +116,10 @@ class PowerControllerWuling(PowerController):
             else:
                 self.switchState[i] = 0
         #5分割部分
-        index = 6+self.fiveLoop[self.switchState[6]]
+        index = 6+self.loopIndex[self.switchState[6]]
         result = self.switchOnOff[index]
         delay = self.delay[index]
+        if(self.switchState[6] == 0): delay += self.loopbackDelay
         self.switchState[6] = (self.switchState[6] + 1)%5
         return (result,delay)
     
@@ -146,6 +198,9 @@ def simulate(requiredPower:int, controller:PowerControllerWuling):
     for i in range(2*period+1):
         if( not doOnce()):
             return BatterySimResult(time=t,value=v,isValid=False)
+    if(controller.needRetry()):
+        controller.retry()
+        return simulate(requiredPower,controller)
     return BatterySimResult(time=t,value=v,isValid=True)
 
 class FitPlan(BaseModel):

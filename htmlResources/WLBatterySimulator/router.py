@@ -3,7 +3,7 @@ from fastapi.responses import HTMLResponse,RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
 from typing import Optional
-
+import traceback
 from .optimizer import optimize
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -36,6 +36,7 @@ def calculate(request: Request, required_power: int = Form(...), storage_margin:
         error = None
     except Exception as e:
         result = None
+        traceback.print_exc()
         error = str(e)
         errResponse = templates.TemplateResponse("error.html",{
             "request": request,
