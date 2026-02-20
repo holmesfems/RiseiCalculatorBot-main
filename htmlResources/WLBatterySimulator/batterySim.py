@@ -116,11 +116,6 @@ def simulate(requiredPower:int, controller:PowerControllerWuling):
         if(isFirst): 
             t.append(nowt)
             v.append(powerRemain)
-        if(isFirst and delay):
-            t.append(nowt+delay)
-            powerRemain = powerRemain - requiredPower*delay #ここでpowerが死ぬわけないのでチェックをスキップ
-            v.append(powerRemain)
-            nowd = delay
         nowt += clock
         isFirst = False
         if(isAccept):
@@ -148,7 +143,7 @@ def simulate(requiredPower:int, controller:PowerControllerWuling):
         return True
 
     #二周期分シミュレートする
-    for i in range(2*period):
+    for i in range(2*period+1):
         if( not doOnce()):
             return BatterySimResult(time=t,value=v,isValid=False)
     return BatterySimResult(time=t,value=v,isValid=True)
