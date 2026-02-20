@@ -148,7 +148,7 @@ def simulate(requiredPower:int, controller:PowerControllerWuling):
         return True
 
     #二周期分シミュレートする
-    for i in range(2*period+1):
+    for i in range(2*period):
         if( not doOnce()):
             return BatterySimResult(time=t,value=v,isValid=False)
     return BatterySimResult(time=t,value=v,isValid=True)
