@@ -30,9 +30,10 @@ def calculate_get(request: Request):
     return RedirectResponse("https://discordbot-riseicalculator.herokuapp.com/WLBatterySimulator/")
 
 @router.post("/calculate", response_class=HTMLResponse)
-def calculate(request: Request, required_power: int = Form(...), storage_margin: int = Form(...), use_margin_under_5:Optional[bool] =Form(False)):
+def calculate(request: Request, required_power: int = Form(...), storage_margin: int = Form(...), use_margin_under_5:Optional[bool] =Form(False), blueprintId:str = Form('...')):
+    print(f"{blueprintId=}")
     try:
-        result = optimize(required_power, storage_margin, use_margin_under_5)
+        result = optimize(required_power, storage_margin, use_margin_under_5,blueprintId)
         error = None
     except Exception as e:
         result = None

@@ -19,6 +19,7 @@
       <h2>発電値計算</h2>
       <form class="form"
         hx-post = "/WLBatterySimulator/calculate"
+        hx-include = "#blueprintSelector"
         hx-swap = "none"
         hx-encoding = "multipart/form-data"
       >
@@ -50,37 +51,90 @@
 
     </section>
     <section class="card">
-      <h2>制御回路図(入力1.5/min)</h2>
+      <h2 id="title">回路図選択</h2>
+
+      <!-- 追加：selector -->
+      <div class="code_selector style="gap:12px; align-items:center;">
+        <label class="muted" for="blueprintSelector">図面選択:</label>
+        <select id="blueprintSelector" class="select-modern" name="blueprintId">
+          <!-- value を「項目ID」として扱う（= お嬢様の言う “id” の役割） -->
+          <option value="CTL_1">標準制御器(800/400/200/100/50/25/5/5/5/5/5)</option>
+          <option value="CTL_2">可変周期入力式標準制御器(beta)</option>
+        </select>
+      </div>
+
       <div class="code-row">
         <label class="muted">
-          コード: <span id="codeValue">EFO01iUIAE8OIE29i72U4</span>
+          入力: <span id="input_freq">1.5/s</span><br> コード: <span id="codeValue">EFO01iUIAE8OIE29i72U4</span>
         </label>
         <button type="button" class="copy-btn" id="copyBtn">コピー</button>
       </div>
+
       <div id="toast" class="toast" role="status" aria-live="polite">コピー完了しました</div>
+
+      <img class="blueprint" id="blueprintImg"
+          src="/WLBatterySimulator/static/blueprint.png"
+          alt="発電制御器 設計図" />
+
       <script>
         const codeValue = document.getElementById("codeValue");
+        const inputFreq = document.getElementById("input_freq");
         const copyBtn = document.getElementById("copyBtn");
         const toast = document.getElementById("toast");
+        const selector = document.getElementById("blueprintSelector");
+        const blueprintImg = document.getElementById("blueprintImg");
+
         let toastTimer;
 
         function showToast(message = "コピー完了しました") {
           toast.textContent = message;
           toast.classList.add("show");
-
           clearTimeout(toastTimer);
-          toastTimer = setTimeout(() => {
-            toast.classList.remove("show");
-          }, 1400);
+          toastTimer = setTimeout(() => toast.classList.remove("show"), 1400);
         }
 
+        // 「項目ID（お嬢様の欲しい id）」 -> 表示内容 のマップ
+        const blueprintMap = {
+          CTL_1: {
+            code: "EFO01iUIAE8OIE29i72U4",
+            inputFreq: "1.5/s",
+            imgSrc: "/WLBatterySimulator/static/blueprint.png",
+            imgAlt: "発電制御器 設計図（入力1.5/min）",
+          },
+          CTL_2: {
+            code: "EFO018Ieo6U9e6166UI73",
+            inputFreq: "可変周期",
+            imgSrc: "/WLBatterySimulator/static/blueprint2.png",
+            imgAlt: "発電制御器 設計図（可変周期）",
+          },
+        };
+
+        function applySelection(itemId) {
+          const item = blueprintMap[itemId];
+          if (!item) return;
+
+          codeValue.textContent = item.code;
+          inputFreq.textContent = item.inputFreq
+          blueprintImg.src = item.imgSrc;
+          blueprintImg.alt = item.imgAlt;
+
+          // 必要なら「現在選択中の項目ID」をどこかに持たせる（デバッグ等）
+          blueprintImg.dataset.itemId = itemId; // ← これが“各項目のid”の参照にもなる
+        }
+
+        selector.addEventListener("change", (e) => {
+          applySelection(e.target.value);
+        });
+
+        // 初期反映（ページ表示時にselectの値から反映）
+        applySelection(selector.value);
+
         copyBtn.addEventListener("click", async () => {
-          const text = codeValue.textContent.trim(); // ←「コード: 」抜きでここだけ
+          const text = codeValue.textContent.trim();
           await navigator.clipboard.writeText(text);
           showToast("コピー完了しました");
         });
       </script>
-      <img class="blueprint" src="/WLBatterySimulator/static/blueprint.png" alt="発電制御器 設計図" />
     </section>
     <script>
       let chartInstance = null;

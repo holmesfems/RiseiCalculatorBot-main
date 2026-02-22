@@ -80,6 +80,14 @@ button {
   gap: 10px;
 }
 
+.code_selector{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 0 5px;
+}
+
 .copy-btn{
   padding: 10px 12px;
   border-radius: 10px;
@@ -194,4 +202,78 @@ button {
 
 .chartBox {
   height: 300px;   /* ここが重要 */
+}
+
+/* モダンselect */
+.select-wrap{
+  position: relative;
+  display: inline-block;
+  min-width: 280px; /* お好みで */
+}
+
+/* 矢印（SVG） */
+.select-wrap::after{
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  opacity: 0.85;
+  background-repeat: no-repeat;
+  background-size: 18px 18px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Cpath fill='%23a78bfa' d='M5.3 7.7a1 1 0 0 1 1.4 0L10 11l3.3-3.3a1 1 0 1 1 1.4 1.4l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 0-1.4z'/%3E%3C/svg%3E");
+}
+
+.select-modern{
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  width: 100%;
+  padding: 10px 42px 10px 12px; /* 右は矢印分余白 */
+  border-radius: 12px;
+
+
+  backdrop-filter: blur(8px);
+
+  background: rgba(15, 23, 42, 0.55);
+  color: #e5e7eb;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+
+  font-size: 14px;
+  line-height: 1.2;
+
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+  transition: border-color .15s ease, box-shadow .15s ease, transform .05s ease;
+}
+
+.select-modern:hover{
+  border-color: rgba(99, 102, 241, 0.55); /* indigo */
+}
+
+.select-modern:focus{
+  outline: none;
+  border-color: rgba(99, 102, 241, 0.75);
+  box-shadow:
+    0 10px 24px rgba(15, 23, 42, 0.10),
+    0 0 0 4px rgba(99, 102, 241, 0.18); /* フォーカスリング */
+}
+
+.select-modern:active{
+  transform: translateY(1px);
+}
+
+/* 無効化時 */
+.select-modern:disabled{
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+label[for="blueprintSelector"]{
+  white-space: nowrap; /* 折り返し禁止 */
+  flex-shrink: 0;      /* flexで潰されない */
 }
