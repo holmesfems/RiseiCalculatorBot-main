@@ -21,7 +21,7 @@ class PowerController(ABC):
         self.delay: list[int] = ...
 
     @abstractmethod
-    def fit(self,requiredPower:int):
+    def fit(self,requiredPower:float):
         result = [False]*len(self.switchValue)
         remain = requiredPower
         for i in range(len(self.switchValue)):
@@ -51,14 +51,33 @@ class PowerControllerWuling(PowerController):
         self.loopbackTarget = 0
         self.loopIndex:PowerControllerWuling.LoopIndex = ...
         self.remainLoop:Queue[PowerControllerWuling.LoopIndex] = Queue()
+        self.powerTime = 40
 
-    def fit(self,requiredPower:int):
+    def increase2OneDigit(self,digit:int):
+        if(digit == 0 and self.switchOnOff[0]): return
+        if(self.switchOnOff[digit]):
+            self.switchOnOff[digit] = False
+            self.increase2OneDigit(digit-1)
+        else:
+            self.switchOnOff[digit] = True
+
+    def increase2(self):
+        self.increase2OneDigit(5)
+
+    def canIncrease2(self):
+        return not numpy.all(self.switchOnOff[:6])
+
+    def fit(self,requiredPower:float):
         super().fit(requiredPower)
         fiveOnOff = self.switchOnOff[6:]
         onNum = len([x for x in fiveOnOff if x])
         self.remainLoop = Queue()
+        if(onNum == 5):
+            if(self.canIncrease2()):
+                self.increase2()
+                onNum=0
         if(onNum <= 2):
-            self.switchOnOff[6:] = [self.switchOnOff[7],self.switchOnOff[6],False,False,False]
+            self.switchOnOff[6:] = [onNum==2,onNum>=1,False,False,False]
             self.loopIndex = PowerControllerWuling.LoopIndex([2,0,3,1,4])
         elif(onNum==3): #2の部分は順序が影響を与えない
             self.switchOnOff[6:] = [False,False,True,True,True]
@@ -74,7 +93,7 @@ class PowerControllerWuling(PowerController):
                 self.remainLoop.put(PowerControllerWuling.LoopIndex(loop))
             self.loopIndex = self.remainLoop.get()
         elif(onNum >= 4):
-            self.switchOnOff[6:] = [self.switchOnOff[10], self.switchOnOff[9], True,True,True]
+            self.switchOnOff[6:] = [onNum==5, onNum>=4, True,True,True]
             allLoop = [
                 [2,0,3,1,4],
                 [2,0,4,1,3],
@@ -92,6 +111,9 @@ class PowerControllerWuling(PowerController):
             for loop in allLoop:
                 self.remainLoop.put(PowerControllerWuling.LoopIndex(loop))
             self.loopIndex = self.remainLoop.get()
+
+    def fitByClock(self,requiredPower:int, clock:int):
+        self.fit(requiredPower=requiredPower*clock/self.powerTime)
 
     def needRetry(self):
         return not self.remainLoop.empty()
@@ -155,10 +177,10 @@ class BatterySimResult(BaseModel):
     def minValue(self)->int:
         return numpy.min(self.value)
 
-def simulate(requiredPower:int, controller:PowerControllerWuling)->BatterySimResult:
+def simulate(requiredPower:int, controller:PowerControllerWuling, clock:int)->BatterySimResult:
     powerRemain = maxStorage
     period = controller.period()
-    clock = 40
+    powerTime = controller.powerTime
     t = []
     v = []
     nowt = 0
@@ -182,13 +204,25 @@ def simulate(requiredPower:int, controller:PowerControllerWuling)->BatterySimRes
                 if(powerRemain < 0): powerRemain = 0
                 v.append(powerRemain)
                 if(powerRemain==0): return False
-            t.append(nowt+delay)
-            powerRemain = powerRemain + (controller.maxPower - requiredPower)*40
+            powerStartTime = nowt -clock + delay
+
+            powerEndTime = powerStartTime + powerTime
+            #print(f"{powerEndTime=},{nowt=},{delay=},{nowd=},{clock=}")
+            t.append(powerEndTime)
+            powerRemain = powerRemain + (controller.maxPower - requiredPower)*powerTime
             if(powerRemain > maxStorage): powerRemain = maxStorage
             v.append(powerRemain)
-            nowd = delay
+            if nowt > powerEndTime:
+                t.append(nowt)
+                powerRemain = powerRemain - requiredPower*(nowt-powerEndTime)
+                if(powerRemain<0): powerRemain = 0
+                v.append(powerRemain)
+                if(powerRemain ==0): return False
+                nowd = 0
+            else:
+                nowd = powerEndTime-nowt
         else:
-            powerRemain = powerRemain - requiredPower * (40-nowd)
+            powerRemain = powerRemain - requiredPower * (clock-nowd)
             if(powerRemain < 0): powerRemain = 0
             nowd = 0
             t.append(nowt)
@@ -197,33 +231,54 @@ def simulate(requiredPower:int, controller:PowerControllerWuling)->BatterySimRes
         return True
 
     #二周期分シミュレートする
-    for i in range(2*period+1):
+    for i in range(2*period):
         if( not doOnce()):
             return BatterySimResult(time=t,value=v,isValid=False)
     thisSimulate = BatterySimResult(time=t,value=v,isValid=True)
     if(controller.needRetry()):
         controller.retry()
-        nextSimulate = simulate(requiredPower,controller)
+        nextSimulate = simulate(requiredPower,controller,clock)
         #最悪状況の結果を返すようにする
         if(nextSimulate.minValue() <= thisSimulate.minValue()):
             return nextSimulate
     return thisSimulate
 
 class FitPlan(BaseModel):
-    needPower: int
+    needPower: float
     maxPower: int
     bitStr: str
     simResult: BatterySimResult
+    clock: int
 
-def searchFitPlan(requiredPower:int,storageMargin:int,useMarginUnder5:bool):
+def searchFitPlanForOneClock(requiredPower:int,storageMargin:int,useMarginUnder5:bool,clock:int):
     controller = PowerControllerWuling()
-    controller.fit(requiredPower=requiredPower)
+    controller.fitByClock(requiredPower=requiredPower,clock=clock)
+    bestPlan: FitPlan|None = None
+    bestRemainPower = 0
     while True:
-        simResult = simulate(requiredPower,controller)
+        simResult = simulate(requiredPower,controller,clock)
+        plan = FitPlan(needPower=controller.nowPower()*controller.powerTime/clock,bitStr=controller.toBit(),simResult=simResult, maxPower=controller.maxPower,clock=clock)
+        if(bestRemainPower <= (minv:=plan.simResult.minValue())):
+            bestPlan = plan
+            bestRemainPower = minv
         if(simResult.isValid):
-
             if((useMarginUnder5 and not controller.isUnder5()) or numpy.min(simResult.value) >= storageMargin ):
-                return FitPlan(needPower=controller.nowPower(),bitStr=controller.toBit(),simResult=simResult, maxPower=controller.maxPower)
-        controller.increasePower()
+                return plan
         if(controller.isMax()):
-            return FitPlan(needPower=controller.nowPower(),bitStr=controller.toBit(),simResult=simResult, maxPower=controller.maxPower)
+            return bestPlan
+        controller.increasePower()
+        
+def searchFitPlanForAllClock(requiredPower:int,storageMargin:int,useMarginUnder5:bool):
+    
+    dummyController = PowerControllerWuling()
+    fitPlans: List[FitPlan] = []
+    clock = 40
+    def isClockAvailable():
+        return requiredPower <= dummyController.maxPower * dummyController.powerTime / clock and clock <= 102
+    while True:
+        if not isClockAvailable(): break
+        fitPlans.append(searchFitPlanForOneClock(requiredPower,storageMargin,useMarginUnder5,clock))
+        clock+=2
+    
+    bestPlan = min(fitPlans,key=lambda x: x.needPower)
+    return bestPlan

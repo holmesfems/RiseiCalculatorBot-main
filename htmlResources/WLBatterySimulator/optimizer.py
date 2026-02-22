@@ -1,17 +1,18 @@
 from pydantic import BaseModel
 from typing import List, Tuple
-from .batterySim import searchFitPlan
+from .batterySim import searchFitPlanForAllClock
 import numpy
 
 class OptimizationResult(BaseModel):
     required_power: int
-    setting_value: int
+    setting_value: float
     time_series: List[int]          # 例: 分
     remaining_series: List[float]   # 例: 残電量(任意単位)
     tobit: str
     lowest_storage: int
     use_margin_under_5: bool
     save_battery: float
+    clock:int
 
 
 def validate_required_power(x: int) -> None:
@@ -21,7 +22,7 @@ def validate_required_power(x: int) -> None:
 
 def optimize(required_power: int, storage_margin:int, use_margin_under_5:bool) -> OptimizationResult:
     validate_required_power(required_power)
-    fitPlan = searchFitPlan(requiredPower=required_power,storageMargin=storage_margin,useMarginUnder5=use_margin_under_5)
+    fitPlan = searchFitPlanForAllClock(requiredPower=required_power,storageMargin=storage_margin,useMarginUnder5=use_margin_under_5)
     setting = fitPlan.needPower
     ts, rs = (fitPlan.simResult.time,fitPlan.simResult.value)
     save_battery = 1.5*60*24*(1 - fitPlan.needPower/fitPlan.maxPower)
@@ -33,5 +34,6 @@ def optimize(required_power: int, storage_margin:int, use_margin_under_5:bool) -
         tobit = fitPlan.bitStr.replace('0','<img src="/WLBatterySimulator/static/merger.png"/>').replace('1','<img src="/WLBatterySimulator/static/crosser.png"/>'),
         lowest_storage=numpy.min(fitPlan.simResult.value),
         use_margin_under_5 = use_margin_under_5,
-        save_battery=save_battery
+        save_battery=save_battery,
+        clock=fitPlan.clock
     )
