@@ -69,6 +69,8 @@
         </label>
         <button type="button" class="copy-btn" id="copyBtn">コピー</button>
       </div>
+      <span id="tutorial_link" hidden></span>
+      </div>
 
       <div id="toast" class="toast" role="status" aria-live="polite">コピー完了しました</div>
 
@@ -83,6 +85,7 @@
         const toast = document.getElementById("toast");
         const selector = document.getElementById("blueprintSelector");
         const blueprintImg = document.getElementById("blueprintImg");
+        const tutorial = document.getElementById("tutorial_link")
 
         let toastTimer;
 
@@ -100,12 +103,14 @@
             inputFreq: "1.5/s",
             imgSrc: "/WLBatterySimulator/static/blueprint.png",
             imgAlt: "発電制御器 設計図（入力1.5/min）",
+            tutorial: null
           },
           CTL_2: {
             code: "EFO018Ieo6U9e6166UI73",
             inputFreq: "可変周期",
             imgSrc: "/WLBatterySimulator/static/blueprint2.png",
             imgAlt: "発電制御器 設計図（可変周期）",
+            tutorial: "/WLBatterySimulator/static/tutorial_CTL2.html"
           },
         };
 
@@ -114,14 +119,30 @@
           if (!item) return;
 
           codeValue.textContent = item.code;
-          inputFreq.textContent = item.inputFreq
+          inputFreq.textContent = item.inputFreq;
           blueprintImg.src = item.imgSrc;
           blueprintImg.alt = item.imgAlt;
 
-          // 必要なら「現在選択中の項目ID」をどこかに持たせる（デバッグ等）
-          blueprintImg.dataset.itemId = itemId; // ← これが“各項目のid”の参照にもなる
-        }
+          blueprintImg.dataset.itemId = itemId;
 
+          // チュートリアルリンクの表示制御
+          if (item.tutorial) {
+            tutorial.hidden = false;
+
+            // 中身をリンクに差し替え（安全に作る）
+            tutorial.innerHTML = ""; // 前の内容をクリア
+            const a = document.createElement("a");
+            a.href = item.tutorial;
+            a.classList.add("muted")
+            a.textContent = "チュートリアルを見る";
+            a.target = "_blank";           // 別タブで開く（不要なら削除）
+            a.rel = "noopener noreferrer"; // セキュリティお作法
+            tutorial.appendChild(a);
+          } else {
+            tutorial.hidden = true;
+            tutorial.innerHTML = "";
+          }
+        }
         selector.addEventListener("change", (e) => {
           applySelection(e.target.value);
         });
