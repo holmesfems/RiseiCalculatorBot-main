@@ -43,8 +43,8 @@ def optimize(required_power: int, storage_margin:int, use_margin_under_5:bool,bl
         fitClock = f"{fitPlan.clock}s"
         if(sc):
             sc.reverse()
-            fitClock += " (+"
-            fitClock += " ".join([str(item) for item in sc])
+            fitClock += " ("
+            fitClock += " ".join([f"+{item}" for item in sc])
             fitClock += ")"
     else: raise Exception("Unknown blueprintId")
     setting = fitPlan.needPower
