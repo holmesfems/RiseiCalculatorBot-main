@@ -5,7 +5,7 @@ from typing import List,Dict
 from pydantic import BaseModel
 from rcutils import netutil,getnow,rcReply
 from datetime import datetime,timedelta
-URL = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData_YoStar/refs/heads/main/ja_JP/gamedata/excel/activity_table.json"
+URL = "https://raw.githubusercontent.com/ArknightsAssets/ArknightsGamedata/refs/heads/master/jp/gamedata/excel/activity_table.json"
 get_json = netutil.get_json
 CACHE_HOURS = 2
 

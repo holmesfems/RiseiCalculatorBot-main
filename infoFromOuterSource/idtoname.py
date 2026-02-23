@@ -9,7 +9,7 @@ import re
 get_json = netutil.get_json
 
 ITEM_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/item_table.json"
-ITEM_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData_YoStar/main/ja_JP/gamedata/excel/item_table.json"
+ITEM_TABLE_URL_JP = "https://raw.githubusercontent.com/ArknightsAssets/ArknightsGamedata/refs/heads/master/jp/gamedata/excel/item_table.json"
 class ItemIdToName:
     __idToJA:Dict[str,str] = {}
     __ZHToJA:Dict[str,str] = {}
@@ -127,7 +127,7 @@ class ItemIdToName:
         return ItemIdToName.__idToZH.get(id,"Missing")
 
 SKILL_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/skill_table.json"
-SKILL_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData_YoStar/main/ja_JP/gamedata/excel/skill_table.json"
+SKILL_TABLE_URL_JP = "https://raw.githubusercontent.com/ArknightsAssets/ArknightsGamedata/refs/heads/master/jp/gamedata/excel/skill_table.json"
 class SkillIdToName:
     with open("infoFromOuterSource/skillmetacode.yaml",encoding="utf-8") as f:
         skillMetaDict:Dict[str,str] = yaml.safe_load(f)
@@ -259,7 +259,7 @@ class SkillIdToName:
             return ""
 
 STAGE_TABLE_URL_CN = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData/master/zh_CN/gamedata/excel/stage_table.json"
-STAGE_TABLE_URL_JP = "https://raw.githubusercontent.com/Kengxxiao/ArknightsGameData_YoStar/main/ja_JP/gamedata/excel/stage_table.json"
+STAGE_TABLE_URL_JP = "https://raw.githubusercontent.com/ArknightsAssets/ArknightsGamedata/refs/heads/master/jp/gamedata/excel/stage_table.json"
 class StageIdToName:
     __idToStr:Dict[str,str] = {}
 
