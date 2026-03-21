@@ -3,8 +3,9 @@ from pydantic import BaseModel
 from typing import List
 from abc import ABC, abstractmethod
 from queue import Queue
+import math
 
-maxStorage = 100000
+MAX_STORAGE = 100000
 
 def last_true_index(lst: list[bool]) -> int:
     for i in range(len(lst) - 1, -1, -1):
@@ -178,7 +179,7 @@ class BatterySimResult(BaseModel):
         return numpy.min(self.value)
 
 def simulate(requiredPower:int, controller:PowerControllerWuling, clock:int)->BatterySimResult:
-    powerRemain = maxStorage
+    powerRemain = MAX_STORAGE
     period = controller.period()
     powerTime = controller.powerTime
     t = []
@@ -210,7 +211,7 @@ def simulate(requiredPower:int, controller:PowerControllerWuling, clock:int)->Ba
             #print(f"{powerEndTime=},{nowt=},{delay=},{nowd=},{clock=}")
             t.append(powerEndTime)
             powerRemain = powerRemain + (controller.maxPower - requiredPower)*powerTime
-            if(powerRemain > maxStorage): powerRemain = maxStorage
+            if(powerRemain > MAX_STORAGE): powerRemain = MAX_STORAGE
             v.append(powerRemain)
             if nowt > powerEndTime:
                 t.append(nowt)
@@ -282,3 +283,89 @@ def searchFitPlanForAllClock(requiredPower:int,storageMargin:int,useMarginUnder5
     
     bestPlan = min(fitPlans,key=lambda x: x.needPower)
     return bestPlan
+
+
+## 周期回路シミュレーション
+class ClockCircuitSimulation:
+    def __init__(self, batteryPower:int):
+        #電池の発電量
+        self.batteryPower = batteryPower
+
+    #必要発電量から周期を逆算
+    def fitClock(self,power:int,margin:int = 0):
+        clock1 = self.batteryPower/power*40
+        clock2 = (MAX_STORAGE-margin)/power+40
+        clock = min(clock1,clock2)
+        intClock = 2*math.floor(clock/2)
+        return intClock
+    
+    #周期から二進法bitを取得
+    def clockToBit(self,clock:int):
+        halfClock = clock//2
+        exponent = math.log2(halfClock)
+        intExp = math.ceil(exponent)
+        power2 = math.exp2(intExp)
+        diff = power2-halfClock
+        bit = ""
+        for i in range(intExp-2,-1,-1):
+            subRoot = math.exp2(i)
+            if(diff >= subRoot):
+                diff -= subRoot
+                bit += "1"
+            else:
+                bit += "0"
+        return bit
+    
+    #clock > 40
+    def getTVCurve(self,power:int,clock:int):
+        time:List[int] = []
+        value:List[int] = []
+        actualClock = max(clock,40)
+        remain = MAX_STORAGE
+        nowt = 0
+        ##最初の点
+        time.append(0)
+        value.append(remain)
+        ##発電終了
+        nowt += 40
+        time.append(nowt)
+        value.append(remain)
+        ##周期終了
+        nowt += (actualClock-40)
+        time.append(nowt)
+        remain -= power*(actualClock-40)
+        value.append(remain)
+        if(remain < 0):
+            return BatterySimResult(time=time,value=value,isValid=False)
+        
+        ##次の周期
+        nowt += 40
+        time.append(nowt)
+        remain += self.batteryPower*40
+        if(remain > MAX_STORAGE): remain = MAX_STORAGE
+        value.append(remain)
+        if(remain < MAX_STORAGE):
+            ##発電不足
+            return BatterySimResult(time=time,value=value,isValid=False)
+        
+        ##発電終了
+        nowt += (actualClock-40)
+        time.append(nowt)
+        remain -= power*(actualClock-40)
+        value.append(remain)
+        return BatterySimResult(time=time,value=value,isValid=True)
+    
+    def clockToPower(self,clock:int):
+        return self.batteryPower*40/clock
+
+##周期回路向けの計算
+def searchPlanForClockCircuit(requiredPower:int, storageMargin:int, batteryPower:int):
+    clockBattery = ClockCircuitSimulation(batteryPower=batteryPower)
+    clock = clockBattery.fitClock(requiredPower,storageMargin)
+    bit = clockBattery.clockToBit(clock)
+    simRes = clockBattery.getTVCurve(requiredPower,clock)
+    return FitPlan(needPower=clockBattery.clockToPower(clock),
+                   maxPower=batteryPower,
+                   bitStr=bit,
+                   simResult=simRes,
+                   clock=clock)

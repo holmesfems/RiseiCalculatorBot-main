@@ -24,7 +24,7 @@
         hx-encoding = "multipart/form-data"
       >
         <label>必要な発電量を入力してください</label>
-        <input name="required_power" type="number" min="5" max="1595" step="5" required
+        <input id="required_power" name="required_power" type="number" min="5" max="1595" step="5" required
                 placeholder="例: 250" value="{{ required_power if required_power is not none else '' }}"/>
         
         <label>残電量安全マージン</label>
@@ -60,6 +60,8 @@
           <!-- value を「項目ID」として扱う（= お嬢様の言う “id” の役割） -->
           <option value="CTL_1">標準制御器(800/400/200/100/50/25/5/5/5/5/5)</option>
           <option value="CTL_2">可変周期入力式標準制御器(beta)</option>
+          <option value="CTL_3">可変周期発電(武陵小電池)</option>
+          <option value="CTL_4">可変周期発電(武陵中電池)</option>
         </select>
       </div>
 
@@ -86,6 +88,7 @@
         const selector = document.getElementById("blueprintSelector");
         const blueprintImg = document.getElementById("blueprintImg");
         const tutorial = document.getElementById("tutorial_link")
+        const inputPower = document.getElementById("required_power")
 
         let toastTimer;
 
@@ -103,6 +106,7 @@
             inputFreq: "1.5/s",
             imgSrc: "/WLBatterySimulator/static/blueprint.png",
             imgAlt: "発電制御器 設計図（入力1.5/min）",
+            maxPower: 1600,
             tutorial: null
           },
           CTL_2: {
@@ -110,7 +114,24 @@
             inputFreq: "可変周期",
             imgSrc: "/WLBatterySimulator/static/blueprint2.png",
             imgAlt: "発電制御器 設計図（可変周期）",
+            maxPower: 1600,
             tutorial: "/WLBatterySimulator/static/tutorial_CTL2.html"
+          },
+          CTL_3: {
+            code: "EFO01iUIAE8OIE2u272U4",
+            inputFreq: "可変周期",
+            imgSrc: "/WLBatterySimulator/static/blueprint3.png",
+            imgAlt: "発電制御器 設計図（可変周期）",
+            maxPower: 1600,
+            tutorial: "https://youtu.be/Wq1ki2xgoEQ"
+          },
+          CTL_4: {
+            code: "EFO012O9Eo1I9o819eIOo",
+            inputFreq: "可変周期",
+            imgSrc: "/WLBatterySimulator/static/blueprint3.png",
+            imgAlt: "発電制御器 設計図（可変周期）",
+            maxPower: 3200,
+            tutorial: "https://youtu.be/Wq1ki2xgoEQ"
           },
         };
 
@@ -124,6 +145,7 @@
           blueprintImg.alt = item.imgAlt;
 
           blueprintImg.dataset.itemId = itemId;
+          inputPower.max = item.maxPower - 5
 
           // チュートリアルリンクの表示制御
           if (item.tutorial) {
