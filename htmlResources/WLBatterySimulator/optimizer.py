@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import List, Tuple
 from .batterySim import searchFitPlanForAllClock,searchFitPlanForOneClock,searchPlanForClockCircuit
-import numpy
+import re,numpy
 
 class OptimizationResult(BaseModel):
     required_power: int
@@ -39,16 +39,20 @@ def separateClock(clock:int):
 
 def optimize(required_power: int, storage_margin:int, use_margin_under_5:bool,blueprintId:str) -> OptimizationResult:
     validate_required_power(required_power, blueprintId)
+    mergerLeft = '<img src="/WLBatterySimulator/static/merger.png"/>'
+    mergerRight = '<img src="/WLBatterySimulator/static/merger.png" style="transform: rotate(180deg);"/>'
 
     if(blueprintId == "CTL_1"):
         #PMW回路
         fitPlan = searchFitPlanForOneClock(requiredPower=required_power,storageMargin=storage_margin,useMarginUnder5=use_margin_under_5,clock=40)
         fitClock = None
+        merger = mergerLeft
     elif(blueprintId == "CTL_2"):
         #周期→PMW回路
         fitPlan = searchFitPlanForAllClock(requiredPower=required_power,storageMargin=storage_margin,useMarginUnder5=use_margin_under_5)
         sc = separateClock(fitPlan.clock)
         fitClock = f"{fitPlan.clock}s"
+        merger = mergerLeft
         if(sc):
             sc.reverse()
             fitClock += " ("
@@ -60,6 +64,7 @@ def optimize(required_power: int, storage_margin:int, use_margin_under_5:bool,bl
                                             storageMargin=storage_margin,
                                             batteryPower=1600)
         fitClock = f"{fitPlan.clock}"
+        merger = mergerRight
     
     elif(blueprintId == "CTL_4"):
         #周期回路(武陵中電池)
@@ -67,6 +72,7 @@ def optimize(required_power: int, storage_margin:int, use_margin_under_5:bool,bl
                                             storageMargin=storage_margin,
                                             batteryPower=3200)
         fitClock = f"{fitPlan.clock}"
+        merger = mergerRight
 
     else: raise Exception("Unknown blueprintId")
     setting = fitPlan.needPower
@@ -77,7 +83,11 @@ def optimize(required_power: int, storage_margin:int, use_margin_under_5:bool,bl
         setting_value=setting,
         time_series=ts,
         remaining_series=rs,
-        tobit = fitPlan.bitStr.replace('0','<img src="/WLBatterySimulator/static/merger.png"/>').replace('1','<img src="/WLBatterySimulator/static/crosser.png"/>'),
+        tobit = re.sub(
+            r'[01]',
+            lambda m: merger if m.group(0) == '0' else '<img src="/WLBatterySimulator/static/crosser.png"/>',
+            fitPlan.bitStr
+        ),
         lowest_storage=numpy.min(fitPlan.simResult.value),
         use_margin_under_5 = use_margin_under_5,
         save_battery=save_battery,
