@@ -63,7 +63,7 @@ def optimize(required_power: int, storage_margin:int, use_margin_under_5:bool,bl
         fitPlan = searchPlanForClockCircuit(requiredPower=required_power,
                                             storageMargin=storage_margin,
                                             batteryPower=1600)
-        fitClock = f"{fitPlan.clock}"
+        fitClock = f"{fitPlan.clock}s"
         merger = mergerRight
     
     elif(blueprintId == "CTL_4"):
@@ -71,7 +71,7 @@ def optimize(required_power: int, storage_margin:int, use_margin_under_5:bool,bl
         fitPlan = searchPlanForClockCircuit(requiredPower=required_power,
                                             storageMargin=storage_margin,
                                             batteryPower=3200)
-        fitClock = f"{fitPlan.clock}"
+        fitClock = f"{fitPlan.clock}s"
         merger = mergerRight
 
     else: raise Exception("Unknown blueprintId")
