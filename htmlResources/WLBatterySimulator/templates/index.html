@@ -211,7 +211,7 @@
               label: '残電量',
               data,
               borderWidth: 2,
-              tension: 0.25,
+              tension: 0,
               pointRadius: 0
             }]
           },
@@ -219,8 +219,14 @@
             responsive: true,
             maintainAspectRatio: false,
             scales: {
-              x: { title: { display: true, text: '時間（秒）' } },
-              y: { title: { display: true, text: '残電量' }, beginAtZero: true }
+              x: {
+                type: 'linear',          // ← ここが重要
+                title: { display: true, text: '時間（秒）' }
+              },
+              y: {
+                title: { display: true, text: '残電量' },
+                beginAtZero: true
+              }
             }
           }
         });
