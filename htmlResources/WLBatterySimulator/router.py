@@ -15,6 +15,7 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 def index(request: Request):
     # 初期表示（未計算）
     return templates.TemplateResponse(
+        request,
         "index.html",
         {
             "request": request,
@@ -39,7 +40,7 @@ def calculate(request: Request, required_power: int = Form(...), storage_margin:
         result = None
         traceback.print_exc()
         error = str(e)
-        errResponse = templates.TemplateResponse("error.html",{
+        errResponse = templates.TemplateResponse(request,"error.html",{
             "request": request,
             "error": error
         })
@@ -50,11 +51,11 @@ def calculate(request: Request, required_power: int = Form(...), storage_margin:
         """)
     
 
-    resultResponse = templates.TemplateResponse("result.html",{
+    resultResponse = templates.TemplateResponse(request,"result.html",{
         "request": request,
         "result": result
     })
-    chartResponse = templates.TemplateResponse("chart.html",{
+    chartResponse = templates.TemplateResponse(request,"chart.html",{
         "request": request,
         "result": result
     })
