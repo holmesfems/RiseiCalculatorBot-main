@@ -22,6 +22,7 @@ valueDict["中級SoCセルフプリンター"] = valueDict["中級SoC"]*8+valueD
 valueDict["★6印交換券"] = valueDict["スカウト券"]*69.2
 valueDict["10回スカウト券"] = valueDict["スカウト券"]*10
 valueDict["10回中堅スカウト券"] = valueDict["スカウト券"]*10
+valueDict["中堅スカウト券"] = valueDict["スカウト券"]
 valueDict["★5特訓装置"] = EXPVALUE_1000*495 + LMDVALUE_1000*447.378
 valueDict["★6特訓装置"] = EXPVALUE_1000*750 + LMDVALUE_1000*744.955
 valueDict["テンニンカ指名契約"] = valueDict["スカウト券"]
