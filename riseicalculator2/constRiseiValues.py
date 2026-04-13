@@ -37,6 +37,7 @@ valueDict["★6スキル指南集"] = 4000
 valueDict["★5スキル指南集"] = 2650
 valueDict["★4スキル指南集"] = 1360
 
+valueDict["T5素材交換券"] = 300
 valueDict["T4素材交換券"] = 100
 valueDict["T3素材交換券"] = 35
 
