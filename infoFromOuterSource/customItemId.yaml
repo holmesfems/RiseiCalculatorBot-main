@@ -51,3 +51,7 @@
 - id: voucher_levelmax_5_temp
   zh: 资深干员特训装置temp
   ja: エリート特訓装置
+
+- id: T5exchange_temp
+  zh: T5素材交换temp
+  ja: T5素材交換券
