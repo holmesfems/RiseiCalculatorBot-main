@@ -145,7 +145,8 @@ class SkillIdToName:
                     "-{-":"{",
                     "{-":"-{",
                     "\\n":"\n",
-                    "AOE":"aoe"
+                    "AOE":"aoe",
+                    "chain.max_target":"max_target"
                 })
                 def cleanStr(string:str)->str:
                     return string.replace("[","").replace("]","").replace(".","")
@@ -157,7 +158,7 @@ class SkillIdToName:
                         if(x is None): return None
                         if(x==round(x)): return int(x)
                         return x
-                    replaceDict = {cleanStr(item["key"]):checkint(item.get("value",None)) for item in rawDict}
+                    replaceDict = {cleanStr(item["key"]).replace("chainmax_target","max_target"):checkint(item.get("value",None)) for item in rawDict}
                     if("duration" not in replaceDict):
                         replaceDict["duration"] = skillJson["duration"]
                     replaceDict_upper = {key.upper():value for key,value in replaceDict.items()}
