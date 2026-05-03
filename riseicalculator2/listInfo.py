@@ -34,7 +34,7 @@ Item_rarity2:List[str] = [
 ]
 
 Item_rarity2_new:List[str] = [
-    
+    '电极单元','液化高能气体'
 ]
 
 Item_rarity3:List[str] = [
@@ -47,7 +47,7 @@ Item_rarity3:List[str] = [
 ]
 
 Item_rarity3_new:List[str] = [
-    
+    '聚能动力单元','液化醚吸聚体'
 ]
 
 Item_rarity4:List[str] = [
@@ -85,7 +85,8 @@ ValueTarget:List[str] = [
 ]
 
 ValueTarget_new:List[str] = [
-    
+    '电极单元','聚能动力单元',
+    '液化高能气体','液化醚吸聚体'
 ]
 
 #契約賞金引換証
